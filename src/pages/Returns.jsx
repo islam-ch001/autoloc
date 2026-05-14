@@ -1,0 +1,289 @@
+import { useState } from 'react';
+import { Plus, Search, CheckCircle, AlertTriangle, Fuel, Gauge } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import Modal from '../components/Modal';
+
+const conditionMap = {
+  'Bon': { cls: 'badge-success', icon: <CheckCircle size={12} /> },
+  'Dommage mineur': { cls: 'badge-warning', icon: <AlertTriangle size={12} /> },
+  'Dommage majeur': { cls: 'badge-danger', icon: <AlertTriangle size={12} /> },
+};
+
+export default function Returns() {
+  const { returns, reservations, vehicles, clients, addReturn } = useApp();
+  const [search, setSearch] = useState('');
+  const [showAdd, setShowAdd] = useState(false);
+
+  const enriched = returns.map(ret => {
+    const res = reservations.find(r => r.id === ret.reservationId);
+    const client = res ? clients.find(c => c.id === res.clientId) : null;
+    const vehicle = res ? vehicles.find(v => v.id === res.vehicleId) : null;
+    return { ...ret, res, client, vehicle };
+  }).filter(r => {
+    const q = search.toLowerCase();
+    return `${r.client?.firstName} ${r.client?.lastName} ${r.vehicle?.brand} ${r.vehicle?.model}`.toLowerCase().includes(q);
+  }).sort((a, b) => new Date(b.returnDate) - new Date(a.returnDate));
+
+  const activeRentals = reservations.filter(r => r.status === 'active');
+
+  return (
+    <div>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Retours de véhicules</h1>
+          <p className="page-subtitle">{returns.length} retours enregistrés</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+          <Plus size={16} /> Enregistrer un retour
+        </button>
+      </div>
+
+      {/* Active rentals alert */}
+      {activeRentals.length > 0 && (
+        <div style={{ padding: '14px 18px', background: 'var(--accent-soft)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 12, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <AlertTriangle size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+          <span style={{ fontSize: 13, color: 'var(--text-2)' }}>
+            <strong style={{ color: 'var(--text)' }}>{activeRentals.length} véhicule(s)</strong> actuellement en location — en attente de retour
+          </span>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+            {activeRentals.slice(0, 3).map(r => {
+              const v = vehicles.find(vv => vv.id === r.vehicleId);
+              return (
+                <span key={r.id} className="badge badge-accent">{v?.brand} {v?.model}</span>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+        <div className="search-bar" style={{ flex: 1 }}>
+          <Search size={16} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Chercher par client ou véhicule..." />
+        </div>
+      </div>
+
+      <div className="card">
+        <div style={{ overflowX: 'auto' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Véhicule</th>
+                <th>Client</th>
+                <th>Date retour</th>
+                <th>Kilométrage</th>
+                <th>Carburant</th>
+                <th>État</th>
+                <th>Frais supp.</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {enriched.map(r => {
+                const kmDiff = r.mileageIn - r.mileageOut;
+                const cond = conditionMap[r.condition] || conditionMap['Bon'];
+                return (
+                  <tr key={r.id}>
+                    <td style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.reservationId}</td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{r.vehicle?.brand} {r.vehicle?.model}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.vehicle?.plate}</div>
+                    </td>
+                    <td style={{ fontWeight: 500 }}>{r.client?.firstName} {r.client?.lastName}</td>
+                    <td style={{ fontSize: 12 }}>{r.returnDate}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                        <Gauge size={12} style={{ color: 'var(--text-3)' }} />
+                        {r.mileageIn.toLocaleString()} km
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>+{kmDiff.toLocaleString()} km</div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Départ: {r.fuelOut}</div>
+                        <div style={{ fontSize: 11, color: r.fuelIn !== r.fuelOut ? 'var(--warning)' : 'var(--text-2)' }}>Retour: {r.fuelIn}</div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`badge ${cond.cls}`} style={{ display: 'flex', alignItems: 'center', gap: 4, width: 'fit-content' }}>
+                        {cond.icon} {r.condition}
+                      </span>
+                    </td>
+                    <td>
+                      {r.extraCharges > 0
+                        ? <span style={{ fontWeight: 700, color: 'var(--danger)' }}>+{r.extraCharges.toLocaleString('fr-DZ')} DA</span>
+                        : <span style={{ color: 'var(--text-3)' }}>—</span>}
+                    </td>
+                    <td style={{ fontSize: 12, color: 'var(--text-2)', maxWidth: 160 }}>
+                      {r.damages && <div style={{ color: 'var(--warning)', marginBottom: 2 }}>⚠ {r.damages}</div>}
+                      {r.notes || '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {showAdd && <ReturnModal onClose={() => setShowAdd(false)} onAdd={ret => { addReturn(ret); setShowAdd(false); }} />}
+    </div>
+  );
+}
+
+function ReturnModal({ onClose, onAdd }) {
+  const { reservations, vehicles, clients } = useApp();
+  const active = reservations.filter(r => r.status === 'active');
+  const [form, setForm] = useState({ reservationId: '', returnDate: new Date().toISOString().split('T')[0], mileageOut: '', mileageIn: '', fuelOut: 'Plein', fuelIn: 'Plein', condition: 'Bon', damages: '', manualCharges: 0, notes: '' });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const selectedRes = reservations.find(r => r.id === +form.reservationId);
+  const vehicle = selectedRes ? vehicles.find(v => v.id === selectedRes.vehicleId) : null;
+
+  // Calcul dépassement kilométrique
+  const kmDriven = form.mileageIn && form.mileageOut ? +form.mileageIn - +form.mileageOut : 0;
+  const kmLimit = selectedRes?.kmLimit || 0;
+  const extraKmPrice = selectedRes?.extraKmPrice || 0;
+  const excessKm = kmLimit > 0 && kmDriven > kmLimit ? kmDriven - kmLimit : 0;
+  const kmFees = excessKm * extraKmPrice;
+  const totalExtraCharges = kmFees + (+form.manualCharges || 0);
+
+  const handleResChange = (id) => {
+    const res = reservations.find(r => r.id === +id);
+    const v = res ? vehicles.find(vv => vv.id === res.vehicleId) : null;
+    set('reservationId', id);
+    if (v) set('mileageOut', v.mileage);
+  };
+
+  return (
+    <Modal title="Retour de véhicule" onClose={onClose} footer={
+      <>
+        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn btn-primary" onClick={() => onAdd({
+          ...form,
+          reservationId: +form.reservationId,
+          mileageOut: +form.mileageOut,
+          mileageIn: +form.mileageIn,
+          excessKm,
+          kmFees,
+          extraCharges: totalExtraCharges,
+        })}>
+          Enregistrer
+        </button>
+      </>
+    }>
+      <div className="form-group">
+        <label className="form-label">Réservation active *</label>
+        <select className="form-select" value={form.reservationId} onChange={e => handleResChange(e.target.value)}>
+          <option value="">-- Sélectionner --</option>
+          {active.map(r => {
+            const v = vehicles.find(vv => vv.id === r.vehicleId);
+            const c = clients.find(cc => cc.id === r.clientId);
+            return <option key={r.id} value={r.id}>#{r.id} — {v?.brand} {v?.model} — {c?.lastName} (retour: {r.endDate})</option>;
+          })}
+        </select>
+      </div>
+
+      {vehicle && (
+        <div style={{ padding: '10px 14px', background: 'var(--primary-soft)', borderRadius: 8, marginBottom: 16, fontSize: 12, color: 'var(--text-2)' }}>
+          🚗 {vehicle.brand} {vehicle.model} — {vehicle.plate} — Km départ enregistré: <strong>{vehicle.mileage.toLocaleString()}</strong>
+        </div>
+      )}
+
+      <div className="form-group">
+        <label className="form-label">Date de retour</label>
+        <input className="form-input" type="date" value={form.returnDate} onChange={e => set('returnDate', e.target.value)} />
+      </div>
+
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Km au départ</label><input className="form-input" type="number" value={form.mileageOut} onChange={e => set('mileageOut', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Km au retour</label><input className="form-input" type="number" value={form.mileageIn} onChange={e => set('mileageIn', e.target.value)} /></div>
+      </div>
+
+      {/* Calcul kilométrique en temps réel */}
+      {kmDriven > 0 && kmLimit > 0 && (
+        <div style={{
+          borderRadius: 10, overflow: 'hidden', marginBottom: 16,
+          border: `1px solid ${excessKm > 0 ? 'rgba(239,68,68,0.25)' : 'rgba(16,185,129,0.25)'}`,
+        }}>
+          <div style={{ padding: '10px 14px', background: excessKm > 0 ? 'var(--danger-soft)' : 'var(--success-soft)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Gauge size={14} style={{ color: excessKm > 0 ? 'var(--danger)' : 'var(--success)' }} />
+            <span style={{ fontWeight: 700, fontSize: 12, color: excessKm > 0 ? 'var(--danger)' : 'var(--success)' }}>
+              {excessKm > 0 ? `Dépassement de ${excessKm.toLocaleString()} km` : 'Kilométrage dans la limite'}
+            </span>
+          </div>
+          <div style={{ padding: '12px 14px', background: 'var(--bg-2)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <KmRow label="Km parcourus" value={`${kmDriven.toLocaleString()} km`} />
+            <KmRow label="Km autorisés" value={`${kmLimit.toLocaleString()} km`} />
+            {excessKm > 0 && (
+              <>
+                <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
+                <KmRow label="Km en dépassement" value={`${excessKm.toLocaleString()} km`} danger />
+                <KmRow label={`Prix/km (${extraKmPrice} DA)`} value={`× ${extraKmPrice.toLocaleString()} DA`} />
+                <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 14 }}>
+                  <span style={{ color: 'var(--text-2)' }}>Frais km suppl.</span>
+                  <span style={{ color: 'var(--danger)' }}>+{kmFees.toLocaleString('fr-DZ')} DA</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Carburant départ</label>
+          <select className="form-select" value={form.fuelOut} onChange={e => set('fuelOut', e.target.value)}>
+            {['Plein', '3/4', '1/2', '1/4', 'Vide'].map(f => <option key={f}>{f}</option>)}
+          </select>
+        </div>
+        <div className="form-group"><label className="form-label">Carburant retour</label>
+          <select className="form-select" value={form.fuelIn} onChange={e => set('fuelIn', e.target.value)}>
+            {['Plein', '3/4', '1/2', '1/4', 'Vide'].map(f => <option key={f}>{f}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className="form-group"><label className="form-label">État du véhicule</label>
+        <select className="form-select" value={form.condition} onChange={e => set('condition', e.target.value)}>
+          {['Bon', 'Dommage mineur', 'Dommage majeur'].map(c => <option key={c}>{c}</option>)}
+        </select>
+      </div>
+
+      {form.condition !== 'Bon' && (
+        <div className="form-group"><label className="form-label">Description des dommages</label><textarea className="form-textarea" value={form.damages} onChange={e => set('damages', e.target.value)} placeholder="Décrivez les dommages..." /></div>
+      )}
+
+      <div className="form-group">
+        <label className="form-label">Autres frais supplémentaires (DA)</label>
+        <input className="form-input" type="number" value={form.manualCharges} onChange={e => set('manualCharges', e.target.value)} placeholder="0" />
+      </div>
+
+      {/* Récap total frais */}
+      {totalExtraCharges > 0 && (
+        <div style={{ padding: '12px 16px', background: 'var(--surface-2)', borderRadius: 10, marginBottom: 12, border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Récapitulatif des frais</div>
+          {kmFees > 0 && <KmRow label="Frais dépassement km" value={`+${kmFees.toLocaleString('fr-DZ')} DA`} danger />}
+          {+form.manualCharges > 0 && <KmRow label="Autres frais" value={`+${(+form.manualCharges).toLocaleString('fr-DZ')} DA`} />}
+          <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 15 }}>
+            <span>Total frais supplémentaires</span>
+            <span style={{ color: 'var(--danger)' }}>+{totalExtraCharges.toLocaleString('fr-DZ')} DA</span>
+          </div>
+        </div>
+      )}
+
+      <div className="form-group"><label className="form-label">Notes</label><textarea className="form-textarea" value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
+    </Modal>
+  );
+}
+
+function KmRow({ label, value, danger }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+      <span style={{ color: 'var(--text-3)' }}>{label}</span>
+      <span style={{ fontWeight: 600, color: danger ? 'var(--danger)' : 'var(--text-2)' }}>{value}</span>
+    </div>
+  );
+}

@@ -1,0 +1,290 @@
+import { useState } from 'react';
+import { Plus, Search, Eye, Edit, FileText, CalendarDays, DollarSign } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import Modal from '../components/Modal';
+import { differenceInDays, format, parseISO } from 'date-fns';
+import { fr } from 'date-fns/locale';
+
+const statusMap = {
+  active: { cls: 'badge-success', label: 'Active' },
+  upcoming: { cls: 'badge-accent', label: 'À venir' },
+  completed: { cls: 'badge-neutral', label: 'Terminée' },
+  cancelled: { cls: 'badge-danger', label: 'Annulée' },
+};
+
+export default function Reservations() {
+  const { reservations, vehicles, clients, addReservation, updateReservation } = useApp();
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('Tous');
+  const [showAdd, setShowAdd] = useState(false);
+  const [selected, setSelected] = useState(null);
+
+  const filtered = reservations.filter(r => {
+    const client = clients.find(c => c.id === r.clientId);
+    const vehicle = vehicles.find(v => v.id === r.vehicleId);
+    const matchSearch = `${client?.firstName} ${client?.lastName} ${vehicle?.brand} ${vehicle?.model}`.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === 'Tous' || r.status === statusFilter;
+    return matchSearch && matchStatus;
+  }).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+  const totalRevenue = reservations.filter(r => r.status !== 'cancelled').reduce((s, r) => s + r.paidAmount, 0);
+  const pendingPayment = reservations.filter(r => r.status === 'active').reduce((s, r) => s + (r.totalPrice - r.paidAmount), 0);
+
+  return (
+    <div>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Réservations</h1>
+          <p className="page-subtitle">{reservations.length} réservations au total</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+          <Plus size={16} /> Nouvelle réservation
+        </button>
+      </div>
+
+      {/* KPIs */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+        {[
+          { icon: <FileText size={14} />, label: 'Actives', value: reservations.filter(r => r.status === 'active').length, color: 'var(--success)' },
+          { icon: <CalendarDays size={14} />, label: 'À venir', value: reservations.filter(r => r.status === 'upcoming').length, color: 'var(--accent)' },
+          { icon: <DollarSign size={14} />, label: 'Encaissé', value: totalRevenue.toLocaleString('fr-DZ') + ' DA', color: 'var(--primary)' },
+          { icon: <DollarSign size={14} />, label: 'Reste à payer', value: pendingPayment.toLocaleString('fr-DZ') + ' DA', color: 'var(--danger)' },
+        ].map(s => (
+          <div key={s.label} style={{ padding: '10px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+            <span style={{ color: s.color }}>{s.icon}</span>
+            <span style={{ color: 'var(--text-3)' }}>{s.label}:</span>
+            <strong>{s.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="search-bar" style={{ flex: 1, minWidth: 260 }}>
+          <Search size={16} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Chercher par client ou véhicule..." />
+        </div>
+        <div className="filter-group">
+          {['Tous', 'active', 'upcoming', 'completed', 'cancelled'].map(s => (
+            <button key={s} className={`filter-btn ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>
+              {s === 'Tous' ? 'Tous' : statusMap[s]?.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="card">
+        <div style={{ overflowX: 'auto' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Client</th>
+                <th>Véhicule</th>
+                <th>Période</th>
+                <th>Durée</th>
+                <th>Total</th>
+                <th>Payé</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(r => {
+                const client = clients.find(c => c.id === r.clientId);
+                const vehicle = vehicles.find(v => v.id === r.vehicleId);
+                const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
+                const remaining = r.totalPrice - r.paidAmount;
+                return (
+                  <tr key={r.id}>
+                    <td style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.id}</td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{client?.firstName} {client?.lastName}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{client?.phone}</div>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{vehicle?.brand} {vehicle?.model}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{vehicle?.plate}</div>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: 12 }}>{format(parseISO(r.startDate), 'dd/MM/yyyy')}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-3)' }}>→ {format(parseISO(r.endDate), 'dd/MM/yyyy')}</div>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{days}j</td>
+                    <td style={{ fontWeight: 700 }}>{r.totalPrice.toLocaleString('fr-DZ')} DA</td>
+                    <td>
+                      <div style={{ fontWeight: 600, color: remaining > 0 ? 'var(--danger)' : 'var(--success)' }}>
+                        {r.paidAmount.toLocaleString('fr-DZ')} DA
+                      </div>
+                      {remaining > 0 && <div style={{ fontSize: 11, color: 'var(--danger)' }}>-{remaining.toLocaleString('fr-DZ')} DA</div>}
+                    </td>
+                    <td><span className={`badge ${statusMap[r.status]?.cls}`}>{statusMap[r.status]?.label}</span></td>
+                    <td>
+                      <div className="actions-cell">
+                        <button className="action-btn" title="Voir" onClick={() => setSelected(r)}><Eye size={14} /></button>
+                        {r.status === 'upcoming' && (
+                          <button className="action-btn" title="Activer" onClick={() => updateReservation(r.id, { status: 'active' })}>
+                            <Edit size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {showAdd && <AddReservationModal onClose={() => setShowAdd(false)} />}
+      {selected && <ReservationDetailModal reservation={selected} onClose={() => setSelected(null)} />}
+    </div>
+  );
+}
+
+function AddReservationModal({ onClose }) {
+  const { clients, vehicles, addReservation } = useApp();
+  const [form, setForm] = useState({ clientId: '', vehicleId: '', startDate: '', endDate: '', paymentMethod: 'Espèces', deposit: '', paidAmount: '', kmLimit: 200, extraKmPrice: 50, notes: '' });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const vehicle = vehicles.find(v => v.id === +form.vehicleId);
+  const days = form.startDate && form.endDate ? differenceInDays(parseISO(form.endDate), parseISO(form.startDate)) : 0;
+  const total = vehicle ? days * vehicle.pricePerDay : 0;
+
+  const handleSubmit = () => {
+    if (!form.clientId || !form.vehicleId || !form.startDate || !form.endDate) return;
+    addReservation({
+      clientId: +form.clientId, vehicleId: +form.vehicleId,
+      startDate: form.startDate, endDate: form.endDate,
+      status: 'upcoming', totalPrice: total,
+      paidAmount: +form.paidAmount || 0,
+      deposit: +form.deposit || 0,
+      paymentMethod: form.paymentMethod, notes: form.notes,
+      kmLimit: +form.kmLimit || 200,
+      extraKmPrice: +form.extraKmPrice || 50,
+    });
+    onClose();
+  };
+
+  return (
+    <Modal title="Nouvelle réservation" onClose={onClose} footer={
+      <>
+        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn btn-primary" onClick={handleSubmit}>Créer</button>
+      </>
+    }>
+      <div className="form-group">
+        <label className="form-label">Client *</label>
+        <select className="form-select" value={form.clientId} onChange={e => set('clientId', e.target.value)}>
+          <option value="">-- Sélectionner --</option>
+          {clients.map(c => <option key={c.id} value={c.id}>{c.firstName} {c.lastName} — {c.phone}</option>)}
+        </select>
+      </div>
+      <div className="form-group">
+        <label className="form-label">Véhicule *</label>
+        <select className="form-select" value={form.vehicleId} onChange={e => set('vehicleId', e.target.value)}>
+          <option value="">-- Sélectionner --</option>
+          {vehicles.filter(v => v.status === 'available').map(v => (
+            <option key={v.id} value={v.id}>{v.brand} {v.model} — {v.pricePerDay.toLocaleString()} DA/j</option>
+          ))}
+        </select>
+      </div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Date de départ *</label><input className="form-input" type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Date de retour *</label><input className="form-input" type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} /></div>
+      </div>
+      {total > 0 && (
+        <div style={{ padding: '12px 16px', background: 'var(--primary-soft)', borderRadius: 8, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{days} jours × {vehicle?.pricePerDay.toLocaleString()} DA</span>
+          <strong style={{ color: 'var(--primary)', fontSize: 16 }}>{total.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+      )}
+      {/* Kilométrage */}
+      <div style={{ padding: '12px 16px', background: 'var(--surface-2)', borderRadius: 8, marginBottom: 16, border: '1px solid var(--border)' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-3)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          📏 Limite kilométrique
+        </div>
+        <div className="form-row" style={{ marginBottom: 0 }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Km autorisés (total)</label>
+            <input className="form-input" type="number" value={form.kmLimit} onChange={e => set('kmLimit', e.target.value)} placeholder="200" />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Frais par km suppl. (DA)</label>
+            <input className="form-input" type="number" value={form.extraKmPrice} onChange={e => set('extraKmPrice', e.target.value)} placeholder="50" />
+          </div>
+        </div>
+        {form.kmLimit && form.extraKmPrice && (
+          <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-3)' }}>
+            Chaque km au-delà de <strong style={{ color: 'var(--text-2)' }}>{(+form.kmLimit).toLocaleString()} km</strong> sera facturé <strong style={{ color: 'var(--primary)' }}>{(+form.extraKmPrice).toLocaleString()} DA/km</strong>
+          </div>
+        )}
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Mode de paiement</label>
+          <select className="form-select" value={form.paymentMethod} onChange={e => set('paymentMethod', e.target.value)}>
+            {['Espèces', 'Virement', 'CCP', 'Chèque'].map(m => <option key={m}>{m}</option>)}
+          </select>
+        </div>
+        <div className="form-group"><label className="form-label">Caution (DA)</label><input className="form-input" type="number" value={form.deposit} onChange={e => set('deposit', e.target.value)} /></div>
+      </div>
+      <div className="form-group"><label className="form-label">Avance payée (DA)</label><input className="form-input" type="number" value={form.paidAmount} onChange={e => set('paidAmount', e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">Notes</label><textarea className="form-textarea" value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
+    </Modal>
+  );
+}
+
+function ReservationDetailModal({ reservation: r, onClose }) {
+  const { clients, vehicles } = useApp();
+  const client = clients.find(c => c.id === r.clientId);
+  const vehicle = vehicles.find(v => v.id === r.vehicleId);
+  const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
+
+  return (
+    <Modal title={`Réservation #${r.id}`} onClose={onClose}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+        <span className={`badge ${statusMap[r.status]?.cls}`}>{statusMap[r.status]?.label}</span>
+        <span className="badge badge-neutral">{r.paymentMethod || 'Non défini'}</span>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        <InfoBox label="Client" value={`${client?.firstName} ${client?.lastName}`} sub={client?.phone} />
+        <InfoBox label="Véhicule" value={`${vehicle?.brand} ${vehicle?.model}`} sub={vehicle?.plate} />
+        <InfoBox label="Départ" value={format(parseISO(r.startDate), 'dd MMMM yyyy', { locale: fr })} />
+        <InfoBox label="Retour" value={format(parseISO(r.endDate), 'dd MMMM yyyy', { locale: fr })} />
+        <InfoBox label="Durée" value={`${days} jours`} />
+        <InfoBox label="Caution" value={`${(r.deposit || 0).toLocaleString('fr-DZ')} DA`} />
+        {r.kmLimit && <InfoBox label="Km autorisés" value={`${r.kmLimit.toLocaleString()} km`} />}
+        {r.extraKmPrice && <InfoBox label="Frais km suppl." value={`${r.extraKmPrice.toLocaleString()} DA/km`} />}
+      </div>
+
+      <div style={{ padding: '14px 16px', background: 'var(--surface-2)', borderRadius: 10, marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13, color: 'var(--text-2)' }}>
+          <span>Total</span><strong style={{ color: 'var(--text)' }}>{r.totalPrice.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-2)' }}>
+          <span>Payé</span><strong style={{ color: 'var(--success)' }}>{r.paidAmount.toLocaleString('fr-DZ')} DA</strong>
+        </div>
+        {r.totalPrice - r.paidAmount > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: 8, color: 'var(--danger)', fontWeight: 600 }}>
+            <span>Reste à payer</span><span>{(r.totalPrice - r.paidAmount).toLocaleString('fr-DZ')} DA</span>
+          </div>
+        )}
+      </div>
+      {r.notes && <div style={{ padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 8, fontSize: 12, color: 'var(--text-2)' }}>📝 {r.notes}</div>}
+    </Modal>
+  );
+}
+
+function InfoBox({ label, value, sub }) {
+  return (
+    <div style={{ background: 'var(--bg-2)', borderRadius: 8, padding: '10px 14px' }}>
+      <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, marginBottom: 4 }}>{label}</div>
+      <div style={{ fontWeight: 600 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{sub}</div>}
+    </div>
+  );
+}
