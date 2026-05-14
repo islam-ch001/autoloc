@@ -15,10 +15,14 @@ function AppShell() {
 
   if (loading) {
     return (
-      <div style={{ height: '100vh', display: 'grid', placeItems: 'center', background: 'var(--bg)', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 44, height: 44, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-          <span style={{ color: 'var(--text-3)', fontSize: 14 }}>Connexion à l'API…</span>
+      <div style={{ height: '100vh', display: 'grid', placeItems: 'center', background: '#0a0a0f' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+          <div style={{ fontSize: 36, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif', letterSpacing: -1 }}>
+            🚗 AutoLoc
+          </div>
+          <div style={{ width: 44, height: 44, border: '3px solid #2a2a3e', borderTopColor: '#f59e0b', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          <span style={{ color: '#b0b0c0', fontSize: 14 }}>Chargement en cours…</span>
+          <span style={{ color: '#707088', fontSize: 11 }}>Démarrage du serveur (peut prendre 30s)</span>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -27,15 +31,15 @@ function AppShell() {
 
   if (error) {
     return (
-      <div style={{ height: '100vh', display: 'grid', placeItems: 'center', background: 'var(--bg)' }}>
-        <div style={{ textAlign: 'center', maxWidth: 420 }}>
+      <div style={{ height: '100vh', display: 'grid', placeItems: 'center', background: '#0a0a0f' }}>
+        <div style={{ textAlign: 'center', maxWidth: 420, padding: '0 20px' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, marginBottom: 8 }}>Impossible de joindre l'API</h2>
-          <p style={{ color: 'var(--text-3)', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>
-            Vérifiez que le serveur backend tourne sur <code style={{ color: 'var(--primary)', background: 'var(--surface)', padding: '2px 6px', borderRadius: 4 }}>http://localhost:3001</code>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, marginBottom: 8, color: '#f0f0f5' }}>Impossible de joindre l'API</h2>
+          <p style={{ color: '#b0b0c0', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>
+            Le serveur backend est peut-être en démarrage. Attendez 30 secondes et réessayez.
           </p>
-          <p style={{ color: 'var(--danger)', fontSize: 12, marginBottom: 20, background: 'var(--danger-soft)', padding: '8px 12px', borderRadius: 8 }}>{error}</p>
-          <button className="btn btn-primary" onClick={reload}>Réessayer</button>
+          <p style={{ color: '#ef4444', fontSize: 12, marginBottom: 20, background: 'rgba(239,68,68,0.12)', padding: '8px 12px', borderRadius: 8 }}>{error}</p>
+          <button className="btn btn-primary" onClick={reload} style={{ background: '#f59e0b', color: '#000', border: 'none', padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>Réessayer</button>
         </div>
       </div>
     );
