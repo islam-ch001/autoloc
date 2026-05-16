@@ -5,9 +5,9 @@ const pool   = require('../db/pool');
 router.get('/', async (req, res) => {
   try {
     const { status } = req.query;
-    let query = 'SELECT * FROM vehicles';
-    const params = [];
-    if (status) { query += ' WHERE status = $1'; params.push(status); }
+    const params = [req.user.id];
+    let query = 'SELECT * FROM vehicles WHERE user_id = $1';
+    if (status) { query += ' AND status = $2'; params.push(status); }
     query += ' ORDER BY id';
     const { rows } = await pool.query(query, params);
     res.json(rows);
@@ -19,7 +19,10 @@ router.get('/', async (req, res) => {
 // GET /api/vehicles/:id
 router.get('/:id', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM vehicles WHERE id = $1', [req.params.id]);
+    const { rows } = await pool.query(
+      'SELECT * FROM vehicles WHERE id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    );
     if (!rows.length) return res.status(404).json({ error: 'Véhicule introuvable' });
     res.json(rows[0]);
   } catch (err) {
@@ -32,9 +35,9 @@ router.post('/', async (req, res) => {
   try {
     const { brand, model, year, category, fuel, transmission, seats, price_per_day, plate, mileage, image, color, features } = req.body;
     const { rows } = await pool.query(
-      `INSERT INTO vehicles (brand, model, year, category, fuel, transmission, seats, price_per_day, plate, mileage, image, color, features)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
-      [brand, model, year, category, fuel, transmission, seats ?? 5, price_per_day, plate, mileage ?? 0, image, color, features ?? []]
+      `INSERT INTO vehicles (user_id, brand, model, year, category, fuel, transmission, seats, price_per_day, plate, mileage, image, color, features)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+      [req.user.id, brand, model, year, category, fuel, transmission, seats ?? 5, price_per_day, plate, mileage ?? 0, image, color, features ?? []]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -56,9 +59,9 @@ router.patch('/:id', async (req, res) => {
       }
     }
     if (!fields.length) return res.status(400).json({ error: 'Aucun champ à mettre à jour' });
-    values.push(req.params.id);
+    values.push(req.params.id, req.user.id);
     const { rows } = await pool.query(
-      `UPDATE vehicles SET ${fields.join(', ')} WHERE id = $${i} RETURNING *`,
+      `UPDATE vehicles SET ${fields.join(', ')} WHERE id = $${i} AND user_id = $${i+1} RETURNING *`,
       values
     );
     if (!rows.length) return res.status(404).json({ error: 'Véhicule introuvable' });
@@ -73,22 +76,20 @@ router.delete('/:id', async (req, res) => {
   const db = await pool.connect();
   try {
     await db.query('BEGIN');
-    // Bloquer si actuellement loué
     const { rows: active } = await db.query(
-      "SELECT id FROM reservations WHERE vehicle_id = $1 AND status = 'active'",
-      [req.params.id]
+      "SELECT id FROM reservations WHERE vehicle_id = $1 AND user_id = $2 AND status = 'active'",
+      [req.params.id, req.user.id]
     );
     if (active.length) {
       await db.query('ROLLBACK');
       return res.status(409).json({ error: 'Impossible : véhicule actuellement en location' });
     }
-    // Supprimer en cascade : retours → réservations → véhicule
     await db.query(
-      'DELETE FROM returns WHERE reservation_id IN (SELECT id FROM reservations WHERE vehicle_id = $1)',
-      [req.params.id]
+      'DELETE FROM returns WHERE user_id = $1 AND reservation_id IN (SELECT id FROM reservations WHERE vehicle_id = $2 AND user_id = $1)',
+      [req.user.id, req.params.id]
     );
-    await db.query('DELETE FROM reservations WHERE vehicle_id = $1', [req.params.id]);
-    const { rows } = await db.query('DELETE FROM vehicles WHERE id = $1 RETURNING id', [req.params.id]);
+    await db.query('DELETE FROM reservations WHERE vehicle_id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+    const { rows } = await db.query('DELETE FROM vehicles WHERE id = $1 AND user_id = $2 RETURNING id', [req.params.id, req.user.id]);
     if (!rows.length) {
       await db.query('ROLLBACK');
       return res.status(404).json({ error: 'Véhicule introuvable' });

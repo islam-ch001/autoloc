@@ -10,7 +10,6 @@ import Calendar from './pages/Calendar';
 import Returns from './pages/Returns';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
-import Users from './pages/Users';
 import './index.css';
 
 function FullScreenLoader({ text = 'Chargement…' }) {
@@ -64,7 +63,6 @@ function AppShell() {
           <Route path="/clients"      element={<Clients />} />
           <Route path="/calendar"     element={<Calendar />} />
           <Route path="/returns"      element={<Returns />} />
-          <Route path="/users"        element={<Users />} />
           <Route path="/settings"     element={<Settings />} />
         </Routes>
       </main>

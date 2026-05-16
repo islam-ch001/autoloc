@@ -4,40 +4,35 @@ const pool   = require('../db/pool');
 // GET /api/dashboard/stats
 router.get('/stats', async (req, res) => {
   try {
+    const uid = req.user.id;
     const [vehicles, reservations, revenue, unpaid, clients, monthlyRev] = await Promise.all([
-      // État flotte
       pool.query(`
         SELECT
           COUNT(*)                                          AS total,
           COUNT(*) FILTER (WHERE status = 'available')     AS available,
           COUNT(*) FILTER (WHERE status = 'rented')        AS rented,
           COUNT(*) FILTER (WHERE status = 'maintenance')   AS maintenance
-        FROM vehicles
-      `),
-      // Réservations par statut
+        FROM vehicles WHERE user_id = $1
+      `, [uid]),
       pool.query(`
         SELECT
           COUNT(*)                                          AS total,
           COUNT(*) FILTER (WHERE status = 'active')        AS active,
           COUNT(*) FILTER (WHERE status = 'upcoming')      AS upcoming,
           COUNT(*) FILTER (WHERE status = 'completed')     AS completed
-        FROM reservations
-      `),
-      // Revenu total encaissé
+        FROM reservations WHERE user_id = $1
+      `, [uid]),
       pool.query(`
         SELECT COALESCE(SUM(paid_amount), 0) AS total_revenue
         FROM reservations
-        WHERE status != 'cancelled'
-      `),
-      // Montant impayé (réservations actives)
+        WHERE user_id = $1 AND status != 'cancelled'
+      `, [uid]),
       pool.query(`
         SELECT COALESCE(SUM(total_price - paid_amount), 0) AS unpaid
         FROM reservations
-        WHERE status = 'active'
-      `),
-      // Clients actifs
-      pool.query(`SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'active') AS active FROM clients`),
-      // Revenus par mois (6 derniers mois)
+        WHERE user_id = $1 AND status = 'active'
+      `, [uid]),
+      pool.query(`SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'active') AS active FROM clients WHERE user_id = $1`, [uid]),
       pool.query(`
         SELECT
           TO_CHAR(start_date, 'Mon') AS month,
@@ -45,11 +40,12 @@ router.get('/stats', async (req, res) => {
           COALESCE(SUM(paid_amount), 0)  AS revenue,
           COUNT(*) AS rentals
         FROM reservations
-        WHERE start_date >= NOW() - INTERVAL '6 months'
+        WHERE user_id = $1
+          AND start_date >= NOW() - INTERVAL '6 months'
           AND status != 'cancelled'
         GROUP BY month, month_key
         ORDER BY month_key
-      `),
+      `, [uid]),
     ]);
 
     res.json({
@@ -75,9 +71,10 @@ router.get('/recent-reservations', async (req, res) => {
       FROM reservations r
       JOIN clients  c ON c.id = r.client_id
       JOIN vehicles v ON v.id = r.vehicle_id
+      WHERE r.user_id = $1
       ORDER BY r.created_at DESC
       LIMIT 8
-    `);
+    `, [req.user.id]);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
