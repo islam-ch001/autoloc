@@ -1,15 +1,45 @@
 // En dev → localhost, en prod → variable d'environnement Vite
 const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
 
+// ─── Conversion snake_case → camelCase ─────────────────────
+const toCamel = (s) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+
+function camelize(obj) {
+  if (Array.isArray(obj)) return obj.map(camelize);
+  if (obj && typeof obj === 'object' && obj.constructor === Object) {
+    const out = {};
+    for (const [k, v] of Object.entries(obj)) {
+      out[toCamel(k)] = camelize(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
+// ─── Conversion camelCase → snake_case (pour envoyer au backend) ──
+const toSnake = (s) => s.replace(/([A-Z])/g, '_$1').toLowerCase();
+
+function snakeify(obj) {
+  if (Array.isArray(obj)) return obj.map(snakeify);
+  if (obj && typeof obj === 'object' && obj.constructor === Object) {
+    const out = {};
+    for (const [k, v] of Object.entries(obj)) {
+      out[toSnake(k)] = snakeify(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
 async function request(method, path, body) {
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? JSON.stringify(snakeify(body)) : undefined,
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Erreur serveur');
-  return data;
+  return camelize(data);
 }
 
 // ─── Véhicules ───────────────────────────────────────────────

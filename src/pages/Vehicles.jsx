@@ -11,22 +11,31 @@ const statusMap = {
 
 
 export default function Vehicles() {
-  const { vehicles, setVehicles, reservations } = useApp();
+  const { vehicles, reservations, addVehicle, patchVehicle, removeVehicle } = useApp();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Tous');
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState(null);
   const [toDelete, setToDelete] = useState(null);
 
-  const handleDelete = (vehicle) => {
+  const handleDelete = async (vehicle) => {
     const isRented = reservations.some(r => r.vehicleId === vehicle.id && r.status === 'active');
     if (isRented) return;
-    setVehicles(prev => prev.filter(v => v.id !== vehicle.id));
-    setToDelete(null);
+    try {
+      await removeVehicle(vehicle.id);
+      setToDelete(null);
+    } catch (err) {
+      alert("Suppression impossible : " + err.message);
+      setToDelete(null);
+    }
   };
 
-  const handleMarkAvailable = (vehicleId) => {
-    setVehicles(prev => prev.map(v => v.id === vehicleId ? { ...v, status: 'available' } : v));
+  const handleMarkAvailable = async (vehicleId) => {
+    try {
+      await patchVehicle(vehicleId, { status: 'available' });
+    } catch (err) {
+      alert("Erreur : " + err.message);
+    }
   };
 
   const filtered = vehicles.filter(v => {
@@ -94,9 +103,13 @@ export default function Vehicles() {
         </div>
       )}
 
-      {showAdd && <AddVehicleModal onClose={() => setShowAdd(false)} onAdd={v => {
-        setVehicles(prev => [...prev, { ...v, id: Math.max(...prev.map(x => x.id)) + 1, status: 'available', features: [] }]);
-        setShowAdd(false);
+      {showAdd && <AddVehicleModal onClose={() => setShowAdd(false)} onAdd={async v => {
+        try {
+          await addVehicle(v);
+          setShowAdd(false);
+        } catch (err) {
+          alert("Erreur : " + err.message);
+        }
       }} />}
 
       {selected && <VehicleDetailModal vehicle={selected} onClose={() => setSelected(null)} />}

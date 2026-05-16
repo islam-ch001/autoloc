@@ -70,17 +70,36 @@ router.patch('/:id', async (req, res) => {
 
 // DELETE /api/vehicles/:id
 router.delete('/:id', async (req, res) => {
+  const db = await pool.connect();
   try {
-    const { rows: active } = await pool.query(
+    await db.query('BEGIN');
+    // Bloquer si actuellement loué
+    const { rows: active } = await db.query(
       "SELECT id FROM reservations WHERE vehicle_id = $1 AND status = 'active'",
       [req.params.id]
     );
-    if (active.length) return res.status(409).json({ error: 'Impossible : véhicule actuellement en location' });
-    const { rows } = await pool.query('DELETE FROM vehicles WHERE id = $1 RETURNING id', [req.params.id]);
-    if (!rows.length) return res.status(404).json({ error: 'Véhicule introuvable' });
+    if (active.length) {
+      await db.query('ROLLBACK');
+      return res.status(409).json({ error: 'Impossible : véhicule actuellement en location' });
+    }
+    // Supprimer en cascade : retours → réservations → véhicule
+    await db.query(
+      'DELETE FROM returns WHERE reservation_id IN (SELECT id FROM reservations WHERE vehicle_id = $1)',
+      [req.params.id]
+    );
+    await db.query('DELETE FROM reservations WHERE vehicle_id = $1', [req.params.id]);
+    const { rows } = await db.query('DELETE FROM vehicles WHERE id = $1 RETURNING id', [req.params.id]);
+    if (!rows.length) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ error: 'Véhicule introuvable' });
+    }
+    await db.query('COMMIT');
     res.json({ message: 'Véhicule supprimé', id: rows[0].id });
   } catch (err) {
+    await db.query('ROLLBACK');
     res.status(500).json({ error: err.message });
+  } finally {
+    db.release();
   }
 });
 
