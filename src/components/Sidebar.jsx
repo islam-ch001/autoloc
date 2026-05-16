@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -52,6 +52,12 @@ export default function Sidebar() {
         ))}
 
         <div className="nav-section-label">Système</div>
+        {user?.role === 'admin' && (
+          <NavLink to="/users" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <ShieldCheck size={18} />
+            Utilisateurs
+          </NavLink>
+        )}
         <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <Settings size={18} />
           Paramètres

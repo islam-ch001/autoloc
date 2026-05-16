@@ -3,30 +3,41 @@ const bcrypt = require('bcryptjs');
 const pool = require('../db/pool');
 const { requireAuth, signToken } = require('../middleware/auth');
 
-// POST /api/auth/register — inscription publique
+// Middleware admin uniquement
+function requireAdmin(req, res, next) {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ error: 'Réservé aux administrateurs' });
+  }
+  next();
+}
+
+// GET /api/auth/bootstrap-status — savoir si l'app a déjà un admin
+router.get('/bootstrap-status', async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM users');
+    res.json({ needsBootstrap: rows[0].n === 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/auth/register — uniquement si AUCUN utilisateur n'existe (bootstrap admin)
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body;
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Email, mot de passe et nom requis' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
-    }
-    const cleanEmail = String(email).trim().toLowerCase();
-
-    // Vérifier l'unicité
-    const { rows: existing } = await pool.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
-    if (existing.length) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
-
-    // Compter les users — le 1er devient admin automatiquement
     const { rows: count } = await pool.query('SELECT COUNT(*)::int AS n FROM users');
-    const role = count[0].n === 0 ? 'admin' : 'user';
+    if (count[0].n > 0) {
+      return res.status(403).json({ error: 'Inscription publique désactivée. Contactez l\'administrateur.' });
+    }
+
+    const { email, password, name } = req.body;
+    if (!email || !password || !name) return res.status(400).json({ error: 'Email, mot de passe et nom requis' });
+    if (password.length < 6) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    const cleanEmail = String(email).trim().toLowerCase();
 
     const hash = await bcrypt.hash(password, 10);
     const { rows } = await pool.query(
-      'INSERT INTO users (email, password_hash, name, role) VALUES ($1,$2,$3,$4) RETURNING id, email, name, role, created_at',
-      [cleanEmail, hash, name.trim(), role]
+      "INSERT INTO users (email, password_hash, name, role) VALUES ($1,$2,$3,'admin') RETURNING id, email, name, role, created_at",
+      [cleanEmail, hash, name.trim()]
     );
     const user = rows[0];
     const token = signToken({ id: user.id, email: user.email, role: user.role });
@@ -72,6 +83,56 @@ router.get('/me', requireAuth, async (req, res) => {
     );
     if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
     res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Gestion des utilisateurs (admin uniquement) ──────────────────
+
+// GET /api/auth/users — liste de tous les comptes
+router.get('/users', requireAuth, requireAdmin, async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, email, name, role, created_at, last_login_at FROM users ORDER BY created_at DESC'
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/auth/users — créer un compte (admin)
+router.post('/users', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { email, password, name, role } = req.body;
+    if (!email || !password || !name) return res.status(400).json({ error: 'Email, mot de passe et nom requis' });
+    if (password.length < 6) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanRole = role === 'admin' ? 'admin' : 'user';
+
+    const { rows: existing } = await pool.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
+    if (existing.length) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
+
+    const hash = await bcrypt.hash(password, 10);
+    const { rows } = await pool.query(
+      'INSERT INTO users (email, password_hash, name, role) VALUES ($1,$2,$3,$4) RETURNING id, email, name, role, created_at',
+      [cleanEmail, hash, name.trim(), cleanRole]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/auth/users/:id — supprimer un compte (admin)
+router.delete('/users/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const id = +req.params.id;
+    if (id === req.user.id) return res.status(400).json({ error: 'Vous ne pouvez pas supprimer votre propre compte' });
+    const { rows } = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    res.json({ message: 'Utilisateur supprimé', id: rows[0].id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
