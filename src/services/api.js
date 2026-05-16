@@ -1,3 +1,5 @@
+import { getToken } from '../context/AuthContext';
+
 // En dev → localhost, en prod → variable d'environnement Vite
 const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
 
@@ -32,11 +34,20 @@ function snakeify(obj) {
 }
 
 async function request(method, path, body) {
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: body ? JSON.stringify(snakeify(body)) : undefined,
   });
+  if (res.status === 401) {
+    // Token expiré → forcer la déconnexion
+    localStorage.removeItem('autoloc_token');
+    window.location.href = '/login';
+    throw new Error('Session expirée');
+  }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Erreur serveur');
   return camelize(data);

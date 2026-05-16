@@ -7,6 +7,8 @@ const clientsRouter      = require('./routes/clients');
 const reservationsRouter = require('./routes/reservations');
 const returnsRouter      = require('./routes/returns');
 const dashboardRouter    = require('./routes/dashboard');
+const authRouter         = require('./routes/auth');
+const { requireAuth }    = require('./middleware/auth');
 
 const app = express();
 
@@ -31,12 +33,15 @@ app.use((req, _res, next) => {
   next();
 });
 
-// Routes
-app.use('/api/vehicles',     vehiclesRouter);
-app.use('/api/clients',      clientsRouter);
-app.use('/api/reservations', reservationsRouter);
-app.use('/api/returns',      returnsRouter);
-app.use('/api/dashboard',    dashboardRouter);
+// Auth (publique)
+app.use('/api/auth', authRouter);
+
+// Routes protégées (requièrent JWT)
+app.use('/api/vehicles',     requireAuth, vehiclesRouter);
+app.use('/api/clients',      requireAuth, clientsRouter);
+app.use('/api/reservations', requireAuth, reservationsRouter);
+app.use('/api/returns',      requireAuth, returnsRouter);
+app.use('/api/dashboard',    requireAuth, dashboardRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date() }));

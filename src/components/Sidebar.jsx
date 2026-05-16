@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings } from 'lucide-react';
+import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
@@ -13,7 +14,11 @@ const navItems = [
 
 export default function Sidebar() {
   const { reservations } = useApp();
+  const { user, logout } = useAuth();
   const activeCount = reservations.filter(r => r.status === 'active').length;
+  const initials = (user?.name || 'U')
+    .split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
+  const roleLabel = user?.role === 'admin' ? 'Administrateur' : 'Utilisateur';
 
   return (
     <aside className="sidebar">
@@ -55,11 +60,24 @@ export default function Sidebar() {
 
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="user-avatar">IB</div>
-          <div className="user-info">
-            <div className="user-name">Islem B.</div>
-            <div className="user-role">Administrateur</div>
+          <div className="user-avatar">{initials}</div>
+          <div className="user-info" style={{ flex: 1, minWidth: 0 }}>
+            <div className="user-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Utilisateur'}</div>
+            <div className="user-role">{roleLabel}</div>
           </div>
+          <button
+            onClick={logout}
+            title="Se déconnecter"
+            style={{
+              background: 'transparent', border: '1px solid var(--border)', cursor: 'pointer',
+              width: 32, height: 32, borderRadius: 8, display: 'grid', placeItems: 'center',
+              color: 'var(--text-3)', transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-3)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+          >
+            <LogOut size={14} />
+          </button>
         </div>
       </div>
     </aside>

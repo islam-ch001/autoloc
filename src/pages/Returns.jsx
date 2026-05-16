@@ -127,7 +127,14 @@ export default function Returns() {
         </div>
       </div>
 
-      {showAdd && <ReturnModal onClose={() => setShowAdd(false)} onAdd={ret => { addReturn(ret); setShowAdd(false); }} />}
+      {showAdd && <ReturnModal onClose={() => setShowAdd(false)} onAdd={async ret => {
+        try {
+          await addReturn(ret);
+          setShowAdd(false);
+        } catch (err) {
+          alert("Erreur : " + err.message);
+        }
+      }} />}
     </div>
   );
 }
@@ -160,15 +167,20 @@ function ReturnModal({ onClose, onAdd }) {
     <Modal title="Retour de véhicule" onClose={onClose} footer={
       <>
         <button className="btn" onClick={onClose}>Annuler</button>
-        <button className="btn btn-primary" onClick={() => onAdd({
-          ...form,
-          reservationId: +form.reservationId,
-          mileageOut: +form.mileageOut,
-          mileageIn: +form.mileageIn,
-          excessKm,
-          kmFees,
-          extraCharges: totalExtraCharges,
-        })}>
+        <button className="btn btn-primary" disabled={!form.reservationId || !form.mileageIn || +form.mileageIn < +form.mileageOut} onClick={() => {
+          if (!form.reservationId) return alert("Sélectionnez une réservation");
+          if (!form.mileageOut || !form.mileageIn) return alert("Renseignez les kilomètres au départ et au retour");
+          if (+form.mileageIn < +form.mileageOut) return alert(`Le km au retour (${form.mileageIn}) doit être supérieur ou égal au km au départ (${form.mileageOut})`);
+          onAdd({
+            ...form,
+            reservationId: +form.reservationId,
+            mileageOut: +form.mileageOut,
+            mileageIn: +form.mileageIn,
+            excessKm,
+            kmFees,
+            extraCharges: totalExtraCharges,
+          });
+        }}>
           Enregistrer
         </button>
       </>
@@ -197,9 +209,14 @@ function ReturnModal({ onClose, onAdd }) {
       </div>
 
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Km au départ</label><input className="form-input" type="number" value={form.mileageOut} onChange={e => set('mileageOut', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Km au retour</label><input className="form-input" type="number" value={form.mileageIn} onChange={e => set('mileageIn', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Km au départ</label><input className="form-input" type="number" value={form.mileageOut} placeholder="Auto-rempli" onChange={e => set('mileageOut', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Km au retour *</label><input className="form-input" type="number" value={form.mileageIn} placeholder={`≥ ${form.mileageOut || '0'}`} min={form.mileageOut || 0} onChange={e => set('mileageIn', e.target.value)} /></div>
       </div>
+      {form.mileageIn && form.mileageOut && +form.mileageIn < +form.mileageOut && (
+        <div style={{ padding: '8px 12px', background: 'rgba(239,68,68,0.12)', color: '#ef4444', borderRadius: 8, fontSize: 12, marginBottom: 12 }}>
+          ⚠️ Le km au retour doit être ≥ km au départ ({form.mileageOut})
+        </div>
+      )}
 
       {/* Calcul kilométrique en temps réel */}
       {kmDriven > 0 && kmLimit > 0 && (
