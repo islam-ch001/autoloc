@@ -101,6 +101,21 @@ CREATE TABLE IF NOT EXISTS returns (
   CHECK (mileage_in >= mileage_out)
 );
 
+CREATE TABLE IF NOT EXISTS invoices (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reservation_id  INTEGER NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
+  invoice_number  TEXT NOT NULL,
+  issue_date      TEXT NOT NULL DEFAULT (date('now')),
+  total_amount    INTEGER NOT NULL DEFAULT 0,
+  paid_amount     INTEGER NOT NULL DEFAULT 0,
+  notes           TEXT,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, invoice_number)
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_user        ON invoices(user_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_reservation ON invoices(reservation_id);
 CREATE INDEX IF NOT EXISTS idx_vehicles_user        ON vehicles(user_id);
 CREATE INDEX IF NOT EXISTS idx_clients_user         ON clients(user_id);
 CREATE INDEX IF NOT EXISTS idx_reservations_user    ON reservations(user_id);

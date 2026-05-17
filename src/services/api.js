@@ -87,6 +87,11 @@ export const createReturn     = (data)     => request('POST', '/returns', data);
 export const getDashboardStats       = () => request('GET', '/dashboard/stats');
 export const getRecentReservations   = () => request('GET', '/dashboard/recent-reservations');
 
+// ─── Factures ────────────────────────────────────────────────
+export const getInvoices       = ()         => request('GET', '/invoices');
+export const createInvoice     = (data)     => request('POST', '/invoices', data);
+export const deleteInvoice     = (id)       => request('DELETE', `/invoices/${id}`);
+
 // ─── Utilitaire ──────────────────────────────────────────────
 function buildQS(params = {}) {
   const q = new URLSearchParams();

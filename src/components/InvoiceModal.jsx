@@ -1,4 +1,5 @@
-import { X, Printer, Download } from 'lucide-react';
+import { X, Printer, Save, Check } from 'lucide-react';
+import { useState } from 'react';
 import { differenceInDays, parseISO, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useApp } from '../context/AppContext';
@@ -6,9 +7,16 @@ import { useSettings } from '../context/SettingsContext';
 
 const formatDA = (n) => (Number(n) || 0).toLocaleString('fr-DZ');
 
-export default function InvoiceModal({ reservation, onClose }) {
-  const { clients, vehicles } = useApp();
+export default function InvoiceModal({ reservation, onClose, existingInvoice = null }) {
+  const { clients, vehicles, invoices, addInvoice } = useApp();
   const { settings } = useSettings();
+  const [savedInvoice, setSavedInvoice] = useState(existingInvoice);
+  const [saving, setSaving] = useState(false);
+
+  // Vérifier s'il y a déjà une facture pour cette réservation
+  const alreadyExists = existingInvoice
+    || (invoices && invoices.find(i => i.reservationId === reservation.id))
+    || savedInvoice;
 
   const client  = clients.find(c => c.id === reservation.clientId);
   const vehicle = vehicles.find(v => v.id === reservation.vehicleId);
@@ -23,10 +31,23 @@ export default function InvoiceModal({ reservation, onClose }) {
   const remaining = total - paid;
   const deposit  = reservation.deposit || 0;
 
-  const invoiceNum = `FAC-${String(reservation.id).padStart(5, '0')}`;
-  const issueDate  = format(new Date(), 'dd MMMM yyyy', { locale: fr });
+  // Si déjà enregistrée → utiliser le numéro et la date stockés
+  const invoiceNum = alreadyExists?.invoiceNumber || `FAC-${String(reservation.id).padStart(5, '0')} (brouillon)`;
+  const issueDate  = alreadyExists?.issueDate
+    ? format(parseISO(alreadyExists.issueDate), 'dd MMMM yyyy', { locale: fr })
+    : format(new Date(), 'dd MMMM yyyy', { locale: fr });
 
   const handlePrint = () => window.print();
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const inv = await addInvoice({ reservationId: reservation.id });
+      setSavedInvoice(inv);
+    } catch (err) {
+      alert('Erreur : ' + err.message);
+    } finally { setSaving(false); }
+  };
 
   return (
     <>
@@ -52,6 +73,15 @@ export default function InvoiceModal({ reservation, onClose }) {
       <div style={styles.overlay}>
         <div id="invoice-controls" style={styles.controls}>
           <div style={{ display: 'flex', gap: 8 }}>
+            {alreadyExists ? (
+              <span style={{ ...styles.btnGhost, background: 'rgba(16,185,129,0.15)', borderColor: 'rgba(16,185,129,0.4)', color: '#10b981' }}>
+                <Check size={16} /> Facture enregistrée
+              </span>
+            ) : (
+              <button onClick={handleSave} disabled={saving} style={{ ...styles.btnSave, opacity: saving ? 0.7 : 1 }}>
+                <Save size={16} /> {saving ? 'Enregistrement…' : 'Enregistrer'}
+              </button>
+            )}
             <button onClick={handlePrint} style={styles.btnPrimary}>
               <Printer size={16} /> Imprimer
             </button>
@@ -223,6 +253,7 @@ const styles = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200, overflow: 'auto', padding: 24 },
   controls: { position: 'sticky', top: 0, display: 'flex', justifyContent: 'flex-end', marginBottom: 16, zIndex: 1 },
   btnPrimary: { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10, border: 'none', background: '#f59e0b', color: '#0a0a0f', fontWeight: 700, cursor: 'pointer', fontSize: 14 },
+  btnSave:    { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10, border: 'none', background: '#10b981', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 },
   btnGhost:   { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', cursor: 'pointer', fontSize: 14 },
   paper: { maxWidth: 820, margin: '0 auto', background: '#fff', color: '#111', padding: '40px 48px', borderRadius: 6, fontFamily: 'Inter, system-ui, sans-serif', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },

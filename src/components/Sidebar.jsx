@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut, Receipt } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -11,6 +11,7 @@ const navItems = [
   { to: '/clients', icon: Users, label: 'Clients' },
   { to: '/calendar', icon: CalendarDays, label: 'Calendrier' },
   { to: '/returns', icon: RotateCcw, label: 'Retours' },
+  { to: '/invoices', icon: Receipt, label: 'Factures' },
 ];
 
 export default function Sidebar() {
