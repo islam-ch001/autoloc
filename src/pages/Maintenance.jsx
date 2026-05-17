@@ -216,9 +216,9 @@ function AddMaintenanceModal({ vehicles, onClose, onAdd }) {
       <div className="form-group">
         <label className="form-label">Véhicule *</label>
         <select className="form-select" value={form.vehicleId} onChange={e => {
-          set('vehicleId', e.target.value);
-          const v = vehicles.find(vv => vv.id === +e.target.value);
-          if (v && !form.mileage) set('mileage', v.mileage);
+          const id = e.target.value;
+          const v = vehicles.find(vv => vv.id === +id);
+          setForm(f => ({ ...f, vehicleId: id, mileage: v ? v.mileage : f.mileage }));
         }}>
           <option value="">-- Sélectionner --</option>
           {vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model} — {v.plate}</option>)}
