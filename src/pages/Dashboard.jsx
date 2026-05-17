@@ -1,12 +1,12 @@
-import { Car, Users, FileText, DollarSign, TrendingUp, AlertTriangle, Clock, Wrench } from 'lucide-react';
+import { Car, FileText, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Clock, Wrench, Receipt } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useApp } from '../context/AppContext';
 import { monthlyRevenue, categoryStats } from '../data/mockData';
 
-const formatDA = (n) => n.toLocaleString('fr-DZ') + ' DA';
+const formatDA = (n) => (n || 0).toLocaleString('fr-DZ') + ' DA';
 
 export default function Dashboard() {
-  const { vehicles, clients, reservations } = useApp();
+  const { vehicles, clients, reservations, maintenance: maintenanceList = [] } = useApp();
 
   const available = vehicles.filter(v => v.status === 'available').length;
   const rented = vehicles.filter(v => v.status === 'rented').length;
@@ -15,6 +15,8 @@ export default function Dashboard() {
   const upcomingRes = reservations.filter(r => r.status === 'upcoming');
   const totalRevenue = reservations.filter(r => r.status === 'completed' || r.status === 'active').reduce((s, r) => s + r.paidAmount, 0);
   const unpaid = activeRes.reduce((s, r) => s + (r.totalPrice - r.paidAmount), 0);
+  const maintenanceCost = maintenanceList.reduce((s, m) => s + (m.cost || 0), 0);
+  const netRevenue = totalRevenue - maintenanceCost;
 
   const recentReservations = [...reservations]
     .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
@@ -30,10 +32,11 @@ export default function Dashboard() {
       </div>
 
       <div className="stats-grid" style={{ marginBottom: 24 }}>
-        <StatCard icon={<Car />} label="Véhicules disponibles" value={`${available}/${vehicles.length}`} change="+2 cette semaine" up bg="var(--success-soft)" iconColor="var(--success)" />
+        <StatCard icon={<Car />} label="Véhicules disponibles" value={`${available}/${vehicles.length}`} change={`${rented} en location · ${maintenance} en maintenance`} up bg="var(--success-soft)" iconColor="var(--success)" />
         <StatCard icon={<FileText />} label="Locations actives" value={rented} change={`${upcomingRes.length} à venir`} up bg="var(--accent-soft)" iconColor="var(--accent)" />
-        <StatCard icon={<DollarSign />} label="Revenu total" value={formatDA(totalRevenue)} change="+18% ce mois" up bg="var(--primary-soft)" iconColor="var(--primary)" />
-        <StatCard icon={<Users />} label="Clients actifs" value={clients.filter(c => c.status === 'active').length} change={`${clients.length} total`} up bg="var(--purple-soft)" iconColor="var(--purple)" />
+        <StatCard icon={<DollarSign />} label="Revenu total" value={formatDA(totalRevenue)} change={`${reservations.filter(r => r.status === 'completed').length} locations terminées`} up bg="var(--primary-soft)" iconColor="var(--primary)" />
+        <StatCard icon={<Wrench />} label="Dépenses maintenance" value={formatDA(maintenanceCost)} change={`${maintenanceList.length} intervention${maintenanceList.length > 1 ? 's' : ''}`} up={false} bg="rgba(239,68,68,0.12)" iconColor="var(--danger)" />
+        <StatCard icon={<Receipt />} label="Revenu net" value={formatDA(netRevenue)} change={`après déduction des dépenses`} up={netRevenue >= 0} bg="rgba(139,92,246,0.12)" iconColor="var(--purple)" />
       </div>
 
       <div className="grid-2" style={{ marginBottom: 24 }}>
@@ -143,7 +146,7 @@ function StatCard({ icon, label, value, change, up, bg, iconColor }) {
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
       <div className={`stat-change ${up ? 'up' : 'down'}`}>
-        <TrendingUp size={12} /> {change}
+        {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />} {change}
       </div>
     </div>
   );
