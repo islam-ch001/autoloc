@@ -26,7 +26,7 @@ app.use(cors({
     cb(new Error(`CORS bloqué pour : ${origin}`));
   },
 }));
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 
 // Logger simple
 app.use((req, _res, next) => {

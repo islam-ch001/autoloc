@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Plus, Search, Car, Fuel, Settings2, Users, Wrench, Eye, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Plus, Search, Car, Fuel, Settings2, Users, Wrench, Eye, Trash2, AlertTriangle, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import Modal from '../components/Modal';
+import { readAndResizeImage } from '../utils/imageUpload';
 
 const statusMap = {
   available: { cls: 'badge-success', label: 'Disponible' },
@@ -131,14 +132,17 @@ function VehicleCard({ vehicle: v, onView, onDelete, onMarkAvailable }) {
   return (
     <div className="vehicle-card" style={{ borderColor: v.status === 'maintenance' ? 'rgba(245,158,11,0.3)' : undefined }}>
       <div style={{
-        position: 'relative', height: 90,
-        background: v.status === 'maintenance'
-          ? 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.05) 100%)'
-          : 'linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%)',
+        position: 'relative', height: v.image ? 180 : 90,
+        background: v.image
+          ? `#0a0a0f center / cover no-repeat url("${v.image}")`
+          : (v.status === 'maintenance'
+            ? 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.05) 100%)'
+            : 'linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%)'),
         borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
+        filter: v.status === 'maintenance' && v.image ? 'brightness(0.7) saturate(0.6)' : undefined,
       }}>
-        <Car size={42} style={{ color: 'var(--text-3)', opacity: 0.5 }} />
+        {!v.image && <Car size={42} style={{ color: 'var(--text-3)', opacity: 0.5 }} />}
         <span className={`badge ${s.cls}`} style={{ position: 'absolute', top: 12, right: 12 }}>{s.label}</span>
         <button
           onClick={onDelete}
@@ -313,7 +317,22 @@ function VehicleDetailModal({ vehicle: v, onClose }) {
 
 function AddVehicleModal({ onClose, onAdd }) {
   const [form, setForm] = useState({ brand: '', model: '', year: new Date().getFullYear(), category: 'Berline', fuel: 'Essence', transmission: 'Manuelle', seats: 5, pricePerDay: '', plate: '', mileage: 0, image: '', color: '#000000' });
+  const [photoErr, setPhotoErr] = useState(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handlePhoto = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoErr(null);
+    setPhotoLoading(true);
+    try {
+      const dataUrl = await readAndResizeImage(file);
+      set('image', dataUrl);
+    } catch (err) {
+      setPhotoErr(err.message);
+    } finally { setPhotoLoading(false); }
+  };
 
   return (
     <Modal title="Ajouter un véhicule" onClose={onClose} footer={
@@ -322,6 +341,35 @@ function AddVehicleModal({ onClose, onAdd }) {
         <button className="btn btn-primary" onClick={() => onAdd(form)}>Ajouter</button>
       </>
     }>
+      <div className="form-group">
+        <label className="form-label">Photo du véhicule (optionnel)</label>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+          <div style={{
+            width: 120, height: 80, borderRadius: 8, overflow: 'hidden',
+            background: form.image ? `center / cover no-repeat url("${form.image}")` : 'var(--bg-2)',
+            border: '1px dashed var(--border)', flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-3)', fontSize: 11, textAlign: 'center', padding: 6,
+          }}>
+            {!form.image && (photoLoading ? 'Chargement…' : 'Aucune photo')}
+          </div>
+          <div style={{ flex: 1 }}>
+            <label className="btn" style={{ display: 'inline-flex', cursor: 'pointer' }}>
+              <ImageIcon size={14} /> {form.image ? 'Changer' : 'Choisir une photo'}
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
+            </label>
+            {form.image && (
+              <button type="button" className="btn" style={{ marginLeft: 8 }} onClick={() => set('image', '')}>
+                Supprimer
+              </button>
+            )}
+            <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6 }}>
+              Stockée localement (redimensionnée à 800×500). Pas de connexion requise.
+            </div>
+            {photoErr && <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>{photoErr}</div>}
+          </div>
+        </div>
+      </div>
       <div className="form-row">
         <div className="form-group"><label className="form-label">Marque *</label><input className="form-input" value={form.brand} onChange={e => set('brand', e.target.value)} placeholder="Toyota" /></div>
         <div className="form-group"><label className="form-label">Modèle *</label><input className="form-input" value={form.model} onChange={e => set('model', e.target.value)} placeholder="Corolla" /></div>
