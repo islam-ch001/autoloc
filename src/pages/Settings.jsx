@@ -1,20 +1,19 @@
-import { Building2, Phone, Mail, MapPin, Save } from 'lucide-react';
-import { useState } from 'react';
+import { Building2, Save } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useSettings } from '../context/SettingsContext';
 
 export default function Settings() {
-  const [form, setForm] = useState({
-    agencyName: 'AutoLoc Algérie',
-    address: 'Rue Didouche Mourad, Alger Centre',
-    phone: '023 XX XX XX',
-    email: 'contact@autoloc.dz',
-    deposit: 20000,
-    lateFeePct: 10,
-    currency: 'DA',
-  });
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const { settings, save } = useSettings();
+  const [form, setForm] = useState(settings);
   const [saved, setSaved] = useState(false);
 
+  // Synchroniser le formulaire quand les settings sont chargés/changent d'utilisateur
+  useEffect(() => { setForm(settings); }, [settings]);
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
   const handleSave = () => {
+    save(form);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -37,7 +36,14 @@ export default function Settings() {
             <span className="card-title"><Building2 size={16} style={{ display: 'inline', marginRight: 8 }} />Informations agence</span>
           </div>
           <div className="card-body">
-            <div className="form-group"><label className="form-label">Nom de l'agence</label><input className="form-input" value={form.agencyName} onChange={e => set('agencyName', e.target.value)} /></div>
+            <div className="form-group">
+              <label className="form-label">Nom de l'agence (affiché dans le logo)</label>
+              <input className="form-input" value={form.agencyName} onChange={e => set('agencyName', e.target.value)} placeholder="AutoLoc" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Sous-titre (sous le logo)</label>
+              <input className="form-input" value={form.tagline} onChange={e => set('tagline', e.target.value)} placeholder="Location de véhicules" />
+            </div>
             <div className="form-group"><label className="form-label">Adresse</label><input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Téléphone</label><input className="form-input" value={form.phone} onChange={e => set('phone', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} /></div>

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SettingsProvider } from './context/SettingsContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Vehicles from './pages/Vehicles';
@@ -78,9 +79,11 @@ export default function App() {
           <Route path="/login"    element={<Login />} />
           <Route path="/*" element={
             <RequireAuth>
-              <AppProvider>
-                <AppShell />
-              </AppProvider>
+              <SettingsProvider>
+                <AppProvider>
+                  <AppShell />
+                </AppProvider>
+              </SettingsProvider>
             </RequireAuth>
           } />
         </Routes>

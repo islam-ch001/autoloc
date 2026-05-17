@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
@@ -15,6 +16,7 @@ const navItems = [
 export default function Sidebar() {
   const { reservations } = useApp();
   const { user, logout } = useAuth();
+  const { settings } = useSettings();
   const activeCount = reservations.filter(r => r.status === 'active').length;
   const initials = (user?.name || 'U')
     .split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
@@ -26,9 +28,9 @@ export default function Sidebar() {
           <div className="logo-icon">
             <Car strokeWidth={2.5} />
           </div>
-          <div>
-            <div className="logo-text">AutoLoc</div>
-            <div className="logo-sub">Location de véhicules</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="logo-text" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{settings?.agencyName || 'AutoLoc'}</div>
+            <div className="logo-sub" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{settings?.tagline || 'Location de véhicules'}</div>
           </div>
         </div>
       </div>
