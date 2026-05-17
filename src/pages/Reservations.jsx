@@ -3,6 +3,7 @@ import { Plus, Search, Eye, Edit, FileText, CalendarDays, DollarSign, Printer, P
 import { useApp } from '../context/AppContext';
 import Modal from '../components/Modal';
 import InvoiceModal from '../components/InvoiceModal';
+import ClientAutocomplete from '../components/ClientAutocomplete';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -301,10 +302,7 @@ function AddReservationModal({ onClose }) {
     }>
       <div className="form-group">
         <label className="form-label">Client *</label>
-        <select className="form-select" value={form.clientId} onChange={e => set('clientId', e.target.value)}>
-          <option value="">-- Sélectionner --</option>
-          {clients.map(c => <option key={c.id} value={c.id}>{c.firstName} {c.lastName} — {c.phone}</option>)}
-        </select>
+        <ClientAutocomplete clients={clients} value={form.clientId} onChange={(id) => set('clientId', id)} />
       </div>
       <div className="form-group">
         <label className="form-label">Véhicule *</label>
