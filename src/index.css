@@ -520,6 +520,14 @@ tbody tr:last-child td { border-bottom: none; }
 .form-textarea { resize: vertical; min-height: 80px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+/* Masquer les petites flèches haut/bas (spinners) sur les inputs number */
+.form-input[type="number"]::-webkit-outer-spin-button,
+.form-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.form-input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
 .vehicle-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
