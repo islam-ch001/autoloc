@@ -8,7 +8,6 @@ export function AppProvider({ children }) {
   const [clients,      setClients]      = useState([]);
   const [reservations, setReservations] = useState([]);
   const [returns,      setReturns]      = useState([]);
-  const [invoices,     setInvoices]     = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
 
@@ -17,18 +16,16 @@ export function AppProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      const [v, c, r, ret, inv] = await Promise.all([
+      const [v, c, r, ret] = await Promise.all([
         api.getVehicles(),
         api.getClients(),
         api.getReservations(),
         api.getReturns(),
-        api.getInvoices(),
       ]);
       setVehicles(v);
       setClients(c);
       setReservations(r);
       setReturns(ret);
-      setInvoices(inv);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -103,21 +100,9 @@ export function AppProvider({ children }) {
   const getVehicle     = (id) => vehicles.find(v => v.id === id);
   const getReservation = (id) => reservations.find(r => r.id === id);
 
-  // ── Factures ───────────────────────────────────────────────
-  const addInvoice = async (data) => {
-    const inv = await api.createInvoice(data);
-    setInvoices(prev => [inv, ...prev]);
-    return inv;
-  };
-  const removeInvoice = async (id) => {
-    await api.deleteInvoice(id);
-    setInvoices(prev => prev.filter(x => x.id !== id));
-  };
-
   const value = {
-    vehicles, clients, reservations, returns, invoices,
+    vehicles, clients, reservations, returns,
     loading, error, reload: loadAll,
-    addInvoice, removeInvoice,
     // Véhicules
     setVehicles, addVehicle, patchVehicle, removeVehicle,
     // Clients
