@@ -12,10 +12,16 @@ export default function Settings() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSave = () => {
-    save(form);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+  const [saving, setSaving] = useState(false);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await save(form);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      alert('Erreur de sauvegarde : ' + err.message);
+    } finally { setSaving(false); }
   };
 
   return (
@@ -25,8 +31,8 @@ export default function Settings() {
           <h1 className="page-title">Paramètres</h1>
           <p className="page-subtitle">Configuration de votre agence</p>
         </div>
-        <button className="btn btn-primary" onClick={handleSave}>
-          <Save size={16} /> {saved ? 'Enregistré ✓' : 'Enregistrer'}
+        <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+          <Save size={16} /> {saving ? 'Enregistrement…' : (saved ? 'Enregistré ✓' : 'Enregistrer')}
         </button>
       </div>
 

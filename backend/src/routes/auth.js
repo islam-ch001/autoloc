@@ -58,6 +58,28 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// GET /api/auth/settings — paramètres de l'utilisateur courant
+router.get('/settings', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT settings FROM users WHERE id = $1', [req.user.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    res.json(rows[0].settings || {});
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/auth/settings — mise à jour des paramètres
+router.put('/settings', requireAuth, async (req, res) => {
+  try {
+    const settings = req.body || {};
+    const { rows } = await pool.query(
+      'UPDATE users SET settings = $1 WHERE id = $2 RETURNING settings',
+      [settings, req.user.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    res.json(rows[0].settings);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // GET /api/auth/me
 router.get('/me', requireAuth, async (req, res) => {
   try {

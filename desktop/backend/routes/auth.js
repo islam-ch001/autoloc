@@ -47,6 +47,33 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// GET /api/auth/settings
+router.get('/settings', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT settings FROM users WHERE id = $1', [req.user.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    let s = rows[0].settings;
+    try { s = typeof s === 'string' ? JSON.parse(s || '{}') : (s || {}); } catch { s = {}; }
+    res.json(s);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/auth/settings
+router.put('/settings', requireAuth, async (req, res) => {
+  try {
+    const settings = req.body || {};
+    const raw = JSON.stringify(settings);
+    const { rows } = await pool.query(
+      'UPDATE users SET settings = $1 WHERE id = $2 RETURNING settings',
+      [raw, req.user.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    let s = rows[0].settings;
+    try { s = typeof s === 'string' ? JSON.parse(s || '{}') : (s || {}); } catch { s = {}; }
+    res.json(s);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 router.get('/me', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(

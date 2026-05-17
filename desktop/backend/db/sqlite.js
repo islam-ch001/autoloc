@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   name          TEXT NOT NULL,
   role          TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('admin','user')),
+  settings      TEXT NOT NULL DEFAULT '{}',
   created_at    TEXT NOT NULL DEFAULT (datetime('now')),
   last_login_at TEXT
 );
@@ -123,6 +124,15 @@ CREATE INDEX IF NOT EXISTS idx_reservations_client  ON reservations(client_id);
 CREATE INDEX IF NOT EXISTS idx_reservations_vehicle ON reservations(vehicle_id);
 CREATE INDEX IF NOT EXISTS idx_returns_user         ON returns(user_id);
 `);
+
+// Migration : ajouter la colonne settings sur les DBs existantes (avant cette version)
+try {
+  const cols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+  if (!cols.includes('settings')) {
+    db.exec("ALTER TABLE users ADD COLUMN settings TEXT NOT NULL DEFAULT '{}'");
+    console.log('[DB] Migration : colonne users.settings ajoutée');
+  }
+} catch (err) { console.error('[DB] Migration error:', err); }
 
 // ─── Wrappers compatibles pg-style ───────────────────────────
 // PostgreSQL: $1, $2, $3 peuvent apparaitre dans n'importe quel ordre, et plusieurs fois.
