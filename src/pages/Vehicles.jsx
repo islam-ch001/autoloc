@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Car, Fuel, Settings2, Users, Wrench, Eye, Trash2, AlertTriangle, CheckCircle, Image as ImageIcon } from 'lucide-react';
+import { Plus, Search, Car, Fuel, Settings2, Users, Wrench, Eye, Trash2, AlertTriangle, CheckCircle, Image as ImageIcon, Pencil } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import Modal from '../components/Modal';
 import { readAndResizeImage } from '../utils/imageUpload';
@@ -18,6 +18,7 @@ export default function Vehicles() {
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState(null);
   const [toDelete, setToDelete] = useState(null);
+  const [editing, setEditing] = useState(null);
 
   const handleDelete = async (vehicle) => {
     const isRented = reservations.some(r => r.vehicleId === vehicle.id && r.status === 'active');
@@ -97,6 +98,7 @@ export default function Vehicles() {
               key={v.id}
               vehicle={v}
               onView={() => setSelected(v)}
+              onEdit={() => setEditing(v)}
               onDelete={() => setToDelete(v)}
               onMarkAvailable={() => handleMarkAvailable(v.id)}
             />
@@ -123,11 +125,20 @@ export default function Vehicles() {
           onConfirm={() => handleDelete(toDelete)}
         />
       )}
+
+      {editing && <EditVehicleModal
+        vehicle={editing}
+        onClose={() => setEditing(null)}
+        onSave={async (data) => {
+          try { await patchVehicle(editing.id, data); setEditing(null); }
+          catch (err) { alert("Erreur : " + err.message); }
+        }}
+      />}
     </div>
   );
 }
 
-function VehicleCard({ vehicle: v, onView, onDelete, onMarkAvailable }) {
+function VehicleCard({ vehicle: v, onView, onEdit, onDelete, onMarkAvailable }) {
   const s = statusMap[v.status];
   return (
     <div className="vehicle-card" style={{ borderColor: v.status === 'maintenance' ? 'rgba(245,158,11,0.3)' : undefined }}>
@@ -144,6 +155,23 @@ function VehicleCard({ vehicle: v, onView, onDelete, onMarkAvailable }) {
       }}>
         {!v.image && <Car size={42} style={{ color: 'var(--text-3)', opacity: 0.5 }} />}
         <span className={`badge ${s.cls}`} style={{ position: 'absolute', top: 12, right: 12 }}>{s.label}</span>
+        <button
+          onClick={onEdit}
+          title="Modifier ce véhicule"
+          style={{
+            position: 'absolute', top: 12, left: 50,
+            width: 30, height: 30, borderRadius: 8,
+            background: 'rgba(10,10,15,0.7)', backdropFilter: 'blur(4px)',
+            border: '1px solid rgba(59,130,246,0.35)',
+            color: 'var(--accent)', cursor: 'pointer',
+            display: 'grid', placeItems: 'center',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = 'white'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(10,10,15,0.7)'; e.currentTarget.style.color = 'var(--accent)'; }}
+        >
+          <Pencil size={13} />
+        </button>
         <button
           onClick={onDelete}
           title="Supprimer ce véhicule"
@@ -399,6 +427,126 @@ function AddVehicleModal({ onClose, onAdd }) {
         <div className="form-group"><label className="form-label">Immatriculation *</label><input className="form-input" value={form.plate} onChange={e => set('plate', e.target.value)} placeholder="00125-116-16" /></div>
       </div>
       <div className="form-group"><label className="form-label">Kilométrage actuel</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', +e.target.value)} /></div>
+    </Modal>
+  );
+}
+
+function EditVehicleModal({ vehicle, onClose, onSave }) {
+  const [form, setForm] = useState({
+    brand: vehicle.brand || '',
+    model: vehicle.model || '',
+    year: vehicle.year || new Date().getFullYear(),
+    category: vehicle.category || 'Berline',
+    fuel: vehicle.fuel || 'Essence',
+    transmission: vehicle.transmission || 'Manuelle',
+    seats: vehicle.seats || 5,
+    pricePerDay: vehicle.pricePerDay || 0,
+    plate: vehicle.plate || '',
+    mileage: vehicle.mileage || 0,
+    image: vehicle.image || '',
+    status: vehicle.status || 'available',
+  });
+  const [photoErr, setPhotoErr] = useState(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handlePhoto = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoErr(null);
+    setPhotoLoading(true);
+    try {
+      const dataUrl = await readAndResizeImage(file);
+      set('image', dataUrl);
+    } catch (err) { setPhotoErr(err.message); }
+    finally { setPhotoLoading(false); }
+  };
+
+  const handleSubmit = async () => {
+    if (!form.brand || !form.model || !form.plate) {
+      alert('Marque, modèle et immatriculation sont obligatoires');
+      return;
+    }
+    setSaving(true);
+    await onSave(form);
+    setSaving(false);
+  };
+
+  return (
+    <Modal title={`Modifier ${vehicle.brand} ${vehicle.model}`} onClose={onClose} footer={
+      <>
+        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn btn-primary" disabled={saving} onClick={handleSubmit}>
+          {saving ? 'Enregistrement…' : 'Enregistrer'}
+        </button>
+      </>
+    }>
+      <div className="form-group">
+        <label className="form-label">Photo du véhicule</label>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+          <div style={{
+            width: 120, height: 80, borderRadius: 8, overflow: 'hidden',
+            background: form.image ? `center / cover no-repeat url("${form.image}")` : 'var(--bg-2)',
+            border: '1px dashed var(--border)', flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-3)', fontSize: 11, textAlign: 'center', padding: 6,
+          }}>
+            {!form.image && (photoLoading ? 'Chargement…' : 'Aucune photo')}
+          </div>
+          <div style={{ flex: 1 }}>
+            <label className="btn" style={{ display: 'inline-flex', cursor: 'pointer' }}>
+              <ImageIcon size={14} /> {form.image ? 'Changer' : 'Choisir une photo'}
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
+            </label>
+            {form.image && (
+              <button type="button" className="btn" style={{ marginLeft: 8 }} onClick={() => set('image', '')}>
+                Supprimer
+              </button>
+            )}
+            {photoErr && <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>{photoErr}</div>}
+          </div>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Marque *</label><input className="form-input" value={form.brand} onChange={e => set('brand', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Modèle *</label><input className="form-input" value={form.model} onChange={e => set('model', e.target.value)} /></div>
+      </div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Année</label><input className="form-input" type="number" value={form.year} onChange={e => set('year', +e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Catégorie</label>
+          <select className="form-select" value={form.category} onChange={e => set('category', e.target.value)}>
+            {['Berline', 'SUV', 'Citadine', 'Premium', 'Économique', 'Utilitaire'].map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Carburant</label>
+          <select className="form-select" value={form.fuel} onChange={e => set('fuel', e.target.value)}>
+            {['Essence', 'Diesel', 'Hybride', 'Électrique'].map(f => <option key={f}>{f}</option>)}
+          </select>
+        </div>
+        <div className="form-group"><label className="form-label">Transmission</label>
+          <select className="form-select" value={form.transmission} onChange={e => set('transmission', e.target.value)}>
+            <option>Manuelle</option><option>Automatique</option>
+          </select>
+        </div>
+      </div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Prix / jour (DA) *</label><input className="form-input" type="number" value={form.pricePerDay} onChange={e => set('pricePerDay', +e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Immatriculation *</label><input className="form-input" value={form.plate} onChange={e => set('plate', e.target.value)} /></div>
+      </div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Kilométrage</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', +e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Statut</label>
+          <select className="form-select" value={form.status} onChange={e => set('status', e.target.value)}>
+            <option value="available">Disponible</option>
+            <option value="rented">En location</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
     </Modal>
   );
 }
