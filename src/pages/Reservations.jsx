@@ -154,7 +154,7 @@ export default function Reservations() {
                             </button>
                           </>
                         )}
-                        {r.status !== 'active' && (
+                        {(r.status === 'upcoming' || r.status === 'cancelled') && (
                           <button className="action-btn" title="Supprimer" onClick={() => handleDelete(r)}>
                             <Trash2 size={14} style={{ color: 'var(--danger)' }} />
                           </button>
