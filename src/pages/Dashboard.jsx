@@ -1,9 +1,21 @@
 import { Car, FileText, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Clock, Wrench, Receipt } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useApp } from '../context/AppContext';
-import { monthlyRevenue, categoryStats } from '../data/mockData';
+import { useMemo } from 'react';
 
 const formatDA = (n) => (n || 0).toLocaleString('fr-DZ') + ' DA';
+
+const MONTH_LABELS = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
+
+// Couleurs pour les catégories de véhicules
+const CAT_COLORS = {
+  'SUV':        '#f59e0b',
+  'Berline':    '#3b82f6',
+  'Citadine':   '#10b981',
+  'Premium':    '#8b5cf6',
+  'Économique': '#6b7280',
+  'Utilitaire': '#ef4444',
+};
 
 export default function Dashboard() {
   const { vehicles, clients, reservations, maintenance: maintenanceList = [] } = useApp();
@@ -17,6 +29,45 @@ export default function Dashboard() {
   const unpaid = activeRes.reduce((s, r) => s + (r.totalPrice - r.paidAmount), 0);
   const maintenanceCost = maintenanceList.reduce((s, m) => s + (m.cost || 0), 0);
   const netRevenue = totalRevenue - maintenanceCost;
+
+  // Revenu des 6 derniers mois — calculé depuis les réservations réelles
+  const monthlyRevenue = useMemo(() => {
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+        month: MONTH_LABELS[d.getMonth()],
+        revenue: 0,
+        rentals: 0,
+      });
+    }
+    reservations.forEach(r => {
+      if (r.status === 'cancelled' || !r.startDate) return;
+      const k = r.startDate.slice(0, 7); // YYYY-MM
+      const slot = months.find(m => m.key === k);
+      if (slot) {
+        slot.revenue += r.paidAmount || 0;
+        slot.rentals += 1;
+      }
+    });
+    return months;
+  }, [reservations]);
+
+  // Statistiques par catégorie — calculées depuis la flotte réelle
+  const categoryStats = useMemo(() => {
+    if (!vehicles.length) return [];
+    const counts = {};
+    vehicles.forEach(v => { counts[v.category] = (counts[v.category] || 0) + 1; });
+    return Object.entries(counts)
+      .map(([name, count]) => ({
+        name,
+        value: Math.round((count / vehicles.length) * 100),
+        color: CAT_COLORS[name] || '#94a3b8',
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [vehicles]);
 
   const recentReservations = [...reservations]
     .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
@@ -43,7 +94,7 @@ export default function Dashboard() {
         <div className="card">
           <div className="card-header">
             <span className="card-title">Revenus mensuels</span>
-            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>2025</span>
+            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>6 derniers mois</span>
           </div>
           <div className="card-body">
             <ResponsiveContainer width="100%" height={240}>
@@ -65,23 +116,32 @@ export default function Dashboard() {
             <span className="card-title">Répartition par catégorie</span>
           </div>
           <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-            <ResponsiveContainer width="50%" height={200}>
-              <PieChart>
-                <Pie data={categoryStats} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
-                  {categoryStats.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: '#1a1a28', border: '1px solid #2a2a3e', borderRadius: 12, fontSize: 12, color: '#f0f0f5' }} formatter={v => [`${v}%`]} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {categoryStats.map(c => (
-                <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 3, background: c.color }} />
-                  <span style={{ color: 'var(--text-2)' }}>{c.name}</span>
-                  <span style={{ marginLeft: 'auto', fontWeight: 600 }}>{c.value}%</span>
+            {categoryStats.length === 0 ? (
+              <div style={{ width: '100%', textAlign: 'center', padding: 30, color: 'var(--text-3)' }}>
+                <Car size={36} style={{ opacity: 0.4, marginBottom: 12 }} />
+                <div style={{ fontSize: 13 }}>Ajoutez des véhicules pour voir la répartition</div>
+              </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="50%" height={200}>
+                  <PieChart>
+                    <Pie data={categoryStats} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
+                      {categoryStats.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: '#1a1a28', border: '1px solid #2a2a3e', borderRadius: 12, fontSize: 12, color: '#f0f0f5' }} formatter={v => [`${v}%`]} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {categoryStats.map(c => (
+                    <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: 3, background: c.color }} />
+                      <span style={{ color: 'var(--text-2)' }}>{c.name}</span>
+                      <span style={{ marginLeft: 'auto', fontWeight: 600 }}>{c.value}%</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         </div>
       </div>
