@@ -122,10 +122,20 @@ export default function Reservations() {
                     </td>
                     <td><span className={`badge ${statusMap[r.status]?.cls}`}>{statusMap[r.status]?.label}</span></td>
                     <td>
-                      <div className="actions-cell">
+                      <div className="actions-cell" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         <button className="action-btn" title="Voir" onClick={() => setSelected(r)}><Eye size={14} /></button>
-                        <button className="action-btn" title="Facture imprimable" onClick={() => setInvoice(r)}>
-                          <Printer size={14} style={{ color: 'var(--primary)' }} />
+                        <button
+                          title="Imprimer la facture"
+                          onClick={() => setInvoice(r)}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            padding: '5px 10px', borderRadius: 6,
+                            background: 'var(--primary-soft)', border: '1px solid rgba(245,158,11,0.35)',
+                            color: 'var(--primary)', cursor: 'pointer',
+                            fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <Printer size={12} /> Facture
                         </button>
                         {r.status === 'upcoming' && (
                           <button className="action-btn" title="Activer" onClick={() => updateReservation(r.id, { status: 'active' })}>
@@ -143,7 +153,7 @@ export default function Reservations() {
       </div>
 
       {showAdd && <AddReservationModal onClose={() => setShowAdd(false)} />}
-      {selected && <ReservationDetailModal reservation={selected} onClose={() => setSelected(null)} />}
+      {selected && <ReservationDetailModal reservation={selected} onClose={() => setSelected(null)} onPrint={() => { setInvoice(selected); setSelected(null); }} />}
       {invoice && <InvoiceModal reservation={invoice} onClose={() => setInvoice(null)} />}
     </div>
   );
@@ -243,14 +253,21 @@ function AddReservationModal({ onClose }) {
   );
 }
 
-function ReservationDetailModal({ reservation: r, onClose }) {
+function ReservationDetailModal({ reservation: r, onClose, onPrint }) {
   const { clients, vehicles } = useApp();
   const client = clients.find(c => c.id === r.clientId);
   const vehicle = vehicles.find(v => v.id === r.vehicleId);
   const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
 
   return (
-    <Modal title={`Réservation #${r.id}`} onClose={onClose}>
+    <Modal title={`Réservation #${r.id}`} onClose={onClose} footer={
+      <>
+        <button className="btn" onClick={onClose}>Fermer</button>
+        <button className="btn btn-primary" onClick={onPrint}>
+          <Printer size={14} /> Imprimer la facture
+        </button>
+      </>
+    }>
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         <span className={`badge ${statusMap[r.status]?.cls}`}>{statusMap[r.status]?.label}</span>
         <span className="badge badge-neutral">{r.paymentMethod || 'Non défini'}</span>
