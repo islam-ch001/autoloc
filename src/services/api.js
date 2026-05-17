@@ -87,6 +87,12 @@ export const createReturn     = (data)     => request('POST', '/returns', data);
 export const getDashboardStats       = () => request('GET', '/dashboard/stats');
 export const getRecentReservations   = () => request('GET', '/dashboard/recent-reservations');
 
+// ─── Maintenance ─────────────────────────────────────────────
+export const getMaintenance     = (vehicleId)  => request('GET', `/maintenance${vehicleId ? `?vehicleId=${vehicleId}` : ''}`);
+export const createMaintenance  = (data)       => request('POST', '/maintenance', data);
+export const updateMaintenance  = (id, data)   => request('PATCH', `/maintenance/${id}`, data);
+export const deleteMaintenance  = (id)         => request('DELETE', `/maintenance/${id}`);
+
 
 // ─── Utilitaire ──────────────────────────────────────────────
 function buildQS(params = {}) {

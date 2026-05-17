@@ -9,6 +9,7 @@ const reservationsRouter = require('./routes/reservations');
 const returnsRouter      = require('./routes/returns');
 const dashboardRouter    = require('./routes/dashboard');
 const invoicesRouter     = require('./routes/invoices');
+const maintenanceRouter  = require('./routes/maintenance');
 
 function createApp() {
   const app = express();
@@ -25,6 +26,7 @@ function createApp() {
   app.use('/api/returns',      requireAuth, returnsRouter);
   app.use('/api/dashboard',    requireAuth, dashboardRouter);
   app.use('/api/invoices',     requireAuth, invoicesRouter);
+  app.use('/api/maintenance',  requireAuth, maintenanceRouter);
 
   // Frontend statique (build Vite copié dans ./frontend par electron-builder)
   const frontendPath = path.join(__dirname, '..', 'frontend');

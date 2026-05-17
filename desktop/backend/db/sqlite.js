@@ -115,6 +115,23 @@ CREATE TABLE IF NOT EXISTS invoices (
   UNIQUE(user_id, invoice_number)
 );
 
+CREATE TABLE IF NOT EXISTS maintenance (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  vehicle_id    INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+  date          TEXT    NOT NULL DEFAULT (date('now')),
+  type          TEXT    NOT NULL,
+  description   TEXT,
+  cost          INTEGER NOT NULL DEFAULT 0,
+  mileage       INTEGER,
+  next_mileage  INTEGER,
+  next_date     TEXT,
+  notes         TEXT,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_maintenance_user     ON maintenance(user_id);
+CREATE INDEX IF NOT EXISTS idx_maintenance_vehicle  ON maintenance(vehicle_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_user        ON invoices(user_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_reservation ON invoices(reservation_id);
 CREATE INDEX IF NOT EXISTS idx_vehicles_user        ON vehicles(user_id);

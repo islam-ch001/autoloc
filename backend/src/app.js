@@ -8,6 +8,7 @@ const reservationsRouter = require('./routes/reservations');
 const returnsRouter      = require('./routes/returns');
 const dashboardRouter    = require('./routes/dashboard');
 const invoicesRouter     = require('./routes/invoices');
+const maintenanceRouter  = require('./routes/maintenance');
 const authRouter         = require('./routes/auth');
 const { requireAuth }    = require('./middleware/auth');
 
@@ -44,6 +45,7 @@ app.use('/api/reservations', requireAuth, reservationsRouter);
 app.use('/api/returns',      requireAuth, returnsRouter);
 app.use('/api/dashboard',    requireAuth, dashboardRouter);
 app.use('/api/invoices',     requireAuth, invoicesRouter);
+app.use('/api/maintenance',  requireAuth, maintenanceRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date() }));

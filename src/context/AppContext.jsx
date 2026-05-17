@@ -8,6 +8,7 @@ export function AppProvider({ children }) {
   const [clients,      setClients]      = useState([]);
   const [reservations, setReservations] = useState([]);
   const [returns,      setReturns]      = useState([]);
+  const [maintenance,  setMaintenance]  = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
 
@@ -16,16 +17,18 @@ export function AppProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      const [v, c, r, ret] = await Promise.all([
+      const [v, c, r, ret, m] = await Promise.all([
         api.getVehicles(),
         api.getClients(),
         api.getReservations(),
         api.getReturns(),
+        api.getMaintenance(),
       ]);
       setVehicles(v);
       setClients(c);
       setReservations(r);
       setReturns(ret);
+      setMaintenance(m);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -107,9 +110,31 @@ export function AppProvider({ children }) {
   const getVehicle     = (id) => vehicles.find(v => v.id === id);
   const getReservation = (id) => reservations.find(r => r.id === id);
 
+  // ── Maintenance ────────────────────────────────────────────
+  const addMaintenance = async (data) => {
+    const m = await api.createMaintenance(data);
+    setMaintenance(prev => [m, ...prev]);
+    // Re-charger les véhicules si le statut a pu changer
+    if (data.setInMaintenance) {
+      const updated = await api.getVehicles();
+      setVehicles(updated);
+    }
+    return m;
+  };
+  const patchMaintenance = async (id, data) => {
+    const m = await api.updateMaintenance(id, data);
+    setMaintenance(prev => prev.map(x => x.id === id ? { ...x, ...m } : x));
+    return m;
+  };
+  const removeMaintenance = async (id) => {
+    await api.deleteMaintenance(id);
+    setMaintenance(prev => prev.filter(x => x.id !== id));
+  };
+
   const value = {
-    vehicles, clients, reservations, returns,
+    vehicles, clients, reservations, returns, maintenance,
     loading, error, reload: loadAll,
+    addMaintenance, patchMaintenance, removeMaintenance,
     // Véhicules
     setVehicles, addVehicle, patchVehicle, removeVehicle,
     // Clients
