@@ -16,12 +16,18 @@ function getSecret() {
 }
 const JWT_SECRET = getSecret();
 
-function requireAuth(req, res, next) {
+const pool = require('../db/pool');
+
+async function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Non authentifié' });
   try {
-    req.user = jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(token, JWT_SECRET);
+    const { rows } = await pool.query('SELECT blocked, blocked_reason FROM users WHERE id = $1', [payload.id]);
+    if (!rows.length) return res.status(401).json({ error: 'Compte introuvable' });
+    if (rows[0].blocked) return res.status(403).json({ error: rows[0].blocked_reason || 'Compte bloqué', blocked: true });
+    req.user = payload;
     next();
   } catch {
     return res.status(401).json({ error: 'Token invalide ou expiré' });

@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
   name          TEXT NOT NULL,
   role          TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('admin','user')),
   settings      TEXT NOT NULL DEFAULT '{}',
+  blocked       INTEGER NOT NULL DEFAULT 0,
+  blocked_reason TEXT,
   created_at    TEXT NOT NULL DEFAULT (datetime('now')),
   last_login_at TEXT
 );
@@ -142,13 +144,12 @@ CREATE INDEX IF NOT EXISTS idx_reservations_vehicle ON reservations(vehicle_id);
 CREATE INDEX IF NOT EXISTS idx_returns_user         ON returns(user_id);
 `);
 
-// Migration : ajouter la colonne settings sur les DBs existantes (avant cette version)
+// Migration : ajouter les colonnes sur les DBs existantes (avant cette version)
 try {
   const cols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
-  if (!cols.includes('settings')) {
-    db.exec("ALTER TABLE users ADD COLUMN settings TEXT NOT NULL DEFAULT '{}'");
-    console.log('[DB] Migration : colonne users.settings ajoutée');
-  }
+  if (!cols.includes('settings'))       db.exec("ALTER TABLE users ADD COLUMN settings TEXT NOT NULL DEFAULT '{}'");
+  if (!cols.includes('blocked'))        db.exec("ALTER TABLE users ADD COLUMN blocked INTEGER NOT NULL DEFAULT 0");
+  if (!cols.includes('blocked_reason')) db.exec("ALTER TABLE users ADD COLUMN blocked_reason TEXT");
 } catch (err) { console.error('[DB] Migration error:', err); }
 
 // Migration : relaxer la contrainte CHECK sur returns.condition (nouveaux libellés)

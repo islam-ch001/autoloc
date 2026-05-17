@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
     const cleanEmail = String(email).trim().toLowerCase();
 
     const { rows } = await pool.query(
-      'SELECT id, email, name, role, password_hash FROM users WHERE email = $1',
+      'SELECT id, email, name, role, password_hash, blocked, blocked_reason FROM users WHERE email = $1',
       [cleanEmail]
     );
     if (!rows.length) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
@@ -47,6 +47,7 @@ router.post('/login', async (req, res) => {
     const user = rows[0];
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    if (user.blocked) return res.status(403).json({ error: user.blocked_reason || 'Votre compte a été bloqué. Contactez l\'administrateur.' });
 
     await pool.query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [user.id]);
 
