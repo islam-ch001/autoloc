@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
-const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+const envUrl = import.meta.env.VITE_API_URL;
+const isDevVite = typeof window !== 'undefined' && window.location.port === '5173';
+const BASE = (envUrl !== undefined ? envUrl : (isDevVite ? 'http://localhost:3001' : '')) + '/api';
 
 // Token persisté dans localStorage
 const TOKEN_KEY = 'autoloc_token';

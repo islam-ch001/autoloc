@@ -1,0 +1,57 @@
+{
+  "name": "autoloc-desktop",
+  "version": "1.0.0",
+  "description": "AutoLoc - Application bureau (hors ligne)",
+  "main": "main.js",
+  "author": "AutoLoc",
+  "license": "ISC",
+  "scripts": {
+    "postinstall": "electron-builder install-app-deps",
+    "start": "electron .",
+    "build:frontend": "cd .. && npm run build",
+    "copy:frontend": "node copy-frontend.js",
+    "pack": "npm run build:frontend && npm run copy:frontend && electron-builder --win --x64"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.0.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.autoloc.desktop",
+    "productName": "AutoLoc",
+    "directories": {
+      "output": "build-output"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "backend/**/*",
+      "frontend/**/*",
+      "node_modules/**/*",
+      "!node_modules/**/{*.md,*.markdown,*.ts,*.map,test/**,tests/**,docs/**,example/**,examples/**}"
+    ],
+    "extraResources": [],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AutoLoc"
+    },
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
+    ]
+  }
+}

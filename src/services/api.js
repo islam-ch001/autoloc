@@ -1,7 +1,12 @@
 import { getToken } from '../context/AuthContext';
 
-// En dev → localhost, en prod → variable d'environnement Vite
-const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+// VITE_API_URL :
+//  - défini  → utiliser cette URL (web production : Render)
+//  - vide ('') ou non défini en desktop → URL relative (même origine, Electron)
+//  - non défini en dev Vite (port 5173) → fallback localhost:3001
+const envUrl = import.meta.env.VITE_API_URL;
+const isDevVite = typeof window !== 'undefined' && window.location.port === '5173';
+const BASE = (envUrl !== undefined ? envUrl : (isDevVite ? 'http://localhost:3001' : '')) + '/api';
 
 // ─── Conversion snake_case → camelCase ─────────────────────
 const toCamel = (s) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoLoc - Location de voitures</title>
+    <style>
+      body { margin: 0; background: #0a0a0f; color: #fff; font-family: system-ui, sans-serif; }
+      #root:empty::before {
+        content: "Chargement de AutoLoc...";
+        display: flex;
+        position: fixed;
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #f59e0b;
+      }
+      #err-overlay {
+        position: fixed;
+        inset: 0;
+        background: #0a0a0f;
+        color: #fff;
+        padding: 30px;
+        font-family: monospace;
+        font-size: 13px;
+        overflow: auto;
+        white-space: pre-wrap;
+        z-index: 9999;
+        display: none;
+      }
+      #err-overlay.show { display: block; }
+      #err-overlay h2 { color: #ef4444; margin-top: 0; }
+    </style>
+    <script type="module" crossorigin src="/assets/index-BHLOK6z4.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Ckl_J1kD.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="err-overlay">
+      <h2>⚠️ Erreur JavaScript détectée</h2>
+      <div id="err-content"></div>
+    </div>
+    <script>
+      window.addEventListener('error', function(e) {
+        var ov = document.getElementById('err-overlay');
+        var c = document.getElementById('err-content');
+        c.textContent += '\n\n' + (e.message || 'unknown') + '\nFichier: ' + (e.filename || '?') + '\nLigne: ' + (e.lineno || '?') + ':' + (e.colno || '?') + '\n' + (e.error && e.error.stack ? e.error.stack : '');
+        ov.classList.add('show');
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        var ov = document.getElementById('err-overlay');
+        var c = document.getElementById('err-content');
+        c.textContent += '\n\nPromise rejection: ' + (e.reason && e.reason.message ? e.reason.message : e.reason) + '\n' + (e.reason && e.reason.stack ? e.reason.stack : '');
+        ov.classList.add('show');
+      });
+    </script>
+  </body>
+</html>

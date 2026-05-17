@@ -130,14 +130,15 @@ function VehicleCard({ vehicle: v, onView, onDelete, onMarkAvailable }) {
   const s = statusMap[v.status];
   return (
     <div className="vehicle-card" style={{ borderColor: v.status === 'maintenance' ? 'rgba(245,158,11,0.3)' : undefined }}>
-      <div style={{ position: 'relative' }}>
-        <img
-          className="vehicle-img"
-          src={v.image}
-          alt={`${v.brand} ${v.model}`}
-          onError={e => { e.target.src = 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400'; }}
-          style={{ filter: v.status === 'maintenance' ? 'brightness(0.75) saturate(0.6)' : undefined }}
-        />
+      <div style={{
+        position: 'relative', height: 90,
+        background: v.status === 'maintenance'
+          ? 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.05) 100%)'
+          : 'linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%)',
+        borderBottom: '1px solid var(--border)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Car size={42} style={{ color: 'var(--text-3)', opacity: 0.5 }} />
         <span className={`badge ${s.cls}`} style={{ position: 'absolute', top: 12, right: 12 }}>{s.label}</span>
         <button
           onClick={onDelete}
@@ -260,8 +261,6 @@ function VehicleDetailModal({ vehicle: v, onClose }) {
   const s = statusMap[v.status];
   return (
     <Modal title={`${v.brand} ${v.model}`} onClose={onClose}>
-      <img src={v.image} alt="" style={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 12, marginBottom: 20 }}
-        onError={e => { e.target.src = 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400'; }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         {[
           ['Marque', v.brand], ['Modèle', v.model], ['Année', v.year], ['Catégorie', v.category],
@@ -333,7 +332,6 @@ function AddVehicleModal({ onClose, onAdd }) {
         <div className="form-group"><label className="form-label">Immatriculation *</label><input className="form-input" value={form.plate} onChange={e => set('plate', e.target.value)} placeholder="00125-116-16" /></div>
       </div>
       <div className="form-group"><label className="form-label">Kilométrage actuel</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', +e.target.value)} /></div>
-      <div className="form-group"><label className="form-label">URL Image (optionnel)</label><input className="form-input" value={form.image} onChange={e => set('image', e.target.value)} placeholder="https://..." /></div>
     </Modal>
   );
 }
