@@ -37,7 +37,32 @@ export default function InvoiceModal({ reservation, onClose, existingInvoice = n
     ? format(parseISO(alreadyExists.issueDate), 'dd MMMM yyyy', { locale: fr })
     : format(new Date(), 'dd MMMM yyyy', { locale: fr });
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    // Cloner le HTML de la facture vers une nouvelle fenêtre qui affichera un vrai aperçu d'impression
+    const node = document.getElementById('invoice-printable');
+    if (!node) return window.print();
+    const html = node.outerHTML;
+    const w = window.open('', '_blank', 'width=900,height=1100,menubar=no,toolbar=no');
+    if (!w) { alert("Impossible d'ouvrir l'aperçu — autorisez les popups."); return; }
+    w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${invoiceNum}</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+      <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 32px; background: #f1f1f5; font-family: Inter, system-ui, sans-serif; }
+        #invoice-printable { margin: 0 auto !important; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+        @page { margin: 1.5cm; size: A4; }
+        @media print {
+          body { background: white !important; padding: 0 !important; }
+          #invoice-printable { box-shadow: none !important; padding: 0 !important; }
+        }
+      </style>
+    </head><body>${html}<script>
+      window.addEventListener('load', () => { setTimeout(() => window.print(), 300); });
+      window.addEventListener('afterprint', () => window.close());
+    </script></body></html>`);
+    w.document.close();
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -51,25 +76,6 @@ export default function InvoiceModal({ reservation, onClose, existingInvoice = n
 
   return (
     <>
-      <style>{`
-        @media print {
-          body * { visibility: hidden !important; }
-          #invoice-printable, #invoice-printable * { visibility: visible !important; }
-          #invoice-printable {
-            position: absolute !important;
-            left: 0 !important; top: 0 !important;
-            width: 100% !important;
-            background: white !important;
-            color: black !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-          }
-          #invoice-controls { display: none !important; }
-          @page { margin: 1.5cm; size: A4; }
-        }
-      `}</style>
-
       <div style={styles.overlay}>
         <div id="invoice-controls" style={styles.controls}>
           <div style={{ display: 'flex', gap: 8 }}>

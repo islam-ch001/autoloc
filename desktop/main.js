@@ -27,8 +27,19 @@ function createWindow() {
   // Charger le frontend local
   mainWindow.loadURL(`http://127.0.0.1:${serverInfo.port}`);
 
-  // Liens externes → ouvrir dans le navigateur système
+  // Liens externes → navigateur système ; popups internes (impression) → fenêtre Electron
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url === 'about:blank' || url.startsWith(`http://127.0.0.1:${serverInfo.port}`)) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          width: 900, height: 1100,
+          backgroundColor: '#ffffff',
+          autoHideMenuBar: true,
+          webPreferences: { contextIsolation: true, nodeIntegration: false },
+        },
+      };
+    }
     shell.openExternal(url);
     return { action: 'deny' };
   });
