@@ -26,9 +26,17 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <div className="logo-icon">
-            <Car strokeWidth={2.5} />
-          </div>
+          {settings?.logo ? (
+            <img
+              src={settings.logo}
+              alt="Logo"
+              style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover', background: 'var(--bg-2)', flexShrink: 0 }}
+            />
+          ) : (
+            <div className="logo-icon">
+              <Car strokeWidth={2.5} />
+            </div>
+          )}
           <div style={{ minWidth: 0, flex: 1 }}>
             <div className="logo-text" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{settings?.agencyName || 'AutoLoc'}</div>
             <div className="logo-sub" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{settings?.tagline || 'Location de véhicules'}</div>

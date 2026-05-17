@@ -10,6 +10,7 @@ const BASE = (envUrl !== undefined ? envUrl : (isDevVite ? 'http://localhost:300
 const DEFAULTS = {
   agencyName: 'AutoLoc',
   tagline:    'Location de véhicules',
+  logo:       '',     // data URL base64
   address:    '',
   phone:      '',
   email:      '',

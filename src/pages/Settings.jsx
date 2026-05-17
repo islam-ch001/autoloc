@@ -1,6 +1,7 @@
-import { Building2, Save } from 'lucide-react';
+import { Building2, Save, Image as ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSettings } from '../context/SettingsContext';
+import { readAndResizeImage } from '../utils/imageUpload';
 
 export default function Settings() {
   const { settings, save } = useSettings();
@@ -13,6 +14,22 @@ export default function Settings() {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const [saving, setSaving] = useState(false);
+  const [logoErr, setLogoErr] = useState(null);
+  const [logoLoading, setLogoLoading] = useState(false);
+
+  const handleLogo = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoErr(null);
+    setLogoLoading(true);
+    try {
+      // Logo carré 256x256 max, qualité élevée
+      const dataUrl = await readAndResizeImage(file, { maxWidth: 256, maxHeight: 256, quality: 0.9 });
+      set('logo', dataUrl);
+    } catch (err) { setLogoErr(err.message); }
+    finally { setLogoLoading(false); }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -43,7 +60,36 @@ export default function Settings() {
           </div>
           <div className="card-body">
             <div className="form-group">
-              <label className="form-label">Nom de l'agence (affiché dans le logo)</label>
+              <label className="form-label">Logo de l'agence</label>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{
+                  width: 72, height: 72, borderRadius: 12, overflow: 'hidden', flexShrink: 0,
+                  background: form.logo ? `center / cover no-repeat url("${form.logo}")` : 'var(--bg-2)',
+                  border: '1px dashed var(--border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--text-3)', fontSize: 10, textAlign: 'center', padding: 4,
+                }}>
+                  {!form.logo && (logoLoading ? 'Chargement…' : 'Aucun logo')}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="btn" style={{ display: 'inline-flex', cursor: 'pointer' }}>
+                    <ImageIcon size={14} /> {form.logo ? 'Changer' : 'Choisir un logo'}
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogo} />
+                  </label>
+                  {form.logo && (
+                    <button type="button" className="btn" style={{ marginLeft: 8 }} onClick={() => set('logo', '')}>
+                      Supprimer
+                    </button>
+                  )}
+                  <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6 }}>
+                    Stocké localement (carré 256×256). Affiché en haut de la barre latérale.
+                  </div>
+                  {logoErr && <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>{logoErr}</div>}
+                </div>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Nom de l'agence (affiché à côté du logo)</label>
               <input className="form-input" value={form.agencyName} onChange={e => set('agencyName', e.target.value)} placeholder="AutoLoc" />
             </div>
             <div className="form-group">
