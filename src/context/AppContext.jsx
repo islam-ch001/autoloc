@@ -84,6 +84,13 @@ export function AppProvider({ children }) {
     return r;
   };
 
+  const removeReservation = async (id) => {
+    await api.deleteReservation(id);
+    setReservations(prev => prev.filter(x => x.id !== id));
+    const updated = await api.getVehicles();
+    setVehicles(updated);
+  };
+
   // ── Retours ────────────────────────────────────────────────
   const addReturn = async (data) => {
     const ret = await api.createReturn(data);
@@ -108,7 +115,7 @@ export function AppProvider({ children }) {
     // Clients
     setClients, addClient, patchClient,
     // Réservations
-    setReservations, addReservation, updateReservation,
+    setReservations, addReservation, updateReservation, removeReservation,
     // Retours
     setReturns, addReturn,
     // Helpers

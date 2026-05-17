@@ -81,11 +81,26 @@ router.patch('/:id', async (req, res) => {
     const fields = [];
     const values = [];
     let i = 1;
-    const allowed = ['status','paid_amount','deposit','payment_method','notes','km_limit','extra_km_price'];
+    const allowed = ['status','paid_amount','deposit','payment_method','notes','km_limit','extra_km_price','start_date','end_date'];
     for (const key of allowed) {
       if (req.body[key] !== undefined) { fields.push(`${key} = $${i++}`); values.push(req.body[key]); }
     }
     if (!fields.length) { await db.query('ROLLBACK'); return res.status(400).json({ error: 'Aucun champ' }); }
+
+    // Recalcul du total_price si les dates changent
+    if (req.body.start_date !== undefined || req.body.end_date !== undefined) {
+      const { rows: cur } = await db.query('SELECT start_date, end_date, vehicle_id FROM reservations WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+      if (cur.length) {
+        const sd = req.body.start_date ?? cur[0].start_date;
+        const ed = req.body.end_date   ?? cur[0].end_date;
+        const { rows: veh } = await db.query('SELECT price_per_day FROM vehicles WHERE id = $1 AND user_id = $2', [cur[0].vehicle_id, req.user.id]);
+        if (veh.length) {
+          const days = Math.ceil((new Date(ed) - new Date(sd)) / 86400000);
+          if (days > 0) { fields.push(`total_price = $${i++}`); values.push(days * veh[0].price_per_day); }
+        }
+      }
+    }
+
     values.push(req.params.id, req.user.id);
     const { rows } = await db.query(`UPDATE reservations SET ${fields.join(', ')} WHERE id = $${i} AND user_id = $${i+1} RETURNING *`, values);
     if (!rows.length) { await db.query('ROLLBACK'); return res.status(404).json({ error: 'Introuvable' }); }
