@@ -87,12 +87,21 @@ export default function InvoiceModal({ reservation, onClose }) {
         <div id="invoice-printable" style={styles.paper}>
           {/* En-tête */}
           <div style={styles.header}>
-            <div>
-              <div style={styles.brand}>{settings.agencyName || 'AutoLoc'}</div>
-              <div style={styles.brandSub}>{settings.tagline || 'Location de véhicules'}</div>
-              {settings.address && <div style={styles.contact}>{settings.address}</div>}
-              {settings.phone   && <div style={styles.contact}>Tél : {settings.phone}</div>}
-              {settings.email   && <div style={styles.contact}>{settings.email}</div>}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+              {settings.logo && (
+                <img
+                  src={settings.logo}
+                  alt="Logo"
+                  style={{ width: 64, height: 64, objectFit: 'contain', borderRadius: 8, background: '#fff', border: '1px solid #eee', flexShrink: 0 }}
+                />
+              )}
+              <div>
+                <div style={styles.brand}>{settings.agencyName || 'AutoLoc'}</div>
+                <div style={styles.brandSub}>{settings.tagline || 'Location de véhicules'}</div>
+                {settings.address && <div style={styles.contact}>{settings.address}</div>}
+                {settings.phone   && <div style={styles.contact}>Tél : {settings.phone}</div>}
+                {settings.email   && <div style={styles.contact}>{settings.email}</div>}
+              </div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={styles.invoiceTitle}>FACTURE</div>
