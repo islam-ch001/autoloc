@@ -45,9 +45,17 @@ export default function InvoiceModal({ reservation, onClose, existingInvoice = n
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
       <style>
         * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; background: white; font-family: Inter, system-ui, sans-serif; color: #111; }
-        #invoice-printable { margin: 0 auto !important; }
-        @page { margin: 1.2cm; size: A4; }
+        html, body { margin: 0; padding: 0; background: white; font-family: Inter, system-ui, sans-serif; color: #111; }
+        @page { size: A4; margin: 0; }
+        #invoice-printable {
+          width: 210mm !important;
+          min-height: 297mm !important;
+          margin: 0 auto !important;
+          padding: 15mm 17mm !important;
+          background: white !important;
+          box-shadow: none !important;
+          border-radius: 0 !important;
+        }
       </style>
     </head><body>${node.outerHTML}</body></html>`;
   };
@@ -270,7 +278,7 @@ const styles = {
   btnPrimary: { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10, border: 'none', background: '#f59e0b', color: '#0a0a0f', fontWeight: 700, cursor: 'pointer', fontSize: 14 },
   btnSave:    { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10, border: 'none', background: '#10b981', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 },
   btnGhost:   { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', cursor: 'pointer', fontSize: 14 },
-  paper: { maxWidth: 820, margin: '0 auto', background: '#fff', color: '#111', padding: '40px 48px', borderRadius: 6, fontFamily: 'Inter, system-ui, sans-serif', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' },
+  paper: { width: '210mm', minHeight: '297mm', margin: '0 auto', background: '#fff', color: '#111', padding: '15mm 17mm', borderRadius: 4, fontFamily: 'Inter, system-ui, sans-serif', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
   brand: { fontSize: 28, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif', letterSpacing: -0.5 },
   brandSub: { fontSize: 12, color: '#888', marginTop: 2, marginBottom: 10 },

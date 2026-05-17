@@ -76,7 +76,8 @@ ipcMain.handle('print-invoice-pdf', async (_event, { html, invoiceNum }) => {
     const pdf = await win.webContents.printToPDF({
       pageSize: 'A4',
       printBackground: true,
-      margins: { marginType: 'custom', top: 0.6, right: 0.6, bottom: 0.6, left: 0.6 },
+      preferCSSPageSize: true,
+      margins: { marginType: 'none' },
     });
     // Sauver dans userData/factures pour persister
     const dir = path.join(app.getPath('userData'), 'factures');
