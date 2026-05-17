@@ -4,9 +4,13 @@ import { useApp } from '../context/AppContext';
 import Modal from '../components/Modal';
 
 const conditionMap = {
-  'Bon': { cls: 'badge-success', icon: <CheckCircle size={12} /> },
+  'Bon état':  { cls: 'badge-success', icon: <CheckCircle size={12} /> },
+  'Sale':      { cls: 'badge-warning', icon: <AlertTriangle size={12} /> },
+  'Endommagé': { cls: 'badge-danger',  icon: <AlertTriangle size={12} /> },
+  // Compatibilité avec anciennes valeurs (pour ne pas casser l'affichage)
+  'Bon':            { cls: 'badge-success', icon: <CheckCircle size={12} /> },
   'Dommage mineur': { cls: 'badge-warning', icon: <AlertTriangle size={12} /> },
-  'Dommage majeur': { cls: 'badge-danger', icon: <AlertTriangle size={12} /> },
+  'Dommage majeur': { cls: 'badge-danger',  icon: <AlertTriangle size={12} /> },
 };
 
 export default function Returns() {
@@ -82,7 +86,7 @@ export default function Returns() {
             <tbody>
               {enriched.map(r => {
                 const kmDiff = r.mileageIn - r.mileageOut;
-                const cond = conditionMap[r.condition] || conditionMap['Bon'];
+                const cond = conditionMap[r.condition] || conditionMap['Bon état'];
                 return (
                   <tr key={r.id}>
                     <td style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.reservationId}</td>
@@ -142,7 +146,7 @@ export default function Returns() {
 function ReturnModal({ onClose, onAdd }) {
   const { reservations, vehicles, clients } = useApp();
   const active = reservations.filter(r => r.status === 'active');
-  const [form, setForm] = useState({ reservationId: '', returnDate: new Date().toISOString().split('T')[0], mileageOut: '', mileageIn: '', fuelOut: 'Plein', fuelIn: 'Plein', condition: 'Bon', damages: '', manualCharges: 0, notes: '' });
+  const [form, setForm] = useState({ reservationId: '', returnDate: new Date().toISOString().split('T')[0], mileageOut: '', mileageIn: '', fuelOut: 'Plein', fuelIn: 'Plein', condition: 'Bon état', damages: '', manualCharges: 0, notes: '' });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const selectedRes = reservations.find(r => r.id === +form.reservationId);
@@ -264,11 +268,11 @@ function ReturnModal({ onClose, onAdd }) {
 
       <div className="form-group"><label className="form-label">État du véhicule</label>
         <select className="form-select" value={form.condition} onChange={e => set('condition', e.target.value)}>
-          {['Bon', 'Dommage mineur', 'Dommage majeur'].map(c => <option key={c}>{c}</option>)}
+          {['Bon état', 'Sale', 'Endommagé'].map(c => <option key={c}>{c}</option>)}
         </select>
       </div>
 
-      {form.condition !== 'Bon' && (
+      {form.condition !== 'Bon état' && (
         <div className="form-group"><label className="form-label">Description des dommages</label><textarea className="form-textarea" value={form.damages} onChange={e => set('damages', e.target.value)} placeholder="Décrivez les dommages..." /></div>
       )}
 

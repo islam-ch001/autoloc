@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
       [req.user.id, reservation_id, return_date, mileage_out, mileage_in, fuel_out, fuel_in, condition ?? 'Bon', damages, excessKm, kmFees, totalExtra, notes]
     );
     await db.query("UPDATE reservations SET status = 'completed' WHERE id = $1 AND user_id = $2", [reservation_id, req.user.id]);
-    const newStatus = condition === 'Dommage majeur' ? 'maintenance' : 'available';
+    const newStatus = condition === 'Endommagé' ? 'maintenance' : 'available';
     await db.query('UPDATE vehicles SET status = $1, mileage = $2 WHERE id = $3 AND user_id = $4', [newStatus, mileage_in, reservation.vehicle_id, req.user.id]);
     await db.query('UPDATE clients SET total_rentals = total_rentals + 1 WHERE id = $1 AND user_id = $2', [reservation.client_id, req.user.id]);
 

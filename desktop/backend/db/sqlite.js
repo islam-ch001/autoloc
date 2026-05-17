@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS returns (
   mileage_in      INTEGER NOT NULL,
   fuel_out        TEXT NOT NULL DEFAULT 'Plein',
   fuel_in         TEXT NOT NULL DEFAULT 'Plein',
-  condition       TEXT NOT NULL DEFAULT 'Bon' CHECK (condition IN ('Bon','Dommage mineur','Dommage majeur')),
+  condition       TEXT NOT NULL DEFAULT 'Bon état',
   damages         TEXT,
   excess_km       INTEGER NOT NULL DEFAULT 0,
   km_fees         INTEGER NOT NULL DEFAULT 0,
@@ -133,6 +133,43 @@ try {
     console.log('[DB] Migration : colonne users.settings ajoutée');
   }
 } catch (err) { console.error('[DB] Migration error:', err); }
+
+// Migration : relaxer la contrainte CHECK sur returns.condition (nouveaux libellés)
+try {
+  const row = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='returns'").get();
+  if (row && row.sql && row.sql.includes("'Dommage")) {
+    console.log('[DB] Migration : relax returns.condition + migrate libellés');
+    db.exec(`
+      PRAGMA foreign_keys = OFF;
+      ALTER TABLE returns RENAME TO returns_old_v1;
+      CREATE TABLE returns (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        reservation_id  INTEGER NOT NULL REFERENCES reservations(id) ON DELETE RESTRICT,
+        return_date     TEXT NOT NULL DEFAULT (date('now')),
+        mileage_out     INTEGER NOT NULL,
+        mileage_in      INTEGER NOT NULL,
+        fuel_out        TEXT NOT NULL DEFAULT 'Plein',
+        fuel_in         TEXT NOT NULL DEFAULT 'Plein',
+        condition       TEXT NOT NULL DEFAULT 'Bon état',
+        damages         TEXT,
+        excess_km       INTEGER NOT NULL DEFAULT 0,
+        km_fees         INTEGER NOT NULL DEFAULT 0,
+        extra_charges   INTEGER NOT NULL DEFAULT 0,
+        notes           TEXT,
+        created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+        CHECK (mileage_in >= mileage_out)
+      );
+      INSERT INTO returns SELECT * FROM returns_old_v1;
+      UPDATE returns SET condition = 'Bon état'  WHERE condition = 'Bon';
+      UPDATE returns SET condition = 'Sale'      WHERE condition = 'Dommage mineur';
+      UPDATE returns SET condition = 'Endommagé' WHERE condition = 'Dommage majeur';
+      DROP TABLE returns_old_v1;
+      CREATE INDEX IF NOT EXISTS idx_returns_user ON returns(user_id);
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+} catch (err) { console.error('[DB] Migration condition error:', err); }
 
 // ─── Wrappers compatibles pg-style ───────────────────────────
 // PostgreSQL: $1, $2, $3 peuvent apparaitre dans n'importe quel ordre, et plusieurs fois.
