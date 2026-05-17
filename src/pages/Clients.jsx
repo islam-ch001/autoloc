@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { Plus, Search, Eye, Phone, Mail, MapPin, User } from 'lucide-react';
+import { Plus, Search, Eye, Phone, Mail, MapPin, User, Pencil } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import Modal from '../components/Modal';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export default function Clients() {
-  const { clients, addClient, reservations, vehicles } = useApp();
+  const { clients, addClient, patchClient, reservations, vehicles } = useApp();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Tous');
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [editing, setEditing] = useState(null);
 
   const filtered = clients.filter(c => {
     const matchSearch = `${c.firstName} ${c.lastName} ${c.phone} ${c.email}`.toLowerCase().includes(search.toLowerCase());
@@ -96,7 +97,12 @@ export default function Clients() {
                       </span>
                     </td>
                     <td>
-                      <button className="action-btn" onClick={() => setSelected(c)}><Eye size={14} /></button>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button className="action-btn" title="Voir" onClick={() => setSelected(c)}><Eye size={14} /></button>
+                        <button className="action-btn" title="Modifier" onClick={() => setEditing(c)}>
+                          <Pencil size={14} style={{ color: 'var(--primary)' }} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -107,7 +113,11 @@ export default function Clients() {
       </div>
 
       {showAdd && <AddClientModal onClose={() => setShowAdd(false)} onAdd={c => { addClient(c); setShowAdd(false); }} />}
-      {selected && <ClientDetailModal client={selected} onClose={() => setSelected(null)} />}
+      {selected && <ClientDetailModal client={selected} onClose={() => setSelected(null)} onEdit={() => { setEditing(selected); setSelected(null); }} />}
+      {editing && <EditClientModal client={editing} onClose={() => setEditing(null)} onSave={async (data) => {
+        try { await patchClient(editing.id, data); setEditing(null); }
+        catch (err) { alert('Erreur : ' + err.message); }
+      }} />}
     </div>
   );
 }
@@ -144,7 +154,67 @@ function AddClientModal({ onClose, onAdd }) {
   );
 }
 
-function ClientDetailModal({ client: c, onClose }) {
+function EditClientModal({ client, onClose, onSave }) {
+  const [form, setForm] = useState({
+    firstName: client.firstName || '',
+    lastName: client.lastName || '',
+    phone: client.phone || '',
+    email: client.email || '',
+    address: client.address || '',
+    license: client.license || 'B',
+    licenseNumber: client.licenseNumber || '',
+    status: client.status || 'active',
+  });
+  const [saving, setSaving] = useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSubmit = async () => {
+    if (!form.firstName || !form.lastName || !form.phone) {
+      alert('Prénom, nom et téléphone sont obligatoires');
+      return;
+    }
+    setSaving(true);
+    await onSave(form);
+    setSaving(false);
+  };
+
+  return (
+    <Modal title={`Modifier ${client.firstName} ${client.lastName}`} onClose={onClose} footer={
+      <>
+        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn btn-primary" disabled={saving} onClick={handleSubmit}>
+          {saving ? 'Enregistrement…' : 'Enregistrer'}
+        </button>
+      </>
+    }>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Prénom *</label><input className="form-input" value={form.firstName} onChange={e => set('firstName', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Nom *</label><input className="form-input" value={form.lastName} onChange={e => set('lastName', e.target.value)} /></div>
+      </div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Téléphone *</label><input className="form-input" value={form.phone} onChange={e => set('phone', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} /></div>
+      </div>
+      <div className="form-group"><label className="form-label">Adresse</label><input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} /></div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Catégorie permis</label>
+          <select className="form-select" value={form.license} onChange={e => set('license', e.target.value)}>
+            {['B', 'C', 'D', 'E'].map(l => <option key={l}>{l}</option>)}
+          </select>
+        </div>
+        <div className="form-group"><label className="form-label">N° permis</label><input className="form-input" value={form.licenseNumber} onChange={e => set('licenseNumber', e.target.value)} /></div>
+      </div>
+      <div className="form-group"><label className="form-label">Statut</label>
+        <select className="form-select" value={form.status} onChange={e => set('status', e.target.value)}>
+          <option value="active">Actif</option>
+          <option value="inactive">Inactif</option>
+        </select>
+      </div>
+    </Modal>
+  );
+}
+
+function ClientDetailModal({ client: c, onClose, onEdit }) {
   const { reservations, vehicles } = useApp();
   const clientRes = reservations.filter(r => r.clientId === c.id).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
   const totalSpent = clientRes.reduce((s, r) => s + r.paidAmount, 0);
@@ -152,7 +222,12 @@ function ClientDetailModal({ client: c, onClose }) {
   const statusMap = { active: { cls: 'badge-success', label: 'Active' }, upcoming: { cls: 'badge-accent', label: 'À venir' }, completed: { cls: 'badge-neutral', label: 'Terminée' } };
 
   return (
-    <Modal title={`${c.firstName} ${c.lastName}`} onClose={onClose}>
+    <Modal title={`${c.firstName} ${c.lastName}`} onClose={onClose} footer={
+      <>
+        <button className="btn" onClick={onClose}>Fermer</button>
+        {onEdit && <button className="btn btn-primary" onClick={onEdit}><Pencil size={14} /> Modifier les infos</button>}
+      </>
+    }>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 0 20px', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
         <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), var(--purple))', display: 'grid', placeItems: 'center', color: 'white', fontWeight: 700, fontSize: 20 }}>
           {c.firstName[0]}{c.lastName[0]}
