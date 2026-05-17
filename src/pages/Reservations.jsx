@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Plus, Search, Eye, Edit, FileText, CalendarDays, DollarSign } from 'lucide-react';
+import { Plus, Search, Eye, Edit, FileText, CalendarDays, DollarSign, Printer } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import Modal from '../components/Modal';
+import InvoiceModal from '../components/InvoiceModal';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -18,6 +19,7 @@ export default function Reservations() {
   const [statusFilter, setStatusFilter] = useState('Tous');
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [invoice, setInvoice]   = useState(null);
 
   const filtered = reservations.filter(r => {
     const client = clients.find(c => c.id === r.clientId);
@@ -122,6 +124,9 @@ export default function Reservations() {
                     <td>
                       <div className="actions-cell">
                         <button className="action-btn" title="Voir" onClick={() => setSelected(r)}><Eye size={14} /></button>
+                        <button className="action-btn" title="Facture imprimable" onClick={() => setInvoice(r)}>
+                          <Printer size={14} style={{ color: 'var(--primary)' }} />
+                        </button>
                         {r.status === 'upcoming' && (
                           <button className="action-btn" title="Activer" onClick={() => updateReservation(r.id, { status: 'active' })}>
                             <Edit size={14} />
@@ -139,6 +144,7 @@ export default function Reservations() {
 
       {showAdd && <AddReservationModal onClose={() => setShowAdd(false)} />}
       {selected && <ReservationDetailModal reservation={selected} onClose={() => setSelected(null)} />}
+      {invoice && <InvoiceModal reservation={invoice} onClose={() => setInvoice(null)} />}
     </div>
   );
 }
