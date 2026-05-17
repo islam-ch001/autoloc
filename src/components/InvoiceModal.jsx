@@ -37,30 +37,39 @@ export default function InvoiceModal({ reservation, onClose, existingInvoice = n
     ? format(parseISO(alreadyExists.issueDate), 'dd MMMM yyyy', { locale: fr })
     : format(new Date(), 'dd MMMM yyyy', { locale: fr });
 
-  const handlePrint = () => {
-    // Cloner le HTML de la facture vers une nouvelle fenêtre qui affichera un vrai aperçu d'impression
+  const buildPrintableHtml = () => {
     const node = document.getElementById('invoice-printable');
-    if (!node) return window.print();
-    const html = node.outerHTML;
-    const w = window.open('', '_blank', 'width=900,height=1100,menubar=no,toolbar=no');
-    if (!w) { alert("Impossible d'ouvrir l'aperçu — autorisez les popups."); return; }
-    w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${invoiceNum}</title>
+    if (!node) return '';
+    return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${invoiceNum}</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
       <style>
         * { box-sizing: border-box; }
-        body { margin: 0; padding: 32px; background: #f1f1f5; font-family: Inter, system-ui, sans-serif; }
-        #invoice-printable { margin: 0 auto !important; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
-        @page { margin: 1.5cm; size: A4; }
-        @media print {
-          body { background: white !important; padding: 0 !important; }
-          #invoice-printable { box-shadow: none !important; padding: 0 !important; }
-        }
+        body { margin: 0; padding: 0; background: white; font-family: Inter, system-ui, sans-serif; color: #111; }
+        #invoice-printable { margin: 0 auto !important; }
+        @page { margin: 1.2cm; size: A4; }
       </style>
-    </head><body>${html}<script>
-      window.addEventListener('load', () => { setTimeout(() => window.print(), 300); });
-      window.addEventListener('afterprint', () => window.close());
-    </script></body></html>`);
+    </head><body>${node.outerHTML}</body></html>`;
+  };
+
+  const handlePrint = async () => {
+    const html = buildPrintableHtml();
+    if (!html) return;
+
+    // Desktop (Electron) : générer un PDF natif et l'ouvrir dans le lecteur système (avec aperçu)
+    if (typeof window !== 'undefined' && window.autoloc?.printInvoicePdf) {
+      const res = await window.autoloc.printInvoicePdf({ html, invoiceNum: invoiceNum.replace(/[^A-Za-z0-9_-]/g, '_') });
+      if (!res?.ok) alert("Erreur génération PDF : " + (res?.error || 'inconnue'));
+      return;
+    }
+
+    // Web : ouvrir un popup avec le rendu, déclencher l'impression Chrome (qui a un aperçu)
+    const w = window.open('', '_blank', 'width=900,height=1100,menubar=no,toolbar=no');
+    if (!w) { alert("Impossible d'ouvrir l'aperçu — autorisez les popups."); return; }
+    const htmlWithAutoPrint = html.replace('</body>',
+      `<script>window.addEventListener('load',()=>{setTimeout(()=>window.print(),300)});window.addEventListener('afterprint',()=>window.close());</script></body>`
+    );
+    w.document.write(htmlWithAutoPrint);
     w.document.close();
   };
 

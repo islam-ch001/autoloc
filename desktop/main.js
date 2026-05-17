@@ -1,5 +1,7 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 const { startServer } = require('./backend/app');
 
 let mainWindow;
@@ -59,6 +61,36 @@ app.whenReady().then(async () => {
   } catch (err) {
     console.error('[Electron] Erreur de démarrage du backend:', err);
     app.quit();
+  }
+});
+
+// IPC : génération du PDF de facture
+ipcMain.handle('print-invoice-pdf', async (_event, { html, invoiceNum }) => {
+  const win = new BrowserWindow({
+    show: false,
+    webPreferences: { sandbox: true, contextIsolation: true, javascript: false },
+  });
+  try {
+    await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+    await new Promise(r => setTimeout(r, 200)); // laisser les fonts se charger
+    const pdf = await win.webContents.printToPDF({
+      pageSize: 'A4',
+      printBackground: true,
+      margins: { marginType: 'custom', top: 0.6, right: 0.6, bottom: 0.6, left: 0.6 },
+    });
+    // Sauver dans userData/factures pour persister
+    const dir = path.join(app.getPath('userData'), 'factures');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const safeName = (invoiceNum || 'facture').replace(/[^A-Za-z0-9_-]/g, '_');
+    const filePath = path.join(dir, `${safeName}.pdf`);
+    fs.writeFileSync(filePath, pdf);
+    // Ouvrir avec le lecteur PDF par défaut du système
+    shell.openPath(filePath);
+    return { ok: true, filePath };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  } finally {
+    win.close();
   }
 });
 
