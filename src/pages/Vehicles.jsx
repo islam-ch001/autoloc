@@ -186,9 +186,31 @@ function VehicleCard({ vehicle: v, onView, onDelete, onMarkAvailable }) {
         )}
       </div>
       <div className="vehicle-body">
-        <div className="vehicle-brand">{v.brand}</div>
-        <div className="vehicle-model">{v.model} <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 400 }}>{v.year}</span></div>
-        <div className="vehicle-specs">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="vehicle-brand">{v.brand}</div>
+            <div className="vehicle-model">{v.model} <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 400 }}>{v.year}</span></div>
+          </div>
+          <div title="Immatriculation" style={{
+            display: 'inline-flex', alignItems: 'center',
+            background: '#facc15',
+            color: '#0a0a0f',
+            border: '2px solid #000',
+            borderRadius: 4,
+            padding: '4px 10px',
+            fontFamily: '"Courier New", Consolas, monospace',
+            fontWeight: 800,
+            fontSize: 14,
+            letterSpacing: 1,
+            lineHeight: 1,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}>
+            {v.plate}
+          </div>
+        </div>
+        <div className="vehicle-specs" style={{ marginTop: 10 }}>
           <span className="vehicle-spec"><Fuel size={12} /> {v.fuel}</span>
           <span className="vehicle-spec"><Settings2 size={12} /> {v.transmission}</span>
           <span className="vehicle-spec"><Users size={12} /> {v.seats} places</span>
@@ -196,10 +218,7 @@ function VehicleCard({ vehicle: v, onView, onDelete, onMarkAvailable }) {
         </div>
       </div>
       <div className="vehicle-footer">
-        <div>
-          <div className="vehicle-price">{v.pricePerDay.toLocaleString('fr-DZ')} DA <span>/ jour</span></div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{v.plate}</div>
-        </div>
+        <div className="vehicle-price">{v.pricePerDay.toLocaleString('fr-DZ')} DA <span>/ jour</span></div>
         <button className="btn btn-sm" onClick={onView}><Eye size={14} /> Détails</button>
       </div>
     </div>
