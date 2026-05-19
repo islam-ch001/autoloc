@@ -80,6 +80,7 @@ export default function Returns() {
                 <th>Carburant</th>
                 <th>État</th>
                 <th>Frais supp.</th>
+                <th>Payé en plus</th>
                 <th>Notes</th>
               </tr>
             </thead>
@@ -119,6 +120,11 @@ export default function Returns() {
                         ? <span style={{ fontWeight: 700, color: 'var(--danger)' }}>+{r.extraCharges.toLocaleString('fr-DZ')} DA</span>
                         : <span style={{ color: 'var(--text-3)' }}>—</span>}
                     </td>
+                    <td>
+                      {r.extraPaid > 0
+                        ? <span style={{ fontWeight: 700, color: 'var(--success)' }}>+{r.extraPaid.toLocaleString('fr-DZ')} DA</span>
+                        : <span style={{ color: 'var(--text-3)' }}>—</span>}
+                    </td>
                     <td style={{ fontSize: 12, color: 'var(--text-2)', maxWidth: 160 }}>
                       {r.damages && <div style={{ color: 'var(--warning)', marginBottom: 2 }}>⚠ {r.damages}</div>}
                       {r.notes || '—'}
@@ -146,7 +152,7 @@ export default function Returns() {
 function ReturnModal({ onClose, onAdd }) {
   const { reservations, vehicles, clients } = useApp();
   const active = reservations.filter(r => r.status === 'active');
-  const [form, setForm] = useState({ reservationId: '', returnDate: new Date().toISOString().split('T')[0], mileageOut: '', mileageIn: '', fuelOut: 'Plein', fuelIn: 'Plein', condition: 'Bon état', damages: '', manualCharges: 0, notes: '' });
+  const [form, setForm] = useState({ reservationId: '', returnDate: new Date().toISOString().split('T')[0], mileageOut: '', mileageIn: '', fuelOut: 'Plein', fuelIn: 'Plein', condition: 'Bon état', damages: '', manualCharges: 0, extraPaid: 0, notes: '' });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const selectedRes = reservations.find(r => r.id === +form.reservationId);
@@ -183,6 +189,7 @@ function ReturnModal({ onClose, onAdd }) {
             excessKm,
             kmFees,
             extraCharges: totalExtraCharges,
+            extraPaid: +form.extraPaid || 0,
           });
         }}>
           Enregistrer
@@ -276,10 +283,24 @@ function ReturnModal({ onClose, onAdd }) {
         <div className="form-group"><label className="form-label">Description des dommages</label><textarea className="form-textarea" value={form.damages} onChange={e => set('damages', e.target.value)} placeholder="Décrivez les dommages..." /></div>
       )}
 
-      <div className="form-group">
-        <label className="form-label">Autres frais supplémentaires (DA)</label>
-        <input className="form-input" type="number" value={form.manualCharges} onChange={e => set('manualCharges', e.target.value)} placeholder="0" />
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Autres frais supplémentaires (DA)</label>
+          <input className="form-input" type="text" inputMode="numeric" value={form.manualCharges}
+            onChange={e => set('manualCharges', e.target.value.replace(/[^\d]/g, ''))} placeholder="0" />
+        </div>
+        <div className="form-group">
+          <label className="form-label" style={{ color: 'var(--success)' }}>💰 Montant payé en plus (DA)</label>
+          <input className="form-input" type="text" inputMode="numeric" value={form.extraPaid}
+            onChange={e => set('extraPaid', e.target.value.replace(/[^\d]/g, ''))} placeholder="0"
+            style={{ borderColor: +form.extraPaid > 0 ? 'rgba(16,185,129,0.4)' : undefined }} />
+        </div>
       </div>
+      {+form.extraPaid > 0 && (
+        <div style={{ padding: '10px 14px', background: 'var(--success-soft)', borderRadius: 8, marginBottom: 12, fontSize: 12, color: 'var(--success)', fontWeight: 600 }}>
+          ✓ +{(+form.extraPaid).toLocaleString('fr-DZ')} DA seront ajoutés au paiement de la réservation (et au revenu total du tableau de bord)
+        </div>
+      )}
 
       {/* Récap total frais */}
       {totalExtraCharges > 0 && (

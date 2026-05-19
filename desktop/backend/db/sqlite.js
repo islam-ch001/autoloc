@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS returns (
   excess_km       INTEGER NOT NULL DEFAULT 0,
   km_fees         INTEGER NOT NULL DEFAULT 0,
   extra_charges   INTEGER NOT NULL DEFAULT 0,
+  extra_paid      INTEGER NOT NULL DEFAULT 0,
   notes           TEXT,
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
   CHECK (mileage_in >= mileage_out)
@@ -150,6 +151,9 @@ try {
   if (!cols.includes('settings'))       db.exec("ALTER TABLE users ADD COLUMN settings TEXT NOT NULL DEFAULT '{}'");
   if (!cols.includes('blocked'))        db.exec("ALTER TABLE users ADD COLUMN blocked INTEGER NOT NULL DEFAULT 0");
   if (!cols.includes('blocked_reason')) db.exec("ALTER TABLE users ADD COLUMN blocked_reason TEXT");
+
+  const retCols = db.prepare("PRAGMA table_info(returns)").all().map(c => c.name);
+  if (!retCols.includes('extra_paid')) db.exec("ALTER TABLE returns ADD COLUMN extra_paid INTEGER NOT NULL DEFAULT 0");
 } catch (err) { console.error('[DB] Migration error:', err); }
 
 // Migration : relaxer la contrainte CHECK sur returns.condition (nouveaux libellés)

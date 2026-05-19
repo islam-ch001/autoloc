@@ -45,7 +45,7 @@ router.post('/', async (req, res) => {
   const db = await pool.connect();
   try {
     await db.query('BEGIN');
-    const { reservation_id, return_date, mileage_out, mileage_in, fuel_out, fuel_in, condition, damages, extra_charges, notes } = req.body;
+    const { reservation_id, return_date, mileage_out, mileage_in, fuel_out, fuel_in, condition, damages, extra_charges, extra_paid, notes } = req.body;
 
     // Vérifier que la réservation appartient à l'utilisateur et est active
     const { rows: resRows } = await db.query(
@@ -62,13 +62,18 @@ router.post('/', async (req, res) => {
     const kmFees     = excessKm * (reservation.extra_km_price || 0);
     const totalExtra = kmFees + (extra_charges || 0);
 
+    const paidExtra = +extra_paid || 0;
     const { rows } = await db.query(
-      `INSERT INTO returns (user_id, reservation_id, return_date, mileage_out, mileage_in, fuel_out, fuel_in, condition, damages, excess_km, km_fees, extra_charges, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
-      [req.user.id, reservation_id, return_date, mileage_out, mileage_in, fuel_out, fuel_in, condition ?? 'Bon', damages, excessKm, kmFees, totalExtra, notes]
+      `INSERT INTO returns (user_id, reservation_id, return_date, mileage_out, mileage_in, fuel_out, fuel_in, condition, damages, excess_km, km_fees, extra_charges, extra_paid, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+      [req.user.id, reservation_id, return_date, mileage_out, mileage_in, fuel_out, fuel_in, condition ?? 'Bon état', damages, excessKm, kmFees, totalExtra, paidExtra, notes]
     );
 
-    await db.query("UPDATE reservations SET status = 'completed' WHERE id = $1 AND user_id = $2", [reservation_id, req.user.id]);
+    // Le paiement supplémentaire est ajouté au paid_amount de la réservation → reflété dans le revenu total
+    await db.query(
+      "UPDATE reservations SET status = 'completed', paid_amount = paid_amount + $1 WHERE id = $2 AND user_id = $3",
+      [paidExtra, reservation_id, req.user.id]
+    );
 
     const newStatus = condition === 'Endommagé' ? 'maintenance' : 'available';
     await db.query(
