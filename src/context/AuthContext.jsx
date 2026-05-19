@@ -5,6 +5,18 @@ const envUrl = import.meta.env.VITE_API_URL;
 const isDevVite = typeof window !== 'undefined' && window.location.port === '5173';
 const BASE = (envUrl !== undefined ? envUrl : (isDevVite ? 'http://localhost:3001' : '')) + '/api';
 
+// Convertit snake_case → camelCase (cohérent avec api.js)
+const toCamel = (s) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+function camelize(obj) {
+  if (Array.isArray(obj)) return obj.map(camelize);
+  if (obj && typeof obj === 'object' && obj.constructor === Object) {
+    const out = {};
+    for (const [k, v] of Object.entries(obj)) out[toCamel(k)] = camelize(v);
+    return out;
+  }
+  return obj;
+}
+
 // Token persisté dans localStorage
 const TOKEN_KEY = 'autoloc_token';
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
@@ -20,7 +32,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await fetch(`${BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error();
-      setUser(await res.json());
+      setUser(camelize(await res.json()));
     } catch {
       setToken(null);
       setUser(null);
@@ -40,7 +52,7 @@ export function AuthProvider({ children }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erreur de connexion');
     setToken(data.token);
-    setUser(data.user);
+    setUser(camelize(data.user));
   };
 
   const register = async (name, email, password) => {
@@ -52,7 +64,7 @@ export function AuthProvider({ children }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erreur d\'inscription');
     setToken(data.token);
-    setUser(data.user);
+    setUser(camelize(data.user));
   };
 
   const logout = () => {
@@ -61,7 +73,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser: fetchMe }}>
       {children}
     </AuthContext.Provider>
   );

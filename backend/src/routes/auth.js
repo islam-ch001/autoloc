@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
     const cleanEmail = String(email).trim().toLowerCase();
 
     const { rows } = await pool.query(
-      'SELECT id, email, name, role, password_hash, blocked, blocked_reason FROM users WHERE email = $1',
+      'SELECT id, email, name, role, password_hash, blocked, blocked_reason, is_super_admin, subscription_status, subscription_end, subscription_plan FROM users WHERE email = $1',
       [cleanEmail]
     );
     if (!rows.length) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
@@ -51,7 +51,16 @@ router.post('/login', async (req, res) => {
 
     await pool.query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [user.id]);
 
-    const safeUser = { id: user.id, email: user.email, name: user.name, role: user.role };
+    const safeUser = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      is_super_admin: user.is_super_admin,
+      subscription_status: user.subscription_status,
+      subscription_end: user.subscription_end,
+      subscription_plan: user.subscription_plan,
+    };
     const token = signToken({ id: user.id, email: user.email, role: user.role });
     res.json({ token, user: safeUser });
   } catch (err) {
