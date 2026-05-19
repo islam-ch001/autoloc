@@ -1,4 +1,4 @@
-import { Lock, Mail, LogOut } from 'lucide-react';
+import { Lock, Mail, LogOut, MessageCircle } from 'lucide-react';
 import { format, parseISO, isBefore } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useAuth } from '../context/AuthContext';
@@ -53,13 +53,14 @@ export default function SubscriptionRequired() {
           )}
         </div>
 
-        <a href="mailto:islamac.hd@gmail.com?subject=Demande d'activation d'abonnement AutoLoc"
+        <a href={`https://wa.me/213554214999?text=${encodeURIComponent(`Bonjour, je souhaite activer mon abonnement AutoLoc.\nCompte: ${user?.email || ''}\nNom: ${user?.name || ''}`)}`}
+           target="_blank" rel="noopener noreferrer"
            style={{
-             display: 'block', textAlign: 'center', padding: '12px 16px',
-             background: '#f59e0b', color: '#0a0a0f', borderRadius: 10,
-             textDecoration: 'none', fontWeight: 700, marginBottom: 10,
+             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+             padding: '12px 16px', background: '#25D366', color: '#fff',
+             borderRadius: 10, textDecoration: 'none', fontWeight: 700, marginBottom: 10,
            }}>
-          📧 Contacter l'administrateur
+          <MessageCircle size={18} /> Contacter l'administrateur
         </a>
         <button onClick={logout} style={{
           width: '100%', padding: '10px 16px', borderRadius: 10,
