@@ -99,10 +99,10 @@ export default function Dashboard() {
           <div className="card-body">
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={monthlyRevenue}>
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#707088', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#707088', fontSize: 11 }} tickFormatter={v => `${v / 1000}k`} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-3)', fontSize: 12 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-3)', fontSize: 11 }} tickFormatter={v => `${v / 1000}k`} />
                 <Tooltip
-                  contentStyle={{ background: '#1a1a28', border: '1px solid #2a2a3e', borderRadius: 12, fontSize: 12, color: '#f0f0f5' }}
+                  contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12, color: 'var(--text)' }}
                   formatter={(v) => [formatDA(v), 'Revenu']}
                 />
                 <Bar dataKey="revenue" fill="#f59e0b" radius={[6, 6, 0, 0]} />
