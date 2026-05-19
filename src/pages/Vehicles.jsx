@@ -3,7 +3,8 @@ import { Plus, Search, Car, Fuel, Settings2, Users, Wrench, Eye, Trash2, AlertTr
 import { useApp } from '../context/AppContext';
 import Modal from '../components/Modal';
 import { readAndResizeImage } from '../utils/imageUpload';
-import { CAR_BRANDS, BRAND_LIST } from '../data/carBrands';
+import { CAR_BRANDS, BRAND_LIST, getModelCategory } from '../data/carBrands';
+import BrandBadge from '../components/BrandBadge';
 
 const statusMap = {
   available: { cls: 'badge-success', label: 'Disponible' },
@@ -421,12 +422,25 @@ function AddVehicleModal({ onClose, onAdd }) {
         </div>
         <div className="form-group">
           <label className="form-label">Modèle *</label>
-          <input className="form-input" list="model-list-add" value={form.model} onChange={e => set('model', e.target.value)} placeholder={CAR_BRANDS[form.brand] ? 'Cliquez pour choisir' : 'Tapez le modèle…'} />
+          <input className="form-input" list="model-list-add" value={form.model}
+            onChange={e => {
+              const model = e.target.value;
+              const cat = getModelCategory(form.brand, model);
+              setForm(f => ({ ...f, model, ...(cat ? { category: cat } : {}) }));
+            }}
+            placeholder={CAR_BRANDS[form.brand] ? 'Cliquez pour choisir' : 'Tapez le modèle…'} />
           <datalist id="model-list-add">
             {(CAR_BRANDS[form.brand] || []).map(m => <option key={m} value={m} />)}
           </datalist>
         </div>
       </div>
+
+      {form.brand && (
+        <div style={{ marginBottom: 14 }}>
+          <BrandBadge brand={form.brand} model={form.model} />
+        </div>
+      )}
+
       <div className="form-row">
         <div className="form-group"><label className="form-label">Année</label><input className="form-input" type="number" value={form.year} onChange={e => set('year', +e.target.value)} /></div>
         <div className="form-group"><label className="form-label">Catégorie</label>
@@ -544,12 +558,23 @@ function EditVehicleModal({ vehicle, onClose, onSave }) {
         </div>
         <div className="form-group">
           <label className="form-label">Modèle *</label>
-          <input className="form-input" list="model-list-edit" value={form.model} onChange={e => set('model', e.target.value)} />
+          <input className="form-input" list="model-list-edit" value={form.model}
+            onChange={e => {
+              const model = e.target.value;
+              const cat = getModelCategory(form.brand, model);
+              setForm(f => ({ ...f, model, ...(cat ? { category: cat } : {}) }));
+            }} />
           <datalist id="model-list-edit">
             {(CAR_BRANDS[form.brand] || []).map(m => <option key={m} value={m} />)}
           </datalist>
         </div>
       </div>
+
+      {form.brand && (
+        <div style={{ marginBottom: 14 }}>
+          <BrandBadge brand={form.brand} model={form.model} />
+        </div>
+      )}
       <div className="form-row">
         <div className="form-group"><label className="form-label">Année</label><input className="form-input" type="number" value={form.year} onChange={e => set('year', +e.target.value)} /></div>
         <div className="form-group"><label className="form-label">Catégorie</label>
