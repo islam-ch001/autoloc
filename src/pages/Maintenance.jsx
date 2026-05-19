@@ -27,6 +27,8 @@ export default function Maintenance() {
   const [showAdd, setShowAdd] = useState(false);
 
   const today = new Date();
+  const KM_WARNING_THRESHOLD = 1000; // km avant prochaine maintenance pour déclencher l'alerte
+
   const filtered = maintenance.filter(m => {
     const text = `${m.type} ${m.description || ''} ${m.brand} ${m.model} ${m.plate}`.toLowerCase();
     const matchSearch = text.includes(search.toLowerCase());
@@ -36,16 +38,34 @@ export default function Maintenance() {
 
   const totalCost = filtered.reduce((s, m) => s + (m.cost || 0), 0);
 
-  // Alertes : interventions futures dont next_date arrive bientôt
-  const upcoming = maintenance
+  // Helper : kilométrage actuel du véhicule
+  const vehicleMileage = (vid) => vehicles.find(v => v.id === vid)?.mileage ?? null;
+
+  // Alertes DATE
+  const upcomingDate = maintenance
     .filter(m => m.nextDate)
     .map(m => ({ ...m, nextDateParsed: parseISO(m.nextDate) }))
     .filter(m => isAfter(m.nextDateParsed, today) && differenceInDays(m.nextDateParsed, today) <= 30)
     .sort((a, b) => a.nextDateParsed - b.nextDateParsed);
 
-  const overdue = maintenance
+  const overdueDate = maintenance
     .filter(m => m.nextDate)
     .filter(m => isBefore(parseISO(m.nextDate), today));
+
+  // Alertes KILOMÉTRAGE
+  const upcomingKm = maintenance
+    .filter(m => m.nextMileage)
+    .map(m => ({ ...m, currentKm: vehicleMileage(m.vehicleId), remaining: m.nextMileage - (vehicleMileage(m.vehicleId) || 0) }))
+    .filter(m => m.currentKm !== null && m.remaining > 0 && m.remaining <= KM_WARNING_THRESHOLD)
+    .sort((a, b) => a.remaining - b.remaining);
+
+  const overdueKm = maintenance
+    .filter(m => m.nextMileage)
+    .map(m => ({ ...m, currentKm: vehicleMileage(m.vehicleId), surplus: (vehicleMileage(m.vehicleId) || 0) - m.nextMileage }))
+    .filter(m => m.currentKm !== null && m.surplus >= 0);
+
+  const upcoming = [...upcomingDate, ...upcomingKm];
+  const overdue = [...overdueDate, ...overdueKm];
 
   return (
     <div>
@@ -82,14 +102,28 @@ export default function Maintenance() {
             <AlertCircle size={14} style={{ color: 'var(--warning)' }} /> Rappels de maintenance
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {overdue.map(m => (
-              <div key={`o-${m.id}`} style={{ fontSize: 12, padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: 6 }}>
-                <strong style={{ color: 'var(--danger)' }}>EN RETARD</strong> · {m.brand} {m.model} ({m.plate}) — {m.type} prévu le {format(parseISO(m.nextDate), 'dd/MM/yyyy')}
+            {/* Alertes DATE en retard */}
+            {overdueDate.map(m => (
+              <div key={`od-${m.id}`} style={{ fontSize: 12, padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: 6 }}>
+                <strong style={{ color: 'var(--danger)' }}>📅 EN RETARD</strong> · {m.brand} {m.model} ({m.plate}) — {m.type} prévu le {format(parseISO(m.nextDate), 'dd/MM/yyyy')}
               </div>
             ))}
-            {upcoming.map(m => (
-              <div key={`u-${m.id}`} style={{ fontSize: 12, padding: '6px 10px', background: 'var(--surface-2)', borderRadius: 6 }}>
-                <strong style={{ color: 'var(--accent)' }}>Dans {differenceInDays(parseISO(m.nextDate), today)}j</strong> · {m.brand} {m.model} ({m.plate}) — {m.type} prévu le {format(parseISO(m.nextDate), 'dd/MM/yyyy')}
+            {/* Alertes KM en retard */}
+            {overdueKm.map(m => (
+              <div key={`ok-${m.id}`} style={{ fontSize: 12, padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: 6 }}>
+                <strong style={{ color: 'var(--danger)' }}>🛣️ DÉPASSÉ</strong> · {m.brand} {m.model} ({m.plate}) — {m.type} : <strong>{(+m.currentKm).toLocaleString('fr-DZ')} km</strong> &gt; {(+m.nextMileage).toLocaleString('fr-DZ')} km prévus (+{m.surplus.toLocaleString('fr-DZ')} km)
+              </div>
+            ))}
+            {/* Alertes DATE à venir */}
+            {upcomingDate.map(m => (
+              <div key={`ud-${m.id}`} style={{ fontSize: 12, padding: '6px 10px', background: 'var(--surface-2)', borderRadius: 6 }}>
+                <strong style={{ color: 'var(--accent)' }}>📅 Dans {differenceInDays(parseISO(m.nextDate), today)}j</strong> · {m.brand} {m.model} ({m.plate}) — {m.type} prévu le {format(parseISO(m.nextDate), 'dd/MM/yyyy')}
+              </div>
+            ))}
+            {/* Alertes KM à venir */}
+            {upcomingKm.map(m => (
+              <div key={`uk-${m.id}`} style={{ fontSize: 12, padding: '6px 10px', background: 'rgba(245,158,11,0.10)', borderRadius: 6 }}>
+                <strong style={{ color: 'var(--warning)' }}>🛣️ Dans {m.remaining.toLocaleString('fr-DZ')} km</strong> · {m.brand} {m.model} ({m.plate}) — {m.type} prévu à {(+m.nextMileage).toLocaleString('fr-DZ')} km (actuel : {(+m.currentKm).toLocaleString('fr-DZ')} km)
               </div>
             ))}
           </div>
