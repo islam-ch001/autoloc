@@ -1,0 +1,40 @@
+// Marques et modèles populaires (marché algérien & importations)
+// L'utilisateur peut toujours taper librement si sa marque/modèle n'est pas listé.
+export const CAR_BRANDS = {
+  'Renault':    ['Clio', 'Symbol', 'Mégane', 'Captur', 'Kadjar', 'Koleos', 'Talisman', 'Trafic', 'Master', 'Express', 'Kangoo', 'Twingo', 'Latitude'],
+  'Peugeot':    ['208', '301', '308', '3008', '5008', '2008', '407', '508', '301 SW', 'Partner', 'Boxer', 'Rifter', 'Expert', 'Traveller'],
+  'Dacia':      ['Logan', 'Sandero', 'Duster', 'Lodgy', 'Dokker', 'Stepway', 'Spring', 'Jogger'],
+  'Hyundai':    ['i10', 'i20', 'i30', 'Accent', 'Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Creta', 'Kona', 'Bayon', 'H1', 'Grand i10', 'Verna'],
+  'Kia':        ['Picanto', 'Rio', 'Cerato', 'K5', 'Optima', 'Sportage', 'Sorento', 'Seltos', 'Stonic', 'Soul', 'Carens', 'Bongo'],
+  'Volkswagen': ['Polo', 'Golf', 'Passat', 'Jetta', 'Tiguan', 'Touareg', 'Touran', 'T-Roc', 'T-Cross', 'Caddy', 'Transporter', 'Crafter', 'Amarok'],
+  'Toyota':     ['Yaris', 'Corolla', 'Camry', 'Avensis', 'RAV4', 'Land Cruiser', 'Hilux', 'Fortuner', 'Hiace', 'Prado', 'C-HR', 'Aygo', 'Auris'],
+  'Citroën':    ['C3', 'C4', 'C5 Aircross', 'C-Elysée', 'Berlingo', 'Jumper', 'Jumpy', 'Nemo', 'DS3', 'DS4', 'DS5', 'C1'],
+  'Fiat':       ['500', 'Panda', 'Tipo', 'Doblo', '500X', '500L', 'Punto', 'Bravo', 'Ducato', 'Fiorino', 'Linea'],
+  'Skoda':      ['Fabia', 'Octavia', 'Superb', 'Rapid', 'Kodiaq', 'Karoq', 'Scala', 'Kamiq'],
+  'Seat':       ['Ibiza', 'Leon', 'Toledo', 'Arona', 'Ateca', 'Tarraco', 'Alhambra'],
+  'Mercedes':   ['Classe A', 'Classe B', 'Classe C', 'Classe E', 'Classe S', 'CLA', 'CLS', 'GLA', 'GLC', 'GLE', 'GLS', 'Vito', 'Sprinter', 'Citan'],
+  'BMW':        ['Série 1', 'Série 2', 'Série 3', 'Série 4', 'Série 5', 'Série 7', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4'],
+  'Audi':       ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
+  'Nissan':     ['Micra', 'Sunny', 'Sentra', 'Almera', 'Qashqai', 'X-Trail', 'Juke', 'Note', 'Navara', 'Patrol', 'Pathfinder', 'Murano'],
+  'Suzuki':     ['Alto', 'Celerio', 'Swift', 'Baleno', 'Vitara', 'Jimny', 'S-Cross', 'Maruti'],
+  'Chevrolet':  ['Spark', 'Aveo', 'Cruze', 'Captiva', 'Trax', 'Optra', 'Sail'],
+  'Ford':       ['Fiesta', 'Focus', 'Fusion', 'Mondeo', 'Kuga', 'Edge', 'EcoSport', 'Ranger', 'Transit', 'Tourneo'],
+  'Opel':       ['Corsa', 'Astra', 'Insignia', 'Mokka', 'Crossland', 'Grandland', 'Combo', 'Vivaro'],
+  'Mitsubishi': ['Mirage', 'Lancer', 'ASX', 'Outlander', 'Eclipse Cross', 'Pajero', 'L200'],
+  'Honda':      ['Jazz', 'Civic', 'Accord', 'CR-V', 'HR-V', 'Pilot'],
+  'Mazda':      ['2', '3', '6', 'CX-3', 'CX-5', 'CX-30', 'CX-9'],
+  'Geely':      ['Emgrand', 'Coolray', 'Atlas', 'Tugella', 'Boyue', 'Azkarra', 'Okavango'],
+  'Chery':      ['Tiggo 2', 'Tiggo 3', 'Tiggo 4', 'Tiggo 7', 'Tiggo 8', 'Arrizo 5', 'QQ'],
+  'JAC':        ['S2', 'S3', 'S5', 'S7', 'T6', 'T8', 'iEV7S'],
+  'Mahindra':   ['XUV300', 'XUV500', 'XUV700', 'Scorpio', 'Bolero', 'Thar'],
+  'Tata':       ['Indica', 'Indigo', 'Nano', 'Tiago', 'Tigor', 'Nexon'],
+  'Isuzu':      ['D-Max', 'MU-X', 'NPR'],
+  'Land Rover': ['Defender', 'Discovery', 'Discovery Sport', 'Range Rover', 'Range Rover Sport', 'Range Rover Evoque', 'Range Rover Velar'],
+  'Jeep':       ['Renegade', 'Compass', 'Cherokee', 'Grand Cherokee', 'Wrangler'],
+  'Mini':       ['Cooper', 'Cooper S', 'Countryman', 'Clubman', 'Paceman'],
+  'Lexus':      ['IS', 'ES', 'GS', 'LS', 'NX', 'RX', 'GX', 'LX', 'UX'],
+  'Volvo':      ['XC40', 'XC60', 'XC90', 'S60', 'S90', 'V40', 'V60', 'V90'],
+};
+
+// Liste plate des marques (triée alphabétiquement)
+export const BRAND_LIST = Object.keys(CAR_BRANDS).sort();
