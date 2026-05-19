@@ -218,7 +218,12 @@ function AddMaintenanceModal({ vehicles, onClose, onAdd }) {
         <select className="form-select" value={form.vehicleId} onChange={e => {
           const id = e.target.value;
           const v = vehicles.find(vv => vv.id === +id);
-          setForm(f => ({ ...f, vehicleId: id, mileage: v ? v.mileage : f.mileage }));
+          // N'écrase le km QUE s'il est vide → on respecte la saisie manuelle
+          setForm(f => ({
+            ...f,
+            vehicleId: id,
+            mileage: (f.mileage === '' || f.mileage === null || f.mileage === undefined) && v ? v.mileage : f.mileage,
+          }));
         }}>
           <option value="">-- Sélectionner --</option>
           {vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model} — {v.plate}</option>)}
@@ -241,8 +246,8 @@ function AddMaintenanceModal({ vehicles, onClose, onAdd }) {
       </div>
 
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Coût (DA)</label><input className="form-input" type="number" value={form.cost} onChange={e => set('cost', e.target.value)} placeholder="0" /></div>
-        <div className="form-group"><label className="form-label">Kilométrage au moment</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', e.target.value)} placeholder={selectedVehicle ? selectedVehicle.mileage : ''} /></div>
+        <div className="form-group"><label className="form-label">Coût (DA)</label><input className="form-input" type="text" inputMode="numeric" value={form.cost} onChange={e => set('cost', e.target.value.replace(/[^\d]/g, ''))} placeholder="0" /></div>
+        <div className="form-group"><label className="form-label">Kilométrage au moment</label><input className="form-input" type="text" inputMode="numeric" value={form.mileage} onChange={e => set('mileage', e.target.value.replace(/[^\d]/g, ''))} placeholder={selectedVehicle ? selectedVehicle.mileage : ''} /></div>
       </div>
 
       <div style={{ marginTop: 6, marginBottom: 6, fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
@@ -250,7 +255,7 @@ function AddMaintenanceModal({ vehicles, onClose, onAdd }) {
       </div>
       <div className="form-row">
         <div className="form-group"><label className="form-label">Date prévue</label><input className="form-input" type="date" value={form.nextDate} onChange={e => set('nextDate', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Km prévus</label><input className="form-input" type="number" value={form.nextMileage} onChange={e => set('nextMileage', e.target.value)} placeholder={selectedVehicle ? selectedVehicle.mileage + 10000 : ''} /></div>
+        <div className="form-group"><label className="form-label">Km prévus</label><input className="form-input" type="text" inputMode="numeric" value={form.nextMileage} onChange={e => set('nextMileage', e.target.value.replace(/[^\d]/g, ''))} placeholder={selectedVehicle ? selectedVehicle.mileage + 10000 : ''} /></div>
       </div>
 
       <div className="form-group">
