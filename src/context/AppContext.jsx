@@ -113,13 +113,16 @@ export function AppProvider({ children }) {
   // ── Maintenance ────────────────────────────────────────────
   const addMaintenance = async (data) => {
     const m = await api.createMaintenance(data);
-    setMaintenance(prev => [m, ...prev]);
+    // La réponse POST ne contient pas les infos du véhicule (jointure côté GET) → on enrichit localement
+    const v = vehicles.find(vv => vv.id === m.vehicleId);
+    const enriched = v ? { ...m, brand: v.brand, model: v.model, plate: v.plate } : m;
+    setMaintenance(prev => [enriched, ...prev]);
     // Re-charger les véhicules si le statut a pu changer
     if (data.setInMaintenance) {
       const updated = await api.getVehicles();
       setVehicles(updated);
     }
-    return m;
+    return enriched;
   };
   const patchMaintenance = async (id, data) => {
     const m = await api.updateMaintenance(id, data);
