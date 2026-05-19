@@ -1,5 +1,6 @@
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut, Wrench, Sun, Moon, Languages, ShieldCheck } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut, Wrench, Sun, Moon, Languages, ShieldCheck, Menu, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -23,12 +24,22 @@ export default function Sidebar() {
   const { theme, toggle: toggleTheme } = useTheme();
   const { lang, toggle: toggleLang, t } = useT();
   const navItems = navItemsConfig.map(i => ({ ...i, label: t(i.key) }));
+  const [open, setOpen] = useState(false);
+  const location = useLocation();
+
+  // Fermer la sidebar quand on change de page (mobile)
+  useEffect(() => { setOpen(false); }, [location.pathname]);
   const activeCount = reservations.filter(r => r.status === 'active').length;
   const initials = (user?.name || 'U')
     .split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
 
   return (
-    <aside className="sidebar">
+    <>
+    <button className="mobile-menu-btn" onClick={() => setOpen(o => !o)} aria-label="Menu">
+      {open ? <X size={20} /> : <Menu size={20} />}
+    </button>
+    <div className={`sidebar-overlay ${open ? 'show' : ''}`} onClick={() => setOpen(false)} />
+    <aside className={`sidebar ${open ? 'open' : ''}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
           {settings?.logo ? (
@@ -129,5 +140,6 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }
