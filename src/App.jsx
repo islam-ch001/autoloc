@@ -3,6 +3,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Vehicles from './pages/Vehicles';
@@ -77,6 +78,7 @@ function AppShell() {
 export default function App() {
   return (
     <BrowserRouter>
+      <LanguageProvider>
       <ThemeProvider>
       <AuthProvider>
         <Routes>
@@ -93,6 +95,7 @@ export default function App() {
         </Routes>
       </AuthProvider>
       </ThemeProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
 }

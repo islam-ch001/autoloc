@@ -1,18 +1,19 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut, Wrench, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut, Wrench, Sun, Moon, Languages } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
+import { useT } from '../context/LanguageContext';
 
-const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
-  { to: '/vehicles', icon: Car, label: 'Véhicules' },
-  { to: '/reservations', icon: FileText, label: 'Réservations' },
-  { to: '/clients', icon: Users, label: 'Clients' },
-  { to: '/calendar', icon: CalendarDays, label: 'Calendrier' },
-  { to: '/returns', icon: RotateCcw, label: 'Retours' },
-  { to: '/maintenance', icon: Wrench, label: 'Maintenance' },
+const navItemsConfig = [
+  { to: '/', icon: LayoutDashboard, key: 'nav.dashboard' },
+  { to: '/vehicles', icon: Car, key: 'nav.vehicles' },
+  { to: '/reservations', icon: FileText, key: 'nav.reservations' },
+  { to: '/clients', icon: Users, key: 'nav.clients' },
+  { to: '/calendar', icon: CalendarDays, key: 'nav.calendar' },
+  { to: '/returns', icon: RotateCcw, key: 'nav.returns' },
+  { to: '/maintenance', icon: Wrench, key: 'nav.maintenance' },
 ];
 
 export default function Sidebar() {
@@ -20,6 +21,8 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const { settings } = useSettings();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { lang, toggle: toggleLang, t } = useT();
+  const navItems = navItemsConfig.map(i => ({ ...i, label: t(i.key) }));
   const activeCount = reservations.filter(r => r.status === 'active').length;
   const initials = (user?.name || 'U')
     .split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
@@ -47,7 +50,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        <div className="nav-section-label">Menu principal</div>
+        <div className="nav-section-label">{t('nav.menuMain')}</div>
         {navItems.map(item => (
           <NavLink
             key={item.to}
@@ -63,10 +66,10 @@ export default function Sidebar() {
           </NavLink>
         ))}
 
-        <div className="nav-section-label">Système</div>
+        <div className="nav-section-label">{t('nav.system')}</div>
         <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <Settings size={18} />
-          Paramètres
+          {t('nav.settings')}
         </NavLink>
       </nav>
 
@@ -78,8 +81,22 @@ export default function Sidebar() {
             <div className="user-role" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
           </div>
           <button
+            onClick={toggleLang}
+            title={lang === 'fr' ? 'العربية' : 'Français'}
+            style={{
+              background: 'transparent', border: '1px solid var(--border)', cursor: 'pointer',
+              minWidth: 32, height: 32, padding: '0 8px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 4,
+              color: 'var(--text-3)', transition: 'all 0.15s', fontSize: 11, fontWeight: 700,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-3)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+          >
+            <Languages size={12} />
+            {lang === 'fr' ? 'AR' : 'FR'}
+          </button>
+          <button
             onClick={toggleTheme}
-            title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+            title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
             style={{
               background: 'transparent', border: '1px solid var(--border)', cursor: 'pointer',
               width: 32, height: 32, borderRadius: 8, display: 'grid', placeItems: 'center',

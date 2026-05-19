@@ -1,6 +1,7 @@
 import { Car, FileText, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Clock, Wrench, Receipt } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useApp } from '../context/AppContext';
+import { useT } from '../context/LanguageContext';
 import { useMemo } from 'react';
 
 const formatDA = (n) => (n || 0).toLocaleString('fr-DZ') + ' DA';
@@ -19,6 +20,7 @@ const CAT_COLORS = {
 
 export default function Dashboard() {
   const { vehicles, clients, reservations, maintenance: maintenanceList = [] } = useApp();
+  const { t } = useT();
 
   const available = vehicles.filter(v => v.status === 'available').length;
   const rented = vehicles.filter(v => v.status === 'rented').length;
@@ -77,24 +79,24 @@ export default function Dashboard() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Tableau de bord</h1>
-          <p className="page-subtitle">Vue d'ensemble de votre activité de location</p>
+          <h1 className="page-title">{t('dash.title')}</h1>
+          <p className="page-subtitle">{t('dash.subtitle')}</p>
         </div>
       </div>
 
       <div className="stats-grid" style={{ marginBottom: 24 }}>
-        <StatCard icon={<Car />} label="Véhicules disponibles" value={`${available}/${vehicles.length}`} change={`${rented} en location · ${maintenance} en maintenance`} up bg="var(--success-soft)" iconColor="var(--success)" />
-        <StatCard icon={<FileText />} label="Locations actives" value={rented} change={`${upcomingRes.length} à venir`} up bg="var(--accent-soft)" iconColor="var(--accent)" />
-        <StatCard icon={<DollarSign />} label="Revenu total" value={formatDA(totalRevenue)} change={`${reservations.filter(r => r.status === 'completed').length} locations terminées`} up bg="var(--primary-soft)" iconColor="var(--primary)" />
-        <StatCard icon={<Wrench />} label="Dépenses maintenance" value={formatDA(maintenanceCost)} change={`${maintenanceList.length} intervention${maintenanceList.length > 1 ? 's' : ''}`} up={false} bg="rgba(239,68,68,0.12)" iconColor="var(--danger)" />
-        <StatCard icon={<Receipt />} label="Revenu net" value={formatDA(netRevenue)} change={`après déduction des dépenses`} up={netRevenue >= 0} bg="rgba(139,92,246,0.12)" iconColor="var(--purple)" />
+        <StatCard icon={<Car />} label={t('dash.vehiclesAvail')} value={`${available}/${vehicles.length}`} change={`${rented} · ${maintenance}`} up bg="var(--success-soft)" iconColor="var(--success)" />
+        <StatCard icon={<FileText />} label={t('dash.activeRentals')} value={rented} change={`${upcomingRes.length} ${t('res.upcoming')}`} up bg="var(--accent-soft)" iconColor="var(--accent)" />
+        <StatCard icon={<DollarSign />} label={t('dash.totalRevenue')} value={formatDA(totalRevenue)} change={`${reservations.filter(r => r.status === 'completed').length} ${t('res.completed')}`} up bg="var(--primary-soft)" iconColor="var(--primary)" />
+        <StatCard icon={<Wrench />} label={t('dash.maintCost')} value={formatDA(maintenanceCost)} change={`${maintenanceList.length} ${t('nav.maintenance')}`} up={false} bg="rgba(239,68,68,0.12)" iconColor="var(--danger)" />
+        <StatCard icon={<Receipt />} label={t('dash.netRevenue')} value={formatDA(netRevenue)} change={''} up={netRevenue >= 0} bg="rgba(139,92,246,0.12)" iconColor="var(--purple)" />
       </div>
 
       <div className="grid-2" style={{ marginBottom: 24 }}>
         <div className="card">
           <div className="card-header">
-            <span className="card-title">Revenus mensuels</span>
-            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>6 derniers mois</span>
+            <span className="card-title">{t('dash.monthlyRevenue')}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{t('dash.last6Months')}</span>
           </div>
           <div className="card-body">
             <ResponsiveContainer width="100%" height={240}>
@@ -113,13 +115,13 @@ export default function Dashboard() {
 
         <div className="card">
           <div className="card-header">
-            <span className="card-title">Répartition par catégorie</span>
+            <span className="card-title">{t('dash.byCategory')}</span>
           </div>
           <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             {categoryStats.length === 0 ? (
               <div style={{ width: '100%', textAlign: 'center', padding: 30, color: 'var(--text-3)' }}>
                 <Car size={36} style={{ opacity: 0.4, marginBottom: 12 }} />
-                <div style={{ fontSize: 13 }}>Ajoutez des véhicules pour voir la répartition</div>
+                <div style={{ fontSize: 13 }}>{t('veh.addVehicles')}</div>
               </div>
             ) : (
               <>
@@ -149,15 +151,15 @@ export default function Dashboard() {
       <div className="grid-2">
         <div className="card">
           <div className="card-header">
-            <span className="card-title">État de la flotte</span>
+            <span className="card-title">{t('dash.fleetState')}</span>
           </div>
           <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <FleetRow icon={<Car size={16} />} label="Disponibles" count={available} total={vehicles.length} color="var(--success)" />
-            <FleetRow icon={<Clock size={16} />} label="En location" count={rented} total={vehicles.length} color="var(--accent)" />
-            <FleetRow icon={<Wrench size={16} />} label="Maintenance" count={maintenance} total={vehicles.length} color="var(--warning)" />
+            <FleetRow icon={<Car size={16} />} label={t('vehicle.available')} count={available} total={vehicles.length} color="var(--success)" />
+            <FleetRow icon={<Clock size={16} />} label={t('vehicle.rented')} count={rented} total={vehicles.length} color="var(--accent)" />
+            <FleetRow icon={<Wrench size={16} />} label={t('vehicle.maintenance')} count={maintenance} total={vehicles.length} color="var(--warning)" />
             {unpaid > 0 && (
               <div style={{ marginTop: 8, padding: '10px 14px', background: 'var(--danger-soft)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--danger)', fontWeight: 600 }}>
-                <AlertTriangle size={14} /> Impayés en cours: {formatDA(unpaid)}
+                <AlertTriangle size={14} /> {t('dash.unpaid')}: {formatDA(unpaid)}
               </div>
             )}
           </div>
@@ -165,16 +167,16 @@ export default function Dashboard() {
 
         <div className="card">
           <div className="card-header">
-            <span className="card-title">Dernières réservations</span>
+            <span className="card-title">{t('dash.recentRes')}</span>
           </div>
           <div style={{ overflow: 'auto' }}>
             <table>
               <thead>
                 <tr>
-                  <th>Client</th>
-                  <th>Véhicule</th>
-                  <th>Statut</th>
-                  <th>Montant</th>
+                  <th>{t('nav.clients')}</th>
+                  <th>{t('veh.title').replace('s','')}</th>
+                  <th>{t('veh.status')}</th>
+                  <th>{t('common.currency')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -228,12 +230,13 @@ function FleetRow({ icon, label, count, total, color }) {
 }
 
 function StatusBadge({ status }) {
+  const { t } = useT();
   const map = {
-    active: { cls: 'badge-success', label: 'Active' },
-    upcoming: { cls: 'badge-accent', label: 'À venir' },
-    completed: { cls: 'badge-neutral', label: 'Terminée' },
-    cancelled: { cls: 'badge-danger', label: 'Annulée' },
+    active:    { cls: 'badge-success', key: 'res.active' },
+    upcoming:  { cls: 'badge-accent',  key: 'res.upcoming' },
+    completed: { cls: 'badge-neutral', key: 'res.completed' },
+    cancelled: { cls: 'badge-danger',  key: 'res.cancelled' },
   };
   const s = map[status] || map.active;
-  return <span className={`badge ${s.cls}`}>{s.label}</span>;
+  return <span className={`badge ${s.cls}`}>{t(s.key)}</span>;
 }
