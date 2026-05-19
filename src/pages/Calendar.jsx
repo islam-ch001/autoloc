@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useT } from '../context/LanguageContext';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isWithinInterval } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -8,6 +9,7 @@ const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
 export default function Calendar() {
   const { reservations, vehicles, clients } = useApp();
+  const { t } = useT();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedVehicle, setSelectedVehicle] = useState('all');
 
@@ -39,8 +41,8 @@ export default function Calendar() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Calendrier</h1>
-          <p className="page-subtitle">Vue des disponibilités et réservations</p>
+          <h1 className="page-title">{t('cal.title')}</h1>
+          <p className="page-subtitle">{t('cal.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <select className="form-select" style={{ width: 220 }} value={selectedVehicle} onChange={e => setSelectedVehicle(e.target.value)}>
@@ -55,15 +57,15 @@ export default function Calendar() {
 
       {/* Month nav */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-        <button className="btn btn-sm" onClick={prev}><ChevronLeft size={16} /></button>
+        <button className="btn btn-sm" onClick={prev} title={t('cal.prev')}><ChevronLeft size={16} /></button>
         <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, textTransform: 'capitalize', minWidth: 200, textAlign: 'center' }}>
           {format(currentDate, 'MMMM yyyy', { locale: fr })}
         </h2>
-        <button className="btn btn-sm" onClick={next}><ChevronRight size={16} /></button>
-        <button className="btn btn-sm" onClick={() => setCurrentDate(new Date())}>Aujourd'hui</button>
+        <button className="btn btn-sm" onClick={next} title={t('cal.next')}><ChevronRight size={16} /></button>
+        <button className="btn btn-sm" onClick={() => setCurrentDate(new Date())}>{t('cal.today')}</button>
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, fontSize: 12 }}>
-          {Object.entries({ active: 'Active', upcoming: 'À venir', completed: 'Terminée' }).map(([k, label]) => (
+          {Object.entries({ active: t('res.active'), upcoming: t('res.upcoming'), completed: t('res.completed') }).map(([k, label]) => (
             <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ width: 10, height: 10, borderRadius: 3, background: statusColor[k] }} />
               <span style={{ color: 'var(--text-3)' }}>{label}</span>

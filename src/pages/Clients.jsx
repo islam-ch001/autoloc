@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Plus, Search, Eye, Phone, Mail, MapPin, User, Pencil } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useT } from '../context/LanguageContext';
 import Modal from '../components/Modal';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export default function Clients() {
   const { clients, addClient, patchClient, reservations, vehicles } = useApp();
+  const { t } = useT();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Tous');
   const [showAdd, setShowAdd] = useState(false);
@@ -19,26 +21,28 @@ export default function Clients() {
     return matchSearch && matchFilter;
   });
 
+  const filterLabels = { 'Tous': t('action.all'), 'Actifs': t('client.actives'), 'Inactifs': t('client.inactives') };
+
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Clients</h1>
-          <p className="page-subtitle">{clients.length} clients enregistrés</p>
+          <h1 className="page-title">{t('cli.title')}</h1>
+          <p className="page-subtitle">{clients.length} {t('cli.registered')}</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-          <Plus size={16} /> Nouveau client
+          <Plus size={16} /> {t('cli.addNew')}
         </button>
       </div>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center', flexWrap: 'wrap' }}>
         <div className="search-bar" style={{ flex: 1, minWidth: 260 }}>
           <Search size={16} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Chercher par nom, téléphone, email..." />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('cli.searchPh')} />
         </div>
         <div className="filter-group">
           {['Tous', 'Actifs', 'Inactifs'].map(f => (
-            <button key={f} className={`filter-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{f}</button>
+            <button key={f} className={`filter-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{filterLabels[f]}</button>
           ))}
         </div>
       </div>
@@ -48,13 +52,13 @@ export default function Clients() {
           <table>
             <thead>
               <tr>
-                <th>Client</th>
-                <th>Contact</th>
-                <th>Adresse</th>
-                <th>Permis</th>
-                <th>Locations</th>
-                <th>Membre depuis</th>
-                <th>Statut</th>
+                <th>{t('res.client')}</th>
+                <th>{t('cli.contact')}</th>
+                <th>{t('cli.address')}</th>
+                <th>{t('cli.license')}</th>
+                <th>{t('cli.rentals')}</th>
+                <th>{t('cli.memberSince')}</th>
+                <th>{t('veh.status')}</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -93,13 +97,13 @@ export default function Clients() {
                     </td>
                     <td>
                       <span className={`badge ${c.status === 'active' ? 'badge-success' : 'badge-neutral'}`}>
-                        {c.status === 'active' ? 'Actif' : 'Inactif'}
+                        {c.status === 'active' ? t('client.active') : t('client.inactive')}
                       </span>
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="action-btn" title="Voir" onClick={() => setSelected(c)}><Eye size={14} /></button>
-                        <button className="action-btn" title="Modifier" onClick={() => setEditing(c)}>
+                        <button className="action-btn" title={t('action.view')} onClick={() => setSelected(c)}><Eye size={14} /></button>
+                        <button className="action-btn" title={t('action.edit')} onClick={() => setEditing(c)}>
                           <Pencil size={14} style={{ color: 'var(--primary)' }} />
                         </button>
                       </div>
@@ -123,38 +127,40 @@ export default function Clients() {
 }
 
 function AddClientModal({ onClose, onAdd }) {
+  const { t } = useT();
   const [form, setForm] = useState({ firstName: '', lastName: '', phone: '', email: '', address: '', license: 'B', licenseNumber: '', joinedDate: new Date().toISOString().split('T')[0] });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <Modal title="Nouveau client" onClose={onClose} footer={
+    <Modal title={t('cli.addNew')} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Annuler</button>
-        <button className="btn btn-primary" onClick={() => onAdd(form)}>Enregistrer</button>
+        <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
+        <button className="btn btn-primary" onClick={() => onAdd(form)}>{t('action.save')}</button>
       </>
     }>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Prénom *</label><input className="form-input" value={form.firstName} onChange={e => set('firstName', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Nom *</label><input className="form-input" value={form.lastName} onChange={e => set('lastName', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.firstName') + ' *'}</label><input className="form-input" value={form.firstName} onChange={e => set('firstName', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.lastName') + ' *'}</label><input className="form-input" value={form.lastName} onChange={e => set('lastName', e.target.value)} /></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Téléphone *</label><input className="form-input" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="0555 12 34 56" /></div>
-        <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.phone') + ' *'}</label><input className="form-input" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="0555 12 34 56" /></div>
+        <div className="form-group"><label className="form-label">{t('cli.email')}</label><input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} /></div>
       </div>
-      <div className="form-group"><label className="form-label">Adresse</label><input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">{t('cli.address')}</label><input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} /></div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Catégorie permis</label>
+        <div className="form-group"><label className="form-label">{t('cli.license')}</label>
           <select className="form-select" value={form.license} onChange={e => set('license', e.target.value)}>
             {['B', 'C', 'D', 'E'].map(l => <option key={l}>{l}</option>)}
           </select>
         </div>
-        <div className="form-group"><label className="form-label">N° permis</label><input className="form-input" value={form.licenseNumber} onChange={e => set('licenseNumber', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.licenseNum')}</label><input className="form-input" value={form.licenseNumber} onChange={e => set('licenseNumber', e.target.value)} /></div>
       </div>
     </Modal>
   );
 }
 
 function EditClientModal({ client, onClose, onSave }) {
+  const { t } = useT();
   const [form, setForm] = useState({
     firstName: client.firstName || '',
     lastName: client.lastName || '',
@@ -179,35 +185,35 @@ function EditClientModal({ client, onClose, onSave }) {
   };
 
   return (
-    <Modal title={`Modifier ${client.firstName} ${client.lastName}`} onClose={onClose} footer={
+    <Modal title={`${t('cli.editTitle')} ${client.firstName} ${client.lastName}`} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
         <button className="btn btn-primary" disabled={saving} onClick={handleSubmit}>
-          {saving ? 'Enregistrement…' : 'Enregistrer'}
+          {saving ? t('action.saving') : t('action.save')}
         </button>
       </>
     }>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Prénom *</label><input className="form-input" value={form.firstName} onChange={e => set('firstName', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Nom *</label><input className="form-input" value={form.lastName} onChange={e => set('lastName', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.firstName') + ' *'}</label><input className="form-input" value={form.firstName} onChange={e => set('firstName', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.lastName') + ' *'}</label><input className="form-input" value={form.lastName} onChange={e => set('lastName', e.target.value)} /></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Téléphone *</label><input className="form-input" value={form.phone} onChange={e => set('phone', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.phone') + ' *'}</label><input className="form-input" value={form.phone} onChange={e => set('phone', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.email')}</label><input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} /></div>
       </div>
-      <div className="form-group"><label className="form-label">Adresse</label><input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">{t('cli.address')}</label><input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} /></div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Catégorie permis</label>
+        <div className="form-group"><label className="form-label">{t('cli.license')}</label>
           <select className="form-select" value={form.license} onChange={e => set('license', e.target.value)}>
             {['B', 'C', 'D', 'E'].map(l => <option key={l}>{l}</option>)}
           </select>
         </div>
-        <div className="form-group"><label className="form-label">N° permis</label><input className="form-input" value={form.licenseNumber} onChange={e => set('licenseNumber', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('cli.licenseNum')}</label><input className="form-input" value={form.licenseNumber} onChange={e => set('licenseNumber', e.target.value)} /></div>
       </div>
-      <div className="form-group"><label className="form-label">Statut</label>
+      <div className="form-group"><label className="form-label">{t('veh.status')}</label>
         <select className="form-select" value={form.status} onChange={e => set('status', e.target.value)}>
-          <option value="active">Actif</option>
-          <option value="inactive">Inactif</option>
+          <option value="active">{t('client.active')}</option>
+          <option value="inactive">{t('client.inactive')}</option>
         </select>
       </div>
     </Modal>
@@ -216,16 +222,17 @@ function EditClientModal({ client, onClose, onSave }) {
 
 function ClientDetailModal({ client: c, onClose, onEdit }) {
   const { reservations, vehicles } = useApp();
+  const { t } = useT();
   const clientRes = reservations.filter(r => r.clientId === c.id).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
   const totalSpent = clientRes.reduce((s, r) => s + r.paidAmount, 0);
 
-  const statusMap = { active: { cls: 'badge-success', label: 'Active' }, upcoming: { cls: 'badge-accent', label: 'À venir' }, completed: { cls: 'badge-neutral', label: 'Terminée' } };
+  const statusMap = { active: { cls: 'badge-success', label: 'res.active' }, upcoming: { cls: 'badge-accent', label: 'res.upcoming' }, completed: { cls: 'badge-neutral', label: 'res.completed' } };
 
   return (
     <Modal title={`${c.firstName} ${c.lastName}`} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Fermer</button>
-        {onEdit && <button className="btn btn-primary" onClick={onEdit}><Pencil size={14} /> Modifier les infos</button>}
+        <button className="btn" onClick={onClose}>{t('action.close')}</button>
+        {onEdit && <button className="btn btn-primary" onClick={onEdit}><Pencil size={14} /> {t('cli.editInfo')}</button>}
       </>
     }>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 0 20px', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
@@ -236,7 +243,7 @@ function ClientDetailModal({ client: c, onClose, onEdit }) {
           <div style={{ fontWeight: 700, fontSize: 18 }}>{c.firstName} {c.lastName}</div>
           <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>Client depuis {format(parseISO(c.joinedDate), 'MMMM yyyy', { locale: fr })}</div>
         </div>
-        <span className={`badge ${c.status === 'active' ? 'badge-success' : 'badge-neutral'}`} style={{ marginLeft: 'auto' }}>{c.status === 'active' ? 'Actif' : 'Inactif'}</span>
+        <span className={`badge ${c.status === 'active' ? 'badge-success' : 'badge-neutral'}`} style={{ marginLeft: 'auto' }}>{c.status === 'active' ? t('client.active') : t('client.inactive')}</span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
@@ -253,17 +260,17 @@ function ClientDetailModal({ client: c, onClose, onEdit }) {
       <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
         <div style={{ flex: 1, background: 'var(--primary-soft)', borderRadius: 10, padding: '12px 16px', textAlign: 'center' }}>
           <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>{c.totalRentals}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Locations</div>
+          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{t('cli.rentals')}</div>
         </div>
         <div style={{ flex: 1, background: 'var(--success-soft)', borderRadius: 10, padding: '12px 16px', textAlign: 'center' }}>
           <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--success)' }}>{totalSpent.toLocaleString('fr-DZ')}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>DA dépensés</div>
+          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{t('cli.totalSpent')}</div>
         </div>
       </div>
 
       {clientRes.length > 0 && (
         <div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-3)', marginBottom: 10 }}>HISTORIQUE</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-3)', marginBottom: 10 }}>{t('cli.history').toUpperCase()}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {clientRes.map(r => {
               const v = vehicles.find(vv => vv.id === r.vehicleId);
@@ -276,7 +283,7 @@ function ClientDetailModal({ client: c, onClose, onEdit }) {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontWeight: 700, fontSize: 13 }}>{r.totalPrice.toLocaleString('fr-DZ')} DA</div>
-                    <span className={`badge ${s.cls}`} style={{ fontSize: 10 }}>{s.label}</span>
+                    <span className={`badge ${s.cls}`} style={{ fontSize: 10 }}>{statusMap[r.status] ? t(s.label) : s.label}</span>
                   </div>
                 </div>
               );

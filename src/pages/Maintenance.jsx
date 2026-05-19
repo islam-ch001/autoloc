@@ -3,6 +3,7 @@ import { Plus, Search, Wrench, Calendar, Gauge, DollarSign, Trash2, AlertCircle,
 import { format, parseISO, isBefore, isAfter, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useApp } from '../context/AppContext';
+import { useT } from '../context/LanguageContext';
 import Modal from '../components/Modal';
 
 const TYPES = [
@@ -22,6 +23,7 @@ const fmt = (n) => (Number(n) || 0).toLocaleString('fr-DZ');
 
 export default function Maintenance() {
   const { maintenance, vehicles, addMaintenance, removeMaintenance } = useApp();
+  const { t } = useT();
   const [search, setSearch] = useState('');
   const [filterVehicle, setFilterVehicle] = useState('all');
   const [showAdd, setShowAdd] = useState(false);
@@ -71,26 +73,26 @@ export default function Maintenance() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Maintenance</h1>
-          <p className="page-subtitle">{maintenance.length} intervention{maintenance.length > 1 ? 's' : ''} enregistrée{maintenance.length > 1 ? 's' : ''}</p>
+          <h1 className="page-title">{t('maint.title')}</h1>
+          <p className="page-subtitle">{maintenance.length} {t('maint.totalCount')}</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-          <Plus size={16} /> Nouvelle intervention
+          <Plus size={16} /> {t('maint.addNew')}
         </button>
       </div>
 
       {/* Stats */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 200px', background: 'var(--primary-soft)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 12, padding: '14px 18px' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Coût total</div>
+          <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('maint.totalCost')}</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--primary)', marginTop: 4 }}>{fmt(totalCost)} DA</div>
         </div>
         <div style={{ flex: '1 1 200px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 18px' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>À planifier (30j)</div>
+          <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('maint.upcoming30')}</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent)', marginTop: 4 }}>{upcoming.length}</div>
         </div>
         <div style={{ flex: '1 1 200px', background: overdue.length ? 'rgba(239,68,68,0.08)' : 'var(--surface-2)', border: `1px solid ${overdue.length ? 'rgba(239,68,68,0.2)' : 'var(--border)'}`, borderRadius: 12, padding: '14px 18px' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>En retard</div>
+          <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('maint.overdue')}</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: overdue.length ? 'var(--danger)' : 'var(--text-2)', marginTop: 4 }}>{overdue.length}</div>
         </div>
       </div>
@@ -99,7 +101,7 @@ export default function Maintenance() {
       {(upcoming.length > 0 || overdue.length > 0) && (
         <div style={{ marginBottom: 20, padding: 14, background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontSize: 13, fontWeight: 700, color: 'var(--text-2)' }}>
-            <AlertCircle size={14} style={{ color: 'var(--warning)' }} /> Rappels de maintenance
+            <AlertCircle size={14} style={{ color: 'var(--warning)' }} /> {t('maint.reminders')}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {/* Alertes DATE en retard */}
@@ -134,10 +136,10 @@ export default function Maintenance() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center', flexWrap: 'wrap' }}>
         <div className="search-bar" style={{ flex: 1, minWidth: 260 }}>
           <Search size={16} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Chercher par type, véhicule, description..." />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('maint.searchPh')} />
         </div>
         <select className="form-select" style={{ maxWidth: 260 }} value={filterVehicle} onChange={e => setFilterVehicle(e.target.value)}>
-          <option value="all">Tous les véhicules</option>
+          <option value="all">{t('maint.allVehicles')}</option>
           {vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model} — {v.plate}</option>)}
         </select>
       </div>
@@ -146,7 +148,7 @@ export default function Maintenance() {
       {filtered.length === 0 ? (
         <div style={{ padding: 60, textAlign: 'center', background: 'var(--bg-2)', borderRadius: 12, border: '1px dashed var(--border)' }}>
           <Wrench size={48} style={{ color: 'var(--text-3)', opacity: 0.4, marginBottom: 16 }} />
-          <h3 style={{ color: 'var(--text-2)', margin: '8px 0' }}>Aucune intervention</h3>
+          <h3 style={{ color: 'var(--text-2)', margin: '8px 0' }}>{t('maint.noInterventions')}</h3>
           <p style={{ color: 'var(--text-3)', fontSize: 13 }}>
             Cliquez sur <strong>"Nouvelle intervention"</strong> pour enregistrer une opération de maintenance.
           </p>
@@ -157,13 +159,13 @@ export default function Maintenance() {
             <table>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Véhicule</th>
-                  <th>Type</th>
-                  <th>Description</th>
-                  <th>Km</th>
-                  <th>Coût</th>
-                  <th>Prochaine</th>
+                  <th>{t('maint.date')}</th>
+                  <th>{t('res.vehicle')}</th>
+                  <th>{t('maint.type')}</th>
+                  <th>{t('maint.description')}</th>
+                  <th>{t('maint.km')}</th>
+                  <th>{t('maint.cost')}</th>
+                  <th>{t('maint.nextDue')}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -185,7 +187,7 @@ export default function Maintenance() {
                       {!m.nextDate && !m.nextMileage && '—'}
                     </td>
                     <td>
-                      <button className="action-btn" title="Supprimer" onClick={async () => {
+                      <button className="action-btn" title={t('action.delete')} onClick={async () => {
                         if (!confirm('Supprimer cette intervention ?')) return;
                         try { await removeMaintenance(m.id); }
                         catch (e) { alert('Erreur : ' + e.message); }
@@ -210,6 +212,7 @@ export default function Maintenance() {
 }
 
 function AddMaintenanceModal({ vehicles, onClose, onAdd }) {
+  const { t } = useT();
   const [form, setForm] = useState({
     vehicleId: '', date: new Date().toISOString().slice(0, 10), type: TYPES[0],
     description: '', cost: '', mileage: '', nextDate: '', nextMileage: '', notes: '',
@@ -239,16 +242,16 @@ function AddMaintenanceModal({ vehicles, onClose, onAdd }) {
   };
 
   return (
-    <Modal title="Nouvelle intervention" onClose={onClose} footer={
+    <Modal title={t('maint.addNew')} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
         <button className="btn btn-primary" disabled={saving} onClick={handleSubmit}>
-          {saving ? 'Enregistrement…' : 'Enregistrer'}
+          {saving ? t('action.saving') : t('action.save')}
         </button>
       </>
     }>
       <div className="form-group">
-        <label className="form-label">Véhicule *</label>
+        <label className="form-label">{t('res.vehicle')} *</label>
         <select className="form-select" value={form.vehicleId} onChange={e => {
           const id = e.target.value;
           const v = vehicles.find(vv => vv.id === +id);
@@ -259,15 +262,15 @@ function AddMaintenanceModal({ vehicles, onClose, onAdd }) {
             mileage: (f.mileage === '' || f.mileage === null || f.mileage === undefined) && v ? v.mileage : f.mileage,
           }));
         }}>
-          <option value="">-- Sélectionner --</option>
+          <option value="">{t('action.select')}</option>
           {vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model} — {v.plate}</option>)}
         </select>
       </div>
 
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Date *</label><input className="form-input" type="date" value={form.date} onChange={e => set('date', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('maint.date')} *</label><input className="form-input" type="date" value={form.date} onChange={e => set('date', e.target.value)} /></div>
         <div className="form-group">
-          <label className="form-label">Type *</label>
+          <label className="form-label">{t('maint.type')} *</label>
           <select className="form-select" value={form.type} onChange={e => set('type', e.target.value)}>
             {TYPES.map(t => <option key={t}>{t}</option>)}
           </select>
@@ -275,31 +278,31 @@ function AddMaintenanceModal({ vehicles, onClose, onAdd }) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Description</label>
+        <label className="form-label">{t('maint.description')}</label>
         <input className="form-input" value={form.description} onChange={e => set('description', e.target.value)} placeholder="Ex: Vidange + filtre huile et air" />
       </div>
 
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Coût (DA)</label><input className="form-input" type="text" inputMode="numeric" value={form.cost} onChange={e => set('cost', e.target.value.replace(/[^\d]/g, ''))} placeholder="0" /></div>
-        <div className="form-group"><label className="form-label">Kilométrage au moment</label><input className="form-input" type="text" inputMode="numeric" value={form.mileage} onChange={e => set('mileage', e.target.value.replace(/[^\d]/g, ''))} placeholder={selectedVehicle ? selectedVehicle.mileage : ''} /></div>
+        <div className="form-group"><label className="form-label">{t('maint.cost')} (DA)</label><input className="form-input" type="text" inputMode="numeric" value={form.cost} onChange={e => set('cost', e.target.value.replace(/[^\d]/g, ''))} placeholder="0" /></div>
+        <div className="form-group"><label className="form-label">{t('maint.atTime')}</label><input className="form-input" type="text" inputMode="numeric" value={form.mileage} onChange={e => set('mileage', e.target.value.replace(/[^\d]/g, ''))} placeholder={selectedVehicle ? selectedVehicle.mileage : ''} /></div>
       </div>
 
       <div style={{ marginTop: 6, marginBottom: 6, fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Prochaine échéance (optionnel)
+        {t('maint.scheduledFor')}
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Date prévue</label><input className="form-input" type="date" value={form.nextDate} onChange={e => set('nextDate', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Km prévus</label><input className="form-input" type="text" inputMode="numeric" value={form.nextMileage} onChange={e => set('nextMileage', e.target.value.replace(/[^\d]/g, ''))} placeholder={selectedVehicle ? selectedVehicle.mileage + 10000 : ''} /></div>
+        <div className="form-group"><label className="form-label">{t('maint.nextDate')}</label><input className="form-input" type="date" value={form.nextDate} onChange={e => set('nextDate', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('maint.nextKm')}</label><input className="form-input" type="text" inputMode="numeric" value={form.nextMileage} onChange={e => set('nextMileage', e.target.value.replace(/[^\d]/g, ''))} placeholder={selectedVehicle ? selectedVehicle.mileage + 10000 : ''} /></div>
       </div>
 
       <div className="form-group">
-        <label className="form-label">Notes</label>
+        <label className="form-label">{t('maint.notes')}</label>
         <textarea className="form-textarea" value={form.notes} onChange={e => set('notes', e.target.value)} />
       </div>
 
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'var(--bg-2)', borderRadius: 8, cursor: 'pointer', fontSize: 13 }}>
         <input type="checkbox" checked={form.setInMaintenance} onChange={e => set('setInMaintenance', e.target.checked)} />
-        Marquer le véhicule "En maintenance" maintenant
+        {t('maint.setStatus')}
       </label>
     </Modal>
   );

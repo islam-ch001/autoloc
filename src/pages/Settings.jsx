@@ -1,10 +1,12 @@
 import { Building2, Save, Image as ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSettings } from '../context/SettingsContext';
+import { useT } from '../context/LanguageContext';
 import { readAndResizeImage } from '../utils/imageUpload';
 
 export default function Settings() {
   const { settings, save } = useSettings();
+  const { t } = useT();
   const [form, setForm] = useState(settings);
   const [saved, setSaved] = useState(false);
 
@@ -45,22 +47,22 @@ export default function Settings() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Paramètres</h1>
-          <p className="page-subtitle">Configuration de votre agence</p>
+          <h1 className="page-title">{t('set.title')}</h1>
+          <p className="page-subtitle">{t('set.subtitle')}</p>
         </div>
         <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-          <Save size={16} /> {saving ? 'Enregistrement…' : (saved ? 'Enregistré ✓' : 'Enregistrer')}
+          <Save size={16} /> {saving ? t('action.saving') : (saved ? t('set.saved') : t('action.save'))}
         </button>
       </div>
 
       <div className="grid-2">
         <div className="card">
           <div className="card-header">
-            <span className="card-title"><Building2 size={16} style={{ display: 'inline', marginRight: 8 }} />Informations agence</span>
+            <span className="card-title"><Building2 size={16} style={{ display: 'inline', marginRight: 8 }} />{t('set.agencyInfo')}</span>
           </div>
           <div className="card-body">
             <div className="form-group">
-              <label className="form-label">Logo de l'agence</label>
+              <label className="form-label">{t('set.logo')}</label>
               <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                 <div style={{
                   width: 72, height: 72, borderRadius: 12, overflow: 'hidden', flexShrink: 0,
@@ -73,50 +75,50 @@ export default function Settings() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className="btn" style={{ display: 'inline-flex', cursor: 'pointer' }}>
-                    <ImageIcon size={14} /> {form.logo ? 'Changer' : 'Choisir un logo'}
+                    <ImageIcon size={14} /> {form.logo ? t('action.change') : t('action.choose')}
                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogo} />
                   </label>
                   {form.logo && (
                     <button type="button" className="btn" style={{ marginLeft: 8 }} onClick={() => set('logo', '')}>
-                      Supprimer
+                      {t('action.delete')}
                     </button>
                   )}
                   <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6 }}>
-                    Stocké localement (carré 256×256). Affiché en haut de la barre latérale.
+                    {t('set.logoHint')}
                   </div>
                   {logoErr && <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>{logoErr}</div>}
                 </div>
               </div>
             </div>
             <div className="form-group">
-              <label className="form-label">Nom de l'agence (affiché à côté du logo)</label>
+              <label className="form-label">{t('set.agencyName')}</label>
               <input className="form-input" value={form.agencyName} onChange={e => set('agencyName', e.target.value)} placeholder="AutoLoc" />
             </div>
             <div className="form-group">
-              <label className="form-label">Sous-titre (sous le logo)</label>
+              <label className="form-label">{t('set.tagline')}</label>
               <input className="form-input" value={form.tagline} onChange={e => set('tagline', e.target.value)} placeholder="Location de véhicules" />
             </div>
-            <div className="form-group"><label className="form-label">Adresse</label><input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} /></div>
-            <div className="form-group"><label className="form-label">Téléphone</label><input className="form-input" value={form.phone} onChange={e => set('phone', e.target.value)} /></div>
-            <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">{t('set.address')}</label><input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">{t('set.phone')}</label><input className="form-input" value={form.phone} onChange={e => set('phone', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">{t('set.email')}</label><input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} /></div>
           </div>
         </div>
 
         <div className="card">
           <div className="card-header">
-            <span className="card-title">Règles de facturation</span>
+            <span className="card-title">{t('set.billingRules')}</span>
           </div>
           <div className="card-body">
             <div className="form-group">
-              <label className="form-label">Caution par défaut (DA)</label>
+              <label className="form-label">{t('set.defaultDeposit')}</label>
               <input className="form-input" type="number" value={form.deposit} onChange={e => set('deposit', +e.target.value)} />
             </div>
             <div className="form-group">
-              <label className="form-label">Pénalité de retard (%/jour)</label>
+              <label className="form-label">{t('set.lateFee')}</label>
               <input className="form-input" type="number" value={form.lateFeePct} onChange={e => set('lateFeePct', +e.target.value)} />
             </div>
             <div className="form-group">
-              <label className="form-label">Devise</label>
+              <label className="form-label">{t('set.currency')}</label>
               <select className="form-select" value={form.currency} onChange={e => set('currency', e.target.value)}>
                 <option>DA</option>
                 <option>EUR</option>
@@ -129,7 +131,7 @@ export default function Settings() {
 
       <div className="card" style={{ marginTop: 16 }}>
         <div className="card-header">
-          <span className="card-title">À propos du système</span>
+          <span className="card-title">{t('set.about')}</span>
         </div>
         <div className="card-body">
           <div style={{ display: 'flex', gap: 40 }}>

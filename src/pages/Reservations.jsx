@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Search, Eye, Edit, FileText, CalendarDays, DollarSign, Printer, Play, Pencil, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useT } from '../context/LanguageContext';
 import Modal from '../components/Modal';
 import InvoiceModal from '../components/InvoiceModal';
 import ClientAutocomplete from '../components/ClientAutocomplete';
@@ -8,14 +9,15 @@ import { differenceInDays, format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 const statusMap = {
-  active: { cls: 'badge-success', label: 'Active' },
-  upcoming: { cls: 'badge-accent', label: 'À venir' },
-  completed: { cls: 'badge-neutral', label: 'Terminée' },
-  cancelled: { cls: 'badge-danger', label: 'Annulée' },
+  active: { cls: 'badge-success', label: 'res.active' },
+  upcoming: { cls: 'badge-accent', label: 'res.upcoming' },
+  completed: { cls: 'badge-neutral', label: 'res.completed' },
+  cancelled: { cls: 'badge-danger', label: 'res.cancelled' },
 };
 
 export default function Reservations() {
   const { reservations, vehicles, clients, addReservation, updateReservation, removeReservation } = useApp();
+  const { t } = useT();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Tous');
   const [showAdd, setShowAdd] = useState(false);
@@ -44,21 +46,21 @@ export default function Reservations() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Réservations</h1>
-          <p className="page-subtitle">{reservations.length} réservations au total</p>
+          <h1 className="page-title">{t('res.title')}</h1>
+          <p className="page-subtitle">{reservations.length} {t('res.totalCount')}</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-          <Plus size={16} /> Nouvelle réservation
+          <Plus size={16} /> {t('res.addNew')}
         </button>
       </div>
 
       {/* KPIs */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
-          { icon: <FileText size={14} />, label: 'Actives', value: reservations.filter(r => r.status === 'active').length, color: 'var(--success)' },
-          { icon: <CalendarDays size={14} />, label: 'À venir', value: reservations.filter(r => r.status === 'upcoming').length, color: 'var(--accent)' },
-          { icon: <DollarSign size={14} />, label: 'Encaissé', value: totalRevenue.toLocaleString('fr-DZ') + ' DA', color: 'var(--primary)' },
-          { icon: <DollarSign size={14} />, label: 'Reste à payer', value: pendingPayment.toLocaleString('fr-DZ') + ' DA', color: 'var(--danger)' },
+          { icon: <FileText size={14} />, label: t('client.actives'), value: reservations.filter(r => r.status === 'active').length, color: 'var(--success)' },
+          { icon: <CalendarDays size={14} />, label: t('res.upcoming'), value: reservations.filter(r => r.status === 'upcoming').length, color: 'var(--accent)' },
+          { icon: <DollarSign size={14} />, label: t('res.encaisse'), value: totalRevenue.toLocaleString('fr-DZ') + ' DA', color: 'var(--primary)' },
+          { icon: <DollarSign size={14} />, label: t('res.remaining'), value: pendingPayment.toLocaleString('fr-DZ') + ' DA', color: 'var(--danger)' },
         ].map(s => (
           <div key={s.label} style={{ padding: '10px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
             <span style={{ color: s.color }}>{s.icon}</span>
@@ -72,12 +74,12 @@ export default function Reservations() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <div className="search-bar" style={{ flex: 1, minWidth: 260 }}>
           <Search size={16} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Chercher par client ou véhicule..." />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('res.searchPh')} />
         </div>
         <div className="filter-group">
           {['Tous', 'active', 'upcoming', 'completed', 'cancelled'].map(s => (
             <button key={s} className={`filter-btn ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>
-              {s === 'Tous' ? 'Tous' : statusMap[s]?.label}
+              {s === 'Tous' ? t('action.all') : t(statusMap[s]?.label)}
             </button>
           ))}
         </div>
@@ -89,13 +91,13 @@ export default function Reservations() {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Client</th>
-                <th>Véhicule</th>
+                <th>{t('res.client')}</th>
+                <th>{t('res.vehicle')}</th>
                 <th>Période</th>
-                <th>Durée</th>
-                <th>Total</th>
-                <th>Payé</th>
-                <th>Statut</th>
+                <th>{t('res.duration')}</th>
+                <th>{t('res.total')}</th>
+                <th>{t('res.paid')}</th>
+                <th>{t('veh.status')}</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -128,12 +130,12 @@ export default function Reservations() {
                       </div>
                       {remaining > 0 && <div style={{ fontSize: 11, color: 'var(--danger)' }}>-{remaining.toLocaleString('fr-DZ')} DA</div>}
                     </td>
-                    <td><span className={`badge ${statusMap[r.status]?.cls}`}>{statusMap[r.status]?.label}</span></td>
+                    <td><span className={`badge ${statusMap[r.status]?.cls}`}>{t(statusMap[r.status]?.label)}</span></td>
                     <td>
                       <div className="actions-cell" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <button className="action-btn" title="Voir" onClick={() => setSelected(r)}><Eye size={14} /></button>
+                        <button className="action-btn" title={t('action.view')} onClick={() => setSelected(r)}><Eye size={14} /></button>
                         <button
-                          title="Imprimer la facture"
+                          title={t('res.invoice')}
                           onClick={() => setInvoice(r)}
                           style={{
                             display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -143,20 +145,20 @@ export default function Reservations() {
                             fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
                           }}
                         >
-                          <Printer size={12} /> Facture
+                          <Printer size={12} /> {t('res.invoice')}
                         </button>
                         {r.status === 'upcoming' && (
                           <>
-                            <button className="action-btn" title="Modifier" onClick={() => setEditing(r)}>
+                            <button className="action-btn" title={t('action.edit')} onClick={() => setEditing(r)}>
                               <Pencil size={14} style={{ color: 'var(--accent)' }} />
                             </button>
-                            <button className="action-btn" title="Activer (démarrer la location)" onClick={() => updateReservation(r.id, { status: 'active' })}>
+                            <button className="action-btn" title={t('action.activate')} onClick={() => updateReservation(r.id, { status: 'active' })}>
                               <Play size={14} style={{ color: 'var(--success)' }} />
                             </button>
                           </>
                         )}
                         {(r.status === 'upcoming' || r.status === 'cancelled') && (
-                          <button className="action-btn" title="Supprimer" onClick={() => handleDelete(r)}>
+                          <button className="action-btn" title={t('action.delete')} onClick={() => handleDelete(r)}>
                             <Trash2 size={14} style={{ color: 'var(--danger)' }} />
                           </button>
                         )}
@@ -187,6 +189,7 @@ export default function Reservations() {
 
 function EditReservationModal({ reservation: r, onClose, onSave }) {
   const { clients, vehicles } = useApp();
+  const { t } = useT();
   const client  = clients.find(c => c.id === r.clientId);
   const vehicle = vehicles.find(v => v.id === r.vehicleId);
 
@@ -228,9 +231,9 @@ function EditReservationModal({ reservation: r, onClose, onSave }) {
   return (
     <Modal title={`Modifier la réservation #${r.id}`} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
         <button className="btn btn-primary" disabled={saving} onClick={handleSubmit}>
-          {saving ? 'Enregistrement…' : 'Enregistrer'}
+          {saving ? t('action.saving') : t('action.save')}
         </button>
       </>
     }>
@@ -240,8 +243,8 @@ function EditReservationModal({ reservation: r, onClose, onSave }) {
       </div>
 
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Date de départ *</label><input className="form-input" type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Date de retour *</label><input className="form-input" type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('res.startDate') + ' *'}</label><input className="form-input" type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('res.endDate') + ' *'}</label><input className="form-input" type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} /></div>
       </div>
 
       {days > 0 && (
@@ -252,25 +255,26 @@ function EditReservationModal({ reservation: r, onClose, onSave }) {
       )}
 
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Mode de paiement</label>
+        <div className="form-group"><label className="form-label">{t('res.payment')}</label>
           <select className="form-select" value={form.paymentMethod} onChange={e => set('paymentMethod', e.target.value)}>
             {['Espèces', 'CCP', 'Virement', 'Carte bancaire', 'Chèque'].map(m => <option key={m}>{m}</option>)}
           </select>
         </div>
-        <div className="form-group"><label className="form-label">Caution (DA)</label><input className="form-input" type="number" value={form.deposit} onChange={e => set('deposit', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('res.deposit') + ' (DA)'}</label><input className="form-input" type="number" value={form.deposit} onChange={e => set('deposit', e.target.value)} /></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Avance payée (DA)</label><input className="form-input" type="number" value={form.paidAmount} onChange={e => set('paidAmount', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Km autorisés</label><input className="form-input" type="number" value={form.kmLimit} onChange={e => set('kmLimit', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('res.paid') + ' (DA)'}</label><input className="form-input" type="number" value={form.paidAmount} onChange={e => set('paidAmount', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('res.kmAllowed')}</label><input className="form-input" type="number" value={form.kmLimit} onChange={e => set('kmLimit', e.target.value)} /></div>
       </div>
-      <div className="form-group"><label className="form-label">Prix km supplémentaire (DA)</label><input className="form-input" type="number" value={form.extraKmPrice} onChange={e => set('extraKmPrice', e.target.value)} /></div>
-      <div className="form-group"><label className="form-label">Notes</label><textarea className="form-textarea" value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">{t('res.kmExtra') + ' (DA)'}</label><input className="form-input" type="number" value={form.extraKmPrice} onChange={e => set('extraKmPrice', e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">{t('res.notes')}</label><textarea className="form-textarea" value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
     </Modal>
   );
 }
 
 function AddReservationModal({ onClose }) {
   const { clients, vehicles, addReservation } = useApp();
+  const { t } = useT();
   const [form, setForm] = useState({ clientId: '', vehicleId: '', startDate: '', endDate: '', paymentMethod: 'Espèces', deposit: '', paidAmount: '', kmLimit: 200, extraKmPrice: 50, notes: '' });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -294,28 +298,28 @@ function AddReservationModal({ onClose }) {
   };
 
   return (
-    <Modal title="Nouvelle réservation" onClose={onClose} footer={
+    <Modal title={t('res.addNew')} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
         <button className="btn btn-primary" onClick={handleSubmit}>Créer</button>
       </>
     }>
       <div className="form-group">
-        <label className="form-label">Client *</label>
+        <label className="form-label">{t('res.client') + ' *'}</label>
         <ClientAutocomplete clients={clients} value={form.clientId} onChange={(id) => set('clientId', id)} />
       </div>
       <div className="form-group">
-        <label className="form-label">Véhicule *</label>
+        <label className="form-label">{t('res.vehicle') + ' *'}</label>
         <select className="form-select" value={form.vehicleId} onChange={e => set('vehicleId', e.target.value)}>
-          <option value="">-- Sélectionner --</option>
+          <option value="">{t('action.select')}</option>
           {vehicles.filter(v => v.status === 'available').map(v => (
             <option key={v.id} value={v.id}>{v.brand} {v.model} — {v.pricePerDay.toLocaleString()} DA/j</option>
           ))}
         </select>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Date de départ *</label><input className="form-input" type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Date de retour *</label><input className="form-input" type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('res.startDate') + ' *'}</label><input className="form-input" type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('res.endDate') + ' *'}</label><input className="form-input" type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} /></div>
       </div>
       {total > 0 && (
         <div style={{ padding: '12px 16px', background: 'var(--primary-soft)', borderRadius: 8, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -330,11 +334,11 @@ function AddReservationModal({ onClose }) {
         </div>
         <div className="form-row" style={{ marginBottom: 0 }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Km autorisés (total)</label>
+            <label className="form-label">{t('res.kmAllowed')}</label>
             <input className="form-input" type="number" value={form.kmLimit} onChange={e => set('kmLimit', e.target.value)} placeholder="200" />
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Frais par km suppl. (DA)</label>
+            <label className="form-label">{t('res.kmExtra') + ' (DA)'}</label>
             <input className="form-input" type="number" value={form.extraKmPrice} onChange={e => set('extraKmPrice', e.target.value)} placeholder="50" />
           </div>
         </div>
@@ -347,21 +351,22 @@ function AddReservationModal({ onClose }) {
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Mode de paiement</label>
+          <label className="form-label">{t('res.payment')}</label>
           <select className="form-select" value={form.paymentMethod} onChange={e => set('paymentMethod', e.target.value)}>
             {['Espèces', 'Virement', 'CCP', 'Chèque'].map(m => <option key={m}>{m}</option>)}
           </select>
         </div>
-        <div className="form-group"><label className="form-label">Caution (DA)</label><input className="form-input" type="number" value={form.deposit} onChange={e => set('deposit', e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('res.deposit') + ' (DA)'}</label><input className="form-input" type="number" value={form.deposit} onChange={e => set('deposit', e.target.value)} /></div>
       </div>
-      <div className="form-group"><label className="form-label">Avance payée (DA)</label><input className="form-input" type="number" value={form.paidAmount} onChange={e => set('paidAmount', e.target.value)} /></div>
-      <div className="form-group"><label className="form-label">Notes</label><textarea className="form-textarea" value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">{t('res.paid') + ' (DA)'}</label><input className="form-input" type="number" value={form.paidAmount} onChange={e => set('paidAmount', e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">{t('res.notes')}</label><textarea className="form-textarea" value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
     </Modal>
   );
 }
 
 function ReservationDetailModal({ reservation: r, onClose, onPrint }) {
   const { clients, vehicles } = useApp();
+  const { t } = useT();
   const client = clients.find(c => c.id === r.clientId);
   const vehicle = vehicles.find(v => v.id === r.vehicleId);
   const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
@@ -369,38 +374,38 @@ function ReservationDetailModal({ reservation: r, onClose, onPrint }) {
   return (
     <Modal title={`Réservation #${r.id}`} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Fermer</button>
+        <button className="btn" onClick={onClose}>{t('action.close')}</button>
         <button className="btn btn-primary" onClick={onPrint}>
-          <Printer size={14} /> Imprimer la facture
+          <Printer size={14} /> {t('res.invoice')}
         </button>
       </>
     }>
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-        <span className={`badge ${statusMap[r.status]?.cls}`}>{statusMap[r.status]?.label}</span>
+        <span className={`badge ${statusMap[r.status]?.cls}`}>{t(statusMap[r.status]?.label)}</span>
         <span className="badge badge-neutral">{r.paymentMethod || 'Non défini'}</span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-        <InfoBox label="Client" value={`${client?.firstName} ${client?.lastName}`} sub={client?.phone} />
-        <InfoBox label="Véhicule" value={`${vehicle?.brand} ${vehicle?.model}`} sub={vehicle?.plate} />
-        <InfoBox label="Départ" value={format(parseISO(r.startDate), 'dd MMMM yyyy', { locale: fr })} />
-        <InfoBox label="Retour" value={format(parseISO(r.endDate), 'dd MMMM yyyy', { locale: fr })} />
-        <InfoBox label="Durée" value={`${days} jours`} />
-        <InfoBox label="Caution" value={`${(r.deposit || 0).toLocaleString('fr-DZ')} DA`} />
-        {r.kmLimit && <InfoBox label="Km autorisés" value={`${r.kmLimit.toLocaleString()} km`} />}
-        {r.extraKmPrice && <InfoBox label="Frais km suppl." value={`${r.extraKmPrice.toLocaleString()} DA/km`} />}
+        <InfoBox label={t('res.client')} value={`${client?.firstName} ${client?.lastName}`} sub={client?.phone} />
+        <InfoBox label={t('res.vehicle')} value={`${vehicle?.brand} ${vehicle?.model}`} sub={vehicle?.plate} />
+        <InfoBox label={t('res.startDate')} value={format(parseISO(r.startDate), 'dd MMMM yyyy', { locale: fr })} />
+        <InfoBox label={t('res.endDate')} value={format(parseISO(r.endDate), 'dd MMMM yyyy', { locale: fr })} />
+        <InfoBox label={t('res.duration')} value={`${days} jours`} />
+        <InfoBox label={t('res.deposit')} value={`${(r.deposit || 0).toLocaleString('fr-DZ')} DA`} />
+        {r.kmLimit && <InfoBox label={t('res.kmAllowed')} value={`${r.kmLimit.toLocaleString()} km`} />}
+        {r.extraKmPrice && <InfoBox label={t('res.kmExtra')} value={`${r.extraKmPrice.toLocaleString()} DA/km`} />}
       </div>
 
       <div style={{ padding: '14px 16px', background: 'var(--surface-2)', borderRadius: 10, marginBottom: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13, color: 'var(--text-2)' }}>
-          <span>Total</span><strong style={{ color: 'var(--text)' }}>{r.totalPrice.toLocaleString('fr-DZ')} DA</strong>
+          <span>{t('res.total')}</span><strong style={{ color: 'var(--text)' }}>{r.totalPrice.toLocaleString('fr-DZ')} DA</strong>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-2)' }}>
-          <span>Payé</span><strong style={{ color: 'var(--success)' }}>{r.paidAmount.toLocaleString('fr-DZ')} DA</strong>
+          <span>{t('res.paid')}</span><strong style={{ color: 'var(--success)' }}>{r.paidAmount.toLocaleString('fr-DZ')} DA</strong>
         </div>
         {r.totalPrice - r.paidAmount > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: 8, color: 'var(--danger)', fontWeight: 600 }}>
-            <span>Reste à payer</span><span>{(r.totalPrice - r.paidAmount).toLocaleString('fr-DZ')} DA</span>
+            <span>{t('res.remaining')}</span><span>{(r.totalPrice - r.paidAmount).toLocaleString('fr-DZ')} DA</span>
           </div>
         )}
       </div>

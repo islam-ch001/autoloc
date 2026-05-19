@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useT } from '../context/LanguageContext';
 
 export default function Login() {
   const { login, register } = useAuth();
+  const { t } = useT();
   const navigate = useNavigate();
   const [mode, setMode]         = useState('login'); // 'login' | 'signup'
   const [name, setName]         = useState('');
@@ -45,23 +47,21 @@ export default function Login() {
         <div style={styles.tabs}>
           <button type="button" onClick={() => { setMode('login'); setError(null); }}
             style={{ ...styles.tab, ...(mode === 'login' ? styles.tabActive : {}) }}>
-            Connexion
+            {t('auth.login')}
           </button>
           <button type="button" onClick={() => { setMode('signup'); setError(null); }}
             style={{ ...styles.tab, ...(mode === 'signup' ? styles.tabActive : {}) }}>
-            Inscription
+            {t('auth.signup')}
           </button>
         </div>
 
         <p style={styles.subtitle}>
-          {isSignup
-            ? '🚀 Créez votre espace AutoLoc privé — votre flotte, vos clients, isolés.'
-            : 'Connectez-vous à votre espace privé.'}
+          {isSignup ? t('auth.createSpace') : t('auth.welcomeBack')}
         </p>
 
         {isSignup && (
           <div style={styles.field}>
-            <label style={styles.label}>Nom complet</label>
+            <label style={styles.label}>{t('auth.name')}</label>
             <div style={styles.inputWrap}>
               <User size={16} style={styles.icon} />
               <input type="text" required value={name} onChange={e => setName(e.target.value)}
@@ -71,7 +71,7 @@ export default function Login() {
         )}
 
         <div style={styles.field}>
-          <label style={styles.label}>Email</label>
+          <label style={styles.label}>{t('auth.email')}</label>
           <div style={styles.inputWrap}>
             <Mail size={16} style={styles.icon} />
             <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
@@ -80,7 +80,7 @@ export default function Login() {
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Mot de passe{isSignup && ' (min. 6 caractères)'}</label>
+          <label style={styles.label}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}</label>
           <div style={styles.inputWrap}>
             <Lock size={16} style={styles.icon} />
             <input type="password" required minLength={isSignup ? 6 : undefined} value={password} onChange={e => setPassword(e.target.value)}
@@ -91,13 +91,13 @@ export default function Login() {
         {error && <div style={styles.error}>{error}</div>}
 
         <button type="submit" disabled={loading} style={{ ...styles.button, opacity: loading ? 0.7 : 1 }}>
-          {loading ? <><Loader2 size={16} className="spin" /> {isSignup ? 'Création…' : 'Connexion…'}</> : (isSignup ? 'Créer mon compte' : 'Se connecter')}
+          {loading ? <><Loader2 size={16} className="spin" /> {isSignup ? t('auth.creating') : t('auth.signingIn')}</> : (isSignup ? t('auth.createAccount') : t('auth.signIn'))}
         </button>
 
         <p style={styles.footer}>
           {isSignup
-            ? <>Déjà un compte ? <a onClick={() => setMode('login')} style={styles.link}>Se connecter</a></>
-            : <>Pas encore de compte ? <a onClick={() => setMode('signup')} style={styles.link}>S'inscrire gratuitement</a></>}
+            ? <>{t('auth.haveAccount')} <a onClick={() => setMode('login')} style={styles.link}>{t('auth.signIn')}</a></>
+            : <>{t('auth.noAccount')} <a onClick={() => setMode('signup')} style={styles.link}>{t('auth.signupFree')}</a></>}
         </p>
       </form>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } } .spin { animation: spin 0.8s linear infinite; }`}</style>

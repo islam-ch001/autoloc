@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { Plus, Search, Car, Fuel, Settings2, Users, Wrench, Eye, Trash2, AlertTriangle, CheckCircle, Image as ImageIcon, Pencil } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useT } from '../context/LanguageContext';
 import Modal from '../components/Modal';
 import { readAndResizeImage } from '../utils/imageUpload';
 import { CAR_BRANDS, BRAND_LIST } from '../data/carBrands';
 
 const statusMap = {
-  available: { cls: 'badge-success', label: 'Disponible' },
-  rented: { cls: 'badge-accent', label: 'En location' },
-  maintenance: { cls: 'badge-warning', label: 'Maintenance' },
+  available: { cls: 'badge-success', tkey: 'vehicle.available' },
+  rented: { cls: 'badge-accent', tkey: 'vehicle.rented' },
+  maintenance: { cls: 'badge-warning', tkey: 'vehicle.maintenance' },
 };
 
 
 export default function Vehicles() {
   const { vehicles, reservations, addVehicle, patchVehicle, removeVehicle } = useApp();
+  const { t } = useT();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Tous');
   const [showAdd, setShowAdd] = useState(false);
@@ -51,11 +53,11 @@ export default function Vehicles() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Véhicules</h1>
-          <p className="page-subtitle">{vehicles.length} véhicules dans la flotte</p>
+          <h1 className="page-title">{t('veh.title')}</h1>
+          <p className="page-subtitle">{vehicles.length} {t('veh.inFleet')}</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-          <Plus size={16} /> Ajouter un véhicule
+          <Plus size={16} /> {t('veh.addNew')}
         </button>
       </div>
 
@@ -63,12 +65,12 @@ export default function Vehicles() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <div className="search-bar" style={{ flex: 1, minWidth: 240 }}>
           <Search size={16} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Chercher par marque, modèle, immatriculation..." />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('veh.searchPh')} />
         </div>
         <div className="filter-group">
           {['Tous', 'available', 'rented', 'maintenance'].map(s => (
             <button key={s} className={`filter-btn ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>
-              {s === 'Tous' ? 'Tous' : statusMap[s]?.label}
+              {s === 'Tous' ? t('action.all') : t(statusMap[s]?.tkey)}
             </button>
           ))}
         </div>
@@ -77,11 +79,11 @@ export default function Vehicles() {
       {/* Stats bar */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         {[
-          { label: 'Disponibles', count: vehicles.filter(v => v.status === 'available').length, color: 'var(--success)' },
-          { label: 'En location', count: vehicles.filter(v => v.status === 'rented').length, color: 'var(--accent)' },
-          { label: 'Maintenance', count: vehicles.filter(v => v.status === 'maintenance').length, color: 'var(--warning)' },
+          { key: 'available', label: t('vehicle.available'), count: vehicles.filter(v => v.status === 'available').length, color: 'var(--success)' },
+          { key: 'rented', label: t('vehicle.rented'), count: vehicles.filter(v => v.status === 'rented').length, color: 'var(--accent)' },
+          { key: 'maintenance', label: t('vehicle.maintenance'), count: vehicles.filter(v => v.status === 'maintenance').length, color: 'var(--warning)' },
         ].map(s => (
-          <div key={s.label} style={{ padding: '8px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+          <div key={s.key} style={{ padding: '8px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, display: 'inline-block' }} />
             <span style={{ color: 'var(--text-3)' }}>{s.label}</span>
             <strong>{s.count}</strong>
@@ -91,7 +93,7 @@ export default function Vehicles() {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="card"><div style={{ padding: 40, textAlign: 'center', color: 'var(--text-3)' }}>Aucun véhicule trouvé</div></div>
+        <div className="card"><div style={{ padding: 40, textAlign: 'center', color: 'var(--text-3)' }}>{t('veh.notFound')}</div></div>
       ) : (
         <div className="vehicle-grid">
           {filtered.map(v => (
@@ -140,6 +142,7 @@ export default function Vehicles() {
 }
 
 function VehicleCard({ vehicle: v, onView, onEdit, onDelete, onMarkAvailable }) {
+  const { t } = useT();
   const s = statusMap[v.status];
   return (
     <div className="vehicle-card" style={{ borderColor: v.status === 'maintenance' ? 'rgba(245,158,11,0.3)' : undefined }}>
@@ -155,10 +158,10 @@ function VehicleCard({ vehicle: v, onView, onEdit, onDelete, onMarkAvailable }) 
         filter: v.status === 'maintenance' && v.image ? 'brightness(0.7) saturate(0.6)' : undefined,
       }}>
         {!v.image && <Car size={42} style={{ color: 'var(--text-3)', opacity: 0.5 }} />}
-        <span className={`badge ${s.cls}`} style={{ position: 'absolute', top: 12, right: 12 }}>{s.label}</span>
+        <span className={`badge ${s.cls}`} style={{ position: 'absolute', top: 12, right: 12 }}>{t(s.tkey)}</span>
         <button
           onClick={onEdit}
-          title="Modifier ce véhicule"
+          title={t('action.edit')}
           style={{
             position: 'absolute', top: 12, left: 50,
             width: 30, height: 30, borderRadius: 8,
@@ -175,7 +178,7 @@ function VehicleCard({ vehicle: v, onView, onEdit, onDelete, onMarkAvailable }) 
         </button>
         <button
           onClick={onDelete}
-          title="Supprimer ce véhicule"
+          title={t('action.delete')}
           style={{
             position: 'absolute', top: 12, left: 12,
             width: 30, height: 30, borderRadius: 8,
@@ -200,7 +203,7 @@ function VehicleCard({ vehicle: v, onView, onEdit, onDelete, onMarkAvailable }) 
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--warning)' }}>
-              <Wrench size={13} /> En maintenance
+              <Wrench size={13} /> {t('vehicle.maintenance')}
             </div>
             <button
               onClick={onMarkAvailable}
@@ -225,7 +228,7 @@ function VehicleCard({ vehicle: v, onView, onEdit, onDelete, onMarkAvailable }) 
                 e.currentTarget.style.boxShadow = '0 4px 14px rgba(34,197,94,0.45), 0 0 0 1px rgba(255,255,255,0.1) inset';
               }}
             >
-              <CheckCircle size={14} /> Rendre disponible
+              <CheckCircle size={14} /> {t('action.makeAvailable')}
             </button>
           </div>
         )}
@@ -264,24 +267,25 @@ function VehicleCard({ vehicle: v, onView, onEdit, onDelete, onMarkAvailable }) 
       </div>
       <div className="vehicle-footer">
         <div className="vehicle-price">{v.pricePerDay.toLocaleString('fr-DZ')} DA <span>/ jour</span></div>
-        <button className="btn btn-sm" onClick={onView}><Eye size={14} /> Détails</button>
+        <button className="btn btn-sm" onClick={onView}><Eye size={14} /> {t('veh.details')}</button>
       </div>
     </div>
   );
 }
 
 function DeleteConfirmModal({ vehicle: v, isRented, onClose, onConfirm }) {
+  const { t } = useT();
   return (
-    <Modal title="Supprimer le véhicule" onClose={onClose} footer={
+    <Modal title={t('veh.delete.title')} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
         {!isRented && (
           <button
             className="btn"
             style={{ background: 'var(--danger)', color: 'white', border: 'none' }}
             onClick={onConfirm}
           >
-            <Trash2 size={14} /> Supprimer définitivement
+            <Trash2 size={14} /> {t('action.delete')}
           </button>
         )}
       </>
@@ -322,14 +326,15 @@ function DeleteConfirmModal({ vehicle: v, isRented, onClose, onConfirm }) {
 }
 
 function VehicleDetailModal({ vehicle: v, onClose }) {
+  const { t } = useT();
   const s = statusMap[v.status];
   return (
     <Modal title={`${v.brand} ${v.model}`} onClose={onClose}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         {[
-          ['Marque', v.brand], ['Modèle', v.model], ['Année', v.year], ['Catégorie', v.category],
-          ['Carburant', v.fuel], ['Transmission', v.transmission], ['Kilométrage', `${v.mileage.toLocaleString()} km`],
-          ['Immatriculation', v.plate],
+          [t('veh.brand'), v.brand], [t('veh.model'), v.model], [t('veh.year'), v.year], [t('veh.category'), v.category],
+          [t('veh.fuel'), v.fuel], [t('veh.transmission'), v.transmission], [t('veh.mileage'), `${v.mileage.toLocaleString()} km`],
+          [t('veh.plate'), v.plate],
         ].map(([label, value]) => (
           <div key={label} style={{ background: 'var(--bg-2)', borderRadius: 8, padding: '10px 14px' }}>
             <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, marginBottom: 4 }}>{label}</div>
@@ -350,13 +355,14 @@ function VehicleDetailModal({ vehicle: v, onClose }) {
         </div>
       )}
       <div style={{ marginTop: 16 }}>
-        <span className={`badge ${s.cls}`}>Statut: {s.label}</span>
+        <span className={`badge ${s.cls}`}>{t('veh.status')}: {t(s.tkey)}</span>
       </div>
     </Modal>
   );
 }
 
 function AddVehicleModal({ onClose, onAdd }) {
+  const { t } = useT();
   const [form, setForm] = useState({ brand: '', model: '', year: new Date().getFullYear(), category: 'Berline', fuel: 'Essence', transmission: 'Manuelle', seats: 5, pricePerDay: '', plate: '', mileage: 0, image: '', color: '#000000' });
   const [photoErr, setPhotoErr] = useState(null);
   const [photoLoading, setPhotoLoading] = useState(false);
@@ -376,14 +382,14 @@ function AddVehicleModal({ onClose, onAdd }) {
   };
 
   return (
-    <Modal title="Ajouter un véhicule" onClose={onClose} footer={
+    <Modal title={t('veh.addNew')} onClose={onClose} footer={
       <>
-        <button className="btn" onClick={onClose}>Annuler</button>
-        <button className="btn btn-primary" onClick={() => onAdd(form)}>Ajouter</button>
+        <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
+        <button className="btn btn-primary" onClick={() => onAdd(form)}>{t('action.add')}</button>
       </>
     }>
       <div className="form-group">
-        <label className="form-label">Photo du véhicule (optionnel)</label>
+        <label className="form-label">{t('veh.photo')}</label>
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
           <div style={{
             width: 120, height: 80, borderRadius: 8, overflow: 'hidden',
@@ -396,12 +402,12 @@ function AddVehicleModal({ onClose, onAdd }) {
           </div>
           <div style={{ flex: 1 }}>
             <label className="btn" style={{ display: 'inline-flex', cursor: 'pointer' }}>
-              <ImageIcon size={14} /> {form.image ? 'Changer' : 'Choisir une photo'}
+              <ImageIcon size={14} /> {form.image ? t('action.change') : t('action.choose')}
               <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
             </label>
             {form.image && (
               <button type="button" className="btn" style={{ marginLeft: 8 }} onClick={() => set('image', '')}>
-                Supprimer
+                {t('action.remove')}
               </button>
             )}
             <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6 }}>
@@ -413,14 +419,14 @@ function AddVehicleModal({ onClose, onAdd }) {
       </div>
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Marque *</label>
+          <label className="form-label">{t('veh.brand')} *</label>
           <input className="form-input" list="brand-list-add" value={form.brand} onChange={e => set('brand', e.target.value)} placeholder="Cliquez pour choisir ou tapez…" />
           <datalist id="brand-list-add">
             {BRAND_LIST.map(b => <option key={b} value={b} />)}
           </datalist>
         </div>
         <div className="form-group">
-          <label className="form-label">Modèle *</label>
+          <label className="form-label">{t('veh.model')} *</label>
           <input className="form-input" list="model-list-add" value={form.model} onChange={e => set('model', e.target.value)} placeholder={CAR_BRANDS[form.brand] ? 'Cliquez pour choisir' : 'Tapez le modèle…'} />
           <datalist id="model-list-add">
             {(CAR_BRANDS[form.brand] || []).map(m => <option key={m} value={m} />)}
@@ -428,35 +434,36 @@ function AddVehicleModal({ onClose, onAdd }) {
         </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Année</label><input className="form-input" type="number" value={form.year} onChange={e => set('year', +e.target.value)} /></div>
-        <div className="form-group"><label className="form-label">Catégorie</label>
+        <div className="form-group"><label className="form-label">{t('veh.year')}</label><input className="form-input" type="number" value={form.year} onChange={e => set('year', +e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">{t('veh.category')}</label>
           <select className="form-select" value={form.category} onChange={e => set('category', e.target.value)}>
             {['Berline', 'SUV', 'Citadine', 'Premium', 'Économique', 'Utilitaire'].map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Carburant</label>
+        <div className="form-group"><label className="form-label">{t('veh.fuel')}</label>
           <select className="form-select" value={form.fuel} onChange={e => set('fuel', e.target.value)}>
             {['Essence', 'Diesel', 'Hybride', 'Électrique'].map(f => <option key={f}>{f}</option>)}
           </select>
         </div>
-        <div className="form-group"><label className="form-label">Transmission</label>
+        <div className="form-group"><label className="form-label">{t('veh.transmission')}</label>
           <select className="form-select" value={form.transmission} onChange={e => set('transmission', e.target.value)}>
             <option>Manuelle</option><option>Automatique</option>
           </select>
         </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Prix / jour (DA) *</label><input className="form-input" type="number" value={form.pricePerDay} onChange={e => set('pricePerDay', +e.target.value)} placeholder="4500" /></div>
-        <div className="form-group"><label className="form-label">Immatriculation *</label><input className="form-input" value={form.plate} onChange={e => set('plate', e.target.value)} placeholder="00125-116-16" /></div>
+        <div className="form-group"><label className="form-label">{t('veh.pricePerDay')} *</label><input className="form-input" type="number" value={form.pricePerDay} onChange={e => set('pricePerDay', +e.target.value)} placeholder="4500" /></div>
+        <div className="form-group"><label className="form-label">{t('veh.plate')} *</label><input className="form-input" value={form.plate} onChange={e => set('plate', e.target.value)} placeholder="00125-116-16" /></div>
       </div>
-      <div className="form-group"><label className="form-label">Kilométrage actuel</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', +e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">{t('veh.mileage')}</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', +e.target.value)} /></div>
     </Modal>
   );
 }
 
 function EditVehicleModal({ vehicle, onClose, onSave }) {
+  const { t } = useT();
   const [form, setForm] = useState({
     brand: vehicle.brand || '',
     model: vehicle.model || '',
