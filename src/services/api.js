@@ -48,10 +48,16 @@ async function request(method, path, body) {
     body: body ? JSON.stringify(snakeify(body)) : undefined,
   });
   if (res.status === 401) {
-    // Token expiré → forcer la déconnexion
     localStorage.removeItem('autoloc_token');
     window.location.href = '/login';
     throw new Error('Session expirée');
+  }
+  if (res.status === 402) {
+    // Abonnement requis → notifier l'app pour afficher l'écran adéquat
+    window.dispatchEvent(new CustomEvent('autoloc:subscription-required'));
+    const e = new Error('Abonnement requis');
+    e.subscriptionRequired = true;
+    throw e;
   }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Erreur serveur');
@@ -92,6 +98,11 @@ export const getMaintenance     = (vehicleId)  => request('GET', `/maintenance${
 export const createMaintenance  = (data)       => request('POST', '/maintenance', data);
 export const updateMaintenance  = (id, data)   => request('PATCH', `/maintenance/${id}`, data);
 export const deleteMaintenance  = (id)         => request('DELETE', `/maintenance/${id}`);
+
+// ─── Super-Admin ─────────────────────────────────────────────
+export const adminListUsers      = ()             => request('GET', '/admin/users');
+export const adminUpdateSubscription = (id, data) => request('PATCH', `/admin/users/${id}/subscription`, data);
+export const adminBlockUser      = (id, data)     => request('PATCH', `/admin/users/${id}/block`, data);
 
 
 // ─── Utilitaire ──────────────────────────────────────────────

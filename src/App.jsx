@@ -13,6 +13,8 @@ import Calendar from './pages/Calendar';
 import Returns from './pages/Returns';
 import Maintenance from './pages/Maintenance';
 import Settings from './pages/Settings';
+import Admin from './pages/Admin';
+import SubscriptionRequired from './pages/SubscriptionRequired';
 import Login from './pages/Login';
 import './index.css';
 
@@ -34,6 +36,14 @@ function RequireAuth({ children }) {
   const location = useLocation();
   if (loading) return <FullScreenLoader text="Vérification de la session…" />;
   if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+
+  // Vérifier l'abonnement (super-admin bypassé)
+  const isSubActive = user.isSuperAdmin
+    || (user.subscriptionStatus === 'active'
+        && user.subscriptionEnd
+        && new Date(user.subscriptionEnd) >= new Date());
+  if (!isSubActive) return <SubscriptionRequired />;
+
   return children;
 }
 
@@ -68,6 +78,7 @@ function AppShell() {
           <Route path="/calendar"     element={<Calendar />} />
           <Route path="/returns"      element={<Returns />} />
           <Route path="/maintenance"  element={<Maintenance />} />
+          <Route path="/admin"        element={<Admin />} />
           <Route path="/settings"     element={<Settings />} />
         </Routes>
       </main>

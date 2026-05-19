@@ -9,6 +9,7 @@ const returnsRouter      = require('./routes/returns');
 const dashboardRouter    = require('./routes/dashboard');
 const invoicesRouter     = require('./routes/invoices');
 const maintenanceRouter  = require('./routes/maintenance');
+const adminRouter        = require('./routes/admin');
 const authRouter         = require('./routes/auth');
 const { requireAuth }    = require('./middleware/auth');
 
@@ -46,6 +47,7 @@ app.use('/api/returns',      requireAuth, returnsRouter);
 app.use('/api/dashboard',    requireAuth, dashboardRouter);
 app.use('/api/invoices',     requireAuth, invoicesRouter);
 app.use('/api/maintenance',  requireAuth, maintenanceRouter);
+app.use('/api/admin',        adminRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date() }));

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const pool = require('../db/pool');
-const { requireAuth, signToken } = require('../middleware/auth');
+const { requireAuth, requireAuthOnly, signToken } = require('../middleware/auth');
 
 // POST /api/auth/register — inscription publique (chaque compte = espace isolé)
 router.post('/register', async (req, res) => {
@@ -60,7 +60,7 @@ router.post('/login', async (req, res) => {
 });
 
 // GET /api/auth/settings — paramètres de l'utilisateur courant
-router.get('/settings', requireAuth, async (req, res) => {
+router.get('/settings', requireAuthOnly, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT settings FROM users WHERE id = $1', [req.user.id]);
     if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
@@ -69,7 +69,7 @@ router.get('/settings', requireAuth, async (req, res) => {
 });
 
 // PUT /api/auth/settings — mise à jour des paramètres
-router.put('/settings', requireAuth, async (req, res) => {
+router.put('/settings', requireAuthOnly, async (req, res) => {
   try {
     const settings = req.body || {};
     const { rows } = await pool.query(
@@ -82,10 +82,10 @@ router.put('/settings', requireAuth, async (req, res) => {
 });
 
 // GET /api/auth/me
-router.get('/me', requireAuth, async (req, res) => {
+router.get('/me', requireAuthOnly, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT id, email, name, role, created_at, last_login_at FROM users WHERE id = $1',
+      'SELECT id, email, name, role, is_super_admin, subscription_status, subscription_end, subscription_plan, created_at, last_login_at FROM users WHERE id = $1',
       [req.user.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
