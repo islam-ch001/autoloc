@@ -204,15 +204,27 @@ function VehicleCard({ vehicle: v, onView, onEdit, onDelete, onMarkAvailable }) 
             <button
               onClick={onMarkAvailable}
               style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700,
-                background: 'var(--success)', color: 'white', border: 'none', cursor: 'pointer',
-                transition: 'opacity 0.15s',
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800,
+                background: '#22c55e', color: '#ffffff',
+                border: '2px solid #4ade80',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(34,197,94,0.45), 0 0 0 1px rgba(255,255,255,0.1) inset',
+                textShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                transition: 'transform 0.15s, box-shadow 0.15s, background 0.15s',
               }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#16a34a';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(34,197,94,0.6), 0 0 0 1px rgba(255,255,255,0.15) inset';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = '#22c55e';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(34,197,94,0.45), 0 0 0 1px rgba(255,255,255,0.1) inset';
+              }}
             >
-              <CheckCircle size={12} /> Rendre disponible
+              <CheckCircle size={14} /> Rendre disponible
             </button>
           </div>
         )}
