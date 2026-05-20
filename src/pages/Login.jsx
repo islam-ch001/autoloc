@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun, Download, ShieldCheck, Cloud, Gauge, CircleUserRound, Globe2 } from 'lucide-react';
+import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun, Download, ShieldCheck, Cloud, Gauge } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
@@ -104,34 +104,21 @@ export default function Login() {
   const isSignup = mode === 'signup';
 
   return (
-    <div className="login-shell">
-      <header className="login-nav">
-        <div className="login-brand-mini"><Car size={17} /> AutoLoc Cloud</div>
-        <nav className="login-nav-links">
-          <a>Home</a>
-          <a>Features</a>
-          <a>Pricing</a>
-          <a>Support</a>
-        </nav>
-        <div className="login-nav-actions">
-          <button
-            type="button"
-            onClick={toggle}
-            title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
-            className="login-theme-btn"
-          >
-            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-            <span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span>
-          </button>
-          <div className="login-avatar"><CircleUserRound size={21} /></div>
-        </div>
-      </header>
-
-      <div className="login-stage">
+    <div style={styles.shell}>
+      <button
+        type="button"
+        onClick={toggle}
+        title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+        style={styles.themeButton}
+      >
+        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        <span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span>
+      </button>
+      <div style={styles.stage}>
         <section style={styles.heroPanel}>
           <div style={styles.heroTopline}>
-            <Car size={14} />
-            AUTOLOC CLOUD
+            <span style={styles.heroDot} />
+            AutoLoc Cloud
           </div>
           <h1 style={styles.heroTitle}>Pilotez votre agence de location depuis le web ou votre PC.</h1>
           <p style={styles.heroText}>
@@ -148,7 +135,6 @@ export default function Login() {
             <div style={styles.featureItem}><ShieldCheck size={18} /><span>Acces controle</span></div>
             <div style={styles.featureItem}><Cloud size={18} /><span>Donnees en ligne</span></div>
             <div style={styles.featureItem}><Gauge size={18} /><span>Gestion rapide</span></div>
-            <div style={styles.featureIcon}><Globe2 size={19} /></div>
           </div>
           <div style={styles.carPlate}>
             <div style={styles.carLine} />
@@ -406,195 +392,68 @@ export default function Login() {
         )}
       </form>
       </div>
-      <div className="login-sparkle" />
-      <style>{loginCss}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } } .spin { animation: spin 0.8s linear infinite; }`}</style>
     </div>
   );
 }
 
 const styles = {
-  heroPanel: { minHeight: 470, borderRadius: 16, border: '1px solid rgba(255,255,255,0.45)', background: 'linear-gradient(135deg, rgba(255,255,255,0.84), rgba(255,255,255,0.58))', boxShadow: '0 28px 80px rgba(3,10,24,0.22)', padding: 26, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', backdropFilter: 'blur(18px)', color: '#111827' },
-  heroTopline: { display: 'inline-flex', alignItems: 'center', gap: 8, color: '#6b4f18', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 14 },
-  heroTitle: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 36, lineHeight: 1.08, letterSpacing: 0, color: '#0f172a', maxWidth: 520, margin: 0 },
-  heroText: { color: '#243244', fontSize: 13, lineHeight: 1.6, maxWidth: 500, margin: '12px 0 0' },
+  shell: { height: '100vh', background: 'radial-gradient(circle at 18% 18%, var(--surface-2) 0%, var(--bg) 52%)', display: 'grid', placeItems: 'center', padding: 20, position: 'relative', overflowY: 'auto' },
+  themeButton: {
+    position: 'fixed',
+    top: 18,
+    right: 18,
+    zIndex: 5,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 40,
+    padding: '0 14px',
+    borderRadius: 10,
+    border: '1px solid var(--border)',
+    background: 'var(--bg-2)',
+    color: 'var(--text)',
+    boxShadow: 'var(--shadow)',
+    cursor: 'pointer',
+    fontSize: 13,
+    fontWeight: 700,
+  },
+  stage: { width: '100%', maxWidth: 1120, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22, alignItems: 'stretch' },
+  heroPanel: { minHeight: 560, borderRadius: 18, border: '1px solid var(--border)', background: 'linear-gradient(145deg, var(--surface) 0%, var(--bg-2) 58%, rgba(245,158,11,0.10) 100%)', boxShadow: 'var(--shadow-lg)', padding: 34, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' },
+  heroTopline: { display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--primary)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 18 },
+  heroDot: { width: 9, height: 9, borderRadius: 999, background: 'var(--success)', boxShadow: '0 0 0 6px var(--success-soft)' },
+  heroTitle: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 42, lineHeight: 1.05, letterSpacing: 0, color: 'var(--text)', maxWidth: 560, margin: 0 },
+  heroText: { color: 'var(--text-2)', fontSize: 15, lineHeight: 1.7, maxWidth: 520, margin: '18px 0 0' },
   heroActions: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 26 },
-  downloadButton: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 38, padding: '0 14px', borderRadius: 9, background: 'linear-gradient(135deg, #183b5c, #9b7a33)', color: '#fff', textDecoration: 'none', fontWeight: 800, fontSize: 12, boxShadow: '0 14px 30px rgba(15,23,42,0.25)' },
-  downloadMeta: { color: '#334155', fontSize: 11, fontWeight: 600 },
+  downloadButton: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 44, padding: '0 16px', borderRadius: 10, background: 'var(--primary)', color: '#0a0a0f', textDecoration: 'none', fontWeight: 800, fontSize: 13, boxShadow: '0 12px 28px var(--primary-glow)' },
+  downloadMeta: { color: 'var(--text-3)', fontSize: 12, fontWeight: 600 },
   featureGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginTop: 24 },
-  featureItem: { minHeight: 46, display: 'flex', alignItems: 'center', gap: 9, padding: '10px 12px', border: '1px solid rgba(255,255,255,0.65)', borderRadius: 10, background: 'rgba(255,255,255,0.42)', color: '#0f172a', fontSize: 11, fontWeight: 800, boxShadow: '0 12px 30px rgba(15,23,42,0.08)' },
-  featureIcon: { minHeight: 46, display: 'grid', placeItems: 'center', borderRadius: 10, color: '#0f172a' },
-  carPlate: { marginTop: 'auto', minHeight: 96, borderRadius: 12, border: '1px solid rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.52)', display: 'grid', placeItems: 'center', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7)' },
-  carLine: { position: 'absolute', left: 0, right: 0, bottom: 30, height: 2, background: 'linear-gradient(90deg, transparent, #d1992e, transparent)', opacity: 0.8 },
-  carShape: { color: '#d1992e', filter: 'drop-shadow(0 10px 22px rgba(209,153,46,0.35))' },
-  plateText: { position: 'absolute', bottom: 16, padding: '4px 14px', borderRadius: 6, background: '#fff', color: '#0f172a', fontSize: 10, fontWeight: 900, letterSpacing: '0.08em' },
-  card: { width: '100%', maxWidth: 380, justifySelf: 'center', alignSelf: 'stretch', minHeight: 470, background: 'rgba(255,255,255,0.94)', border: '1px solid rgba(255,255,255,0.75)', borderRadius: 16, padding: 34, display: 'flex', flexDirection: 'column', gap: 14, boxShadow: '0 28px 80px rgba(3,10,24,0.24)', color: '#111827' },
+  featureItem: { minHeight: 58, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', border: '1px solid var(--border)', borderRadius: 10, background: 'rgba(255,255,255,0.03)', color: 'var(--text-2)', fontSize: 12, fontWeight: 700 },
+  carPlate: { marginTop: 'auto', minHeight: 170, borderRadius: 14, border: '1px solid var(--border)', background: 'linear-gradient(180deg, var(--surface-2), var(--bg))', display: 'grid', placeItems: 'center', position: 'relative', overflow: 'hidden' },
+  carLine: { position: 'absolute', left: 0, right: 0, bottom: 42, height: 2, background: 'linear-gradient(90deg, transparent, var(--primary), transparent)', opacity: 0.8 },
+  carShape: { color: 'var(--primary)', filter: 'drop-shadow(0 18px 35px var(--primary-glow))' },
+  plateText: { position: 'absolute', bottom: 14, padding: '5px 14px', borderRadius: 7, background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em' },
+  card: { width: '100%', maxWidth: 430, justifySelf: 'center', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, padding: 36, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: 'var(--shadow-lg)' },
   logo: { display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 4 },
-  brand: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: '#172033', letterSpacing: -0.5 },
-  tabs: { display: 'flex', background: '#e7ecf2', padding: 4, borderRadius: 999, border: '1px solid #d7dee8', boxShadow: 'inset 0 1px 4px rgba(15,23,42,0.08)' },
-  tab: { flex: 1, padding: '8px 12px', background: 'transparent', border: 'none', color: '#334155', fontWeight: 700, fontSize: 12, cursor: 'pointer', borderRadius: 999 },
-  tabActive: { background: 'linear-gradient(135deg, #173b60, #8f762f)', color: '#fff', boxShadow: '0 8px 18px rgba(15,23,42,0.18)' },
-  subtitle: { margin: 0, fontSize: 12, color: '#334155', textAlign: 'center', marginBottom: 4 },
+  brand: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--primary)', letterSpacing: -0.5 },
+  tabs: { display: 'flex', background: 'var(--bg)', padding: 4, borderRadius: 10, border: '1px solid var(--border)' },
+  tab: { flex: 1, padding: '8px 12px', background: 'transparent', border: 'none', color: 'var(--text-3)', fontWeight: 600, fontSize: 13, cursor: 'pointer', borderRadius: 7 },
+  tabActive: { background: 'var(--primary)', color: '#0a0a0f' },
+  subtitle: { margin: 0, fontSize: 13, color: 'var(--text-3)', textAlign: 'center', marginBottom: 4 },
   field: { display: 'flex', flexDirection: 'column', gap: 6 },
-  label: { fontSize: 11, fontWeight: 800, color: '#172033' },
+  label: { fontSize: 12, fontWeight: 600, color: 'var(--text-2)' },
   inputWrap: { position: 'relative' },
-  icon: { position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#536173' },
+  icon: { position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' },
   eyeBtn: {
     position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
     background: 'transparent', border: 'none', cursor: 'pointer',
-    color: '#536173', padding: 6, borderRadius: 6,
+    color: 'var(--text-3)', padding: 6, borderRadius: 6,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
-  input: { width: '100%', padding: '11px 14px 11px 38px', background: '#f7f9fc', border: '1px solid #dce3ed', borderRadius: 10, color: '#111827', fontSize: 13, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', boxShadow: 'inset 0 1px 4px rgba(15,23,42,0.05)' },
-  button: { padding: '12px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #173b60, #9b7a33)', color: '#fff', fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4, boxShadow: '0 14px 26px rgba(15,23,42,0.20)' },
+  input: { width: '100%', padding: '11px 14px 11px 38px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text)', fontSize: 14, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
+  button: { padding: '12px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'var(--primary)', color: '#0a0a0f', fontWeight: 700, fontSize: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 },
   error: { padding: '10px 12px', background: 'var(--danger-soft)', border: '1px solid rgba(239,68,68,0.25)', color: 'var(--danger)', borderRadius: 10, fontSize: 13 },
-  footer: { textAlign: 'center', fontSize: 12, color: '#334155', margin: 0, paddingTop: 4 },
-  link: { color: '#8f762f', textDecoration: 'none', fontWeight: 800, cursor: 'pointer' },
+  footer: { textAlign: 'center', fontSize: 12, color: 'var(--text-3)', margin: 0, paddingTop: 4 },
+  link: { color: 'var(--primary)', textDecoration: 'none', fontWeight: 600, cursor: 'pointer' },
 };
-
-const loginCss = `
-@keyframes spin { to { transform: rotate(360deg); } }
-.spin { animation: spin 0.8s linear infinite; }
-.login-shell {
-  min-height: 100vh;
-  background:
-    linear-gradient(90deg, rgba(5,16,31,0.92), rgba(7,32,60,0.76) 46%, rgba(238,232,215,0.36)),
-    radial-gradient(circle at 22% 62%, rgba(35,84,123,0.65), transparent 28%),
-    radial-gradient(circle at 82% 40%, rgba(255,245,221,0.72), transparent 24%),
-    linear-gradient(115deg, #111827 0%, #0c2744 45%, #d7d2c6 100%);
-  display: grid;
-  grid-template-rows: auto 1fr;
-  padding: 22px;
-  position: relative;
-  overflow-y: auto;
-}
-.login-shell::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    linear-gradient(90deg, transparent 0 19%, rgba(255,255,255,0.16) 19.3% 19.6%, transparent 20% 39%, rgba(255,255,255,0.10) 39.4% 39.7%, transparent 40%),
-    linear-gradient(0deg, transparent 0 60%, rgba(255,255,255,0.10) 60.4% 60.7%, transparent 61%);
-  opacity: 0.55;
-  filter: blur(1px);
-  pointer-events: none;
-}
-.login-nav {
-  width: 100%;
-  max-width: 1180px;
-  margin: 0 auto;
-  min-height: 54px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 16px;
-  position: relative;
-  z-index: 2;
-}
-.login-brand-mini {
-  color: rgba(255,255,255,0.86);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 800;
-  font-size: 12px;
-}
-.login-nav-links {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px;
-  border-radius: 999px;
-  background: rgba(12, 25, 44, 0.36);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-.login-nav-links a {
-  color: rgba(255,255,255,0.72);
-  font-size: 12px;
-  text-decoration: none;
-  padding: 8px 16px;
-  border-radius: 999px;
-}
-.login-nav-links a:first-child {
-  background: rgba(255,255,255,0.12);
-  color: #fff;
-}
-.login-nav-actions {
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-.login-theme-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 34px;
-  padding: 0 13px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.20);
-  background: rgba(19,31,47,0.45);
-  color: #fff;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  backdrop-filter: blur(12px);
-}
-.login-avatar {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.82);
-  color: #172033;
-}
-.login-stage {
-  width: 100%;
-  max-width: 940px;
-  margin: 42px auto 0;
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
-  gap: 58px;
-  align-items: stretch;
-}
-.login-sparkle {
-  position: fixed;
-  right: 28px;
-  bottom: 24px;
-  width: 48px;
-  height: 48px;
-  pointer-events: none;
-}
-.login-sparkle::before,
-.login-sparkle::after {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  background: rgba(255,255,255,0.75);
-  clip-path: polygon(50% 0, 62% 36%, 100% 50%, 62% 64%, 50% 100%, 38% 64%, 0 50%, 38% 36%);
-}
-.login-sparkle::after { inset: 18px; opacity: 0.55; transform: translate(-22px, 12px); }
-:root[data-theme="dark"] .login-shell {
-  background:
-    linear-gradient(90deg, rgba(5,16,31,0.94), rgba(7,32,60,0.80) 46%, rgba(238,232,215,0.24)),
-    radial-gradient(circle at 22% 62%, rgba(35,84,123,0.55), transparent 28%),
-    radial-gradient(circle at 82% 40%, rgba(255,245,221,0.48), transparent 24%),
-    linear-gradient(115deg, #070b13 0%, #0c2744 45%, #8d887e 100%);
-}
-@media (max-width: 920px) {
-  .login-shell { padding: 16px; }
-  .login-nav { grid-template-columns: 1fr auto; }
-  .login-nav-links { display: none; }
-  .login-stage { grid-template-columns: 1fr; gap: 18px; margin-top: 18px; max-width: 460px; }
-  .login-stage section { min-height: auto !important; }
-  .login-stage form { min-height: auto !important; }
-}
-@media (max-width: 520px) {
-  .login-brand-mini { display: none; }
-  .login-nav { grid-template-columns: 1fr; justify-items: end; }
-}
-`;
