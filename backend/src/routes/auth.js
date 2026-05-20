@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const pool = require('../db/pool');
 const { requireAuth, requireAuthOnly, signToken } = require('../middleware/auth');
-const { sendVerificationCode } = require('../lib/mailer');
+const { sendVerificationCode, sendPasswordReset } = require('../lib/mailer');
 
 // Validation email RFC-light : local@domaine.tld
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -227,6 +227,85 @@ router.put('/settings', requireAuthOnly, async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
     res.json(rows[0].settings);
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ─── MOT DE PASSE OUBLIÉ ─────────────────────────────────────
+
+// POST /api/auth/forgot-password — demande de réinitialisation
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email requis' });
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    const { rows } = await pool.query('SELECT id, name, blocked FROM users WHERE email = $1', [cleanEmail]);
+    // Sécurité : toujours retourner OK pour ne pas révéler quels emails existent
+    if (!rows.length) return res.json({ ok: true, message: 'Si cet email existe, un code a été envoyé.' });
+    const user = rows[0];
+    if (user.blocked) return res.json({ ok: true, message: 'Si cet email existe, un code a été envoyé.' });
+
+    // Nettoyer anciennes demandes
+    await pool.query('DELETE FROM password_resets WHERE email = $1 OR expires_at < NOW()', [cleanEmail]);
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const codeHash = crypto.createHash('sha256').update(code).digest('hex');
+
+    await pool.query(
+      `INSERT INTO password_resets (user_id, email, code_hash, expires_at)
+       VALUES ($1, $2, $3, NOW() + INTERVAL '10 minutes')`,
+      [user.id, cleanEmail, codeHash]
+    );
+
+    try {
+      await sendPasswordReset({ to: cleanEmail, code, name: user.name });
+    } catch (err) {
+      console.error('[forgot-password] Erreur envoi email:', err);
+      return res.status(500).json({ error: "Impossible d'envoyer l'email. Réessayez dans un instant." });
+    }
+    res.json({ ok: true, message: 'Un code a été envoyé à votre email.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/auth/reset-password — vérifier code + changer mot de passe
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) return res.status(400).json({ error: 'Email, code et nouveau mot de passe requis' });
+    if (newPassword.length < 6) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanCode = String(code).trim();
+
+    const { rows } = await pool.query(
+      'SELECT * FROM password_resets WHERE email = $1 AND used = FALSE AND expires_at > NOW() ORDER BY id DESC LIMIT 1',
+      [cleanEmail]
+    );
+    if (!rows.length) return res.status(400).json({ error: 'Code expiré ou introuvable. Recommencez la procédure.' });
+
+    const reset = rows[0];
+    if (reset.attempts >= 5) {
+      await pool.query('UPDATE password_resets SET used = TRUE WHERE id = $1', [reset.id]);
+      return res.status(429).json({ error: 'Trop de tentatives. Recommencez la procédure.' });
+    }
+
+    const codeHash = crypto.createHash('sha256').update(cleanCode).digest('hex');
+    if (codeHash !== reset.code_hash) {
+      await pool.query('UPDATE password_resets SET attempts = attempts + 1 WHERE id = $1', [reset.id]);
+      return res.status(400).json({ error: 'Code incorrect' });
+    }
+
+    // Code OK → changer le mot de passe
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [newHash, reset.user_id]);
+    await pool.query('UPDATE password_resets SET used = TRUE WHERE id = $1', [reset.id]);
+    // Invalider tous les autres codes pour cet email
+    await pool.query('DELETE FROM password_resets WHERE email = $1 AND id != $2', [cleanEmail, reset.id]);
+
+    res.json({ ok: true, message: 'Mot de passe modifié. Vous pouvez vous connecter.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // GET /api/auth/me

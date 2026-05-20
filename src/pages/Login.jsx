@@ -5,15 +5,16 @@ import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 
 export default function Login() {
-  const { login, signupRequest, signupVerify, signupResend } = useAuth();
+  const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
   const { t } = useT();
   const navigate = useNavigate();
-  const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'verify'
+  const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'verify' | 'forgot' | 'reset'
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode]         = useState('');
   const [error, setError]       = useState(null);
+  const [success, setSuccess]   = useState(null);
   const [loading, setLoading]   = useState(false);
   const [resending, setResending] = useState(false);
 
@@ -35,14 +36,18 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
     if (mode === 'signup') {
       const emailErr = validateEmail(email);
       if (emailErr) { setError(emailErr); return; }
       if (password.length < 6) { setError('Le mot de passe doit faire au moins 6 caractères'); return; }
       if (!name.trim() || name.trim().length < 2) { setError('Nom invalide (minimum 2 caractères)'); return; }
     }
-    if (mode === 'verify') {
+    if (mode === 'verify' || mode === 'reset') {
       if (!/^\d{6}$/.test(code.trim())) { setError('Le code doit contenir 6 chiffres'); return; }
+    }
+    if (mode === 'reset') {
+      if (password.length < 6) { setError('Le nouveau mot de passe doit faire au moins 6 caractères'); return; }
     }
     setLoading(true);
     try {
@@ -52,6 +57,18 @@ export default function Login() {
       } else if (mode === 'verify') {
         await signupVerify(email, code);
         navigate('/');
+      } else if (mode === 'forgot') {
+        await forgotPassword(email);
+        setSuccess('Si cet email existe, un code de réinitialisation a été envoyé. Vérifiez votre boîte mail (et le dossier spam).');
+        setMode('reset');
+        setCode('');
+        setPassword('');
+      } else if (mode === 'reset') {
+        await resetPassword(email, code, password);
+        setSuccess('Mot de passe modifié avec succès. Vous pouvez maintenant vous connecter.');
+        setMode('login');
+        setCode('');
+        setPassword('');
       } else {
         await login(email, password);
         navigate('/');
@@ -84,7 +101,7 @@ export default function Login() {
           <span style={styles.brand}>AutoLoc</span>
         </div>
 
-        {mode !== 'verify' && (
+        {(mode === 'login' || mode === 'signup') && (
           <div style={styles.tabs}>
             <button type="button" onClick={() => { setMode('login'); setError(null); }}
               style={{ ...styles.tab, ...(mode === 'login' ? styles.tabActive : {}) }}>
@@ -100,10 +117,84 @@ export default function Login() {
         <p style={styles.subtitle}>
           {mode === 'verify'
             ? <>📧 Un code à 6 chiffres a été envoyé à<br/><strong style={{ color: '#f0f0f5' }}>{email}</strong></>
-            : (isSignup ? t('auth.createSpace') : t('auth.welcomeBack'))}
+            : mode === 'forgot'
+              ? <>🔐 Saisissez votre email — nous vous enverrons un code de réinitialisation.</>
+              : mode === 'reset'
+                ? <>🔑 Saisissez le code reçu par email et votre <strong style={{ color: '#f0f0f5' }}>nouveau mot de passe</strong>.</>
+                : (isSignup ? t('auth.createSpace') : t('auth.welcomeBack'))}
         </p>
 
-        {mode === 'verify' ? (
+        {success && <div style={{ ...styles.error, background: 'rgba(16,185,129,0.12)', borderColor: 'rgba(16,185,129,0.3)', color: '#10b981' }}>{success}</div>}
+
+        {mode === 'forgot' ? (
+          <>
+            <div style={styles.field}>
+              <label style={styles.label}>Email du compte</label>
+              <div style={styles.inputWrap}>
+                <Mail size={16} style={styles.icon} />
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="vous@exemple.com" style={styles.input} autoFocus />
+              </div>
+            </div>
+            {error && <div style={styles.error}>{error}</div>}
+            <button type="submit" disabled={loading || !email} style={{ ...styles.button, opacity: (loading || !email) ? 0.6 : 1 }}>
+              {loading ? <><Loader2 size={16} className="spin" /> Envoi…</> : 'Recevoir le code par email'}
+            </button>
+            <button type="button" onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
+              style={{ background: 'none', border: 'none', color: '#707088', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 12 }}>
+              <ArrowLeft size={12} /> Retour à la connexion
+            </button>
+          </>
+        ) : mode === 'reset' ? (
+          <>
+            <div style={styles.field}>
+              <label style={styles.label}>Email du compte</label>
+              <div style={styles.inputWrap}>
+                <Mail size={16} style={styles.icon} />
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="vous@exemple.com" style={styles.input} />
+              </div>
+            </div>
+            <div style={styles.field}>
+              <label style={styles.label}>Code reçu par email</label>
+              <div style={styles.inputWrap}>
+                <KeyRound size={16} style={styles.icon} />
+                <input
+                  type="text" required maxLength={6} inputMode="numeric" pattern="\d{6}"
+                  value={code}
+                  onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  style={{ ...styles.input, letterSpacing: 8, fontSize: 20, fontWeight: 700, textAlign: 'center', fontFamily: 'Courier New, monospace' }}
+                  autoFocus={!!email}
+                />
+              </div>
+            </div>
+            <div style={styles.field}>
+              <label style={styles.label}>Nouveau mot de passe (min. 6 caractères)</label>
+              <div style={styles.inputWrap}>
+                <Lock size={16} style={styles.icon} />
+                <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••" style={styles.input} autoComplete="new-password" />
+              </div>
+            </div>
+            {error && <div style={styles.error}>{error}</div>}
+            <button type="submit" disabled={loading || code.length !== 6 || password.length < 6}
+              style={{ ...styles.button, opacity: (loading || code.length !== 6 || password.length < 6) ? 0.6 : 1 }}>
+              {loading ? <><Loader2 size={16} className="spin" /> Réinitialisation…</> : 'Changer mon mot de passe'}
+            </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
+              <button type="button" onClick={() => { setMode('login'); setError(null); setSuccess(null); setCode(''); setPassword(''); }}
+                style={{ background: 'none', border: 'none', color: '#707088', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <ArrowLeft size={12} /> Retour
+              </button>
+              <button type="button" onClick={async () => {
+                try { await forgotPassword(email); setSuccess('Nouveau code envoyé !'); } catch (e) { setError(e.message); }
+              }} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontWeight: 600 }}>
+                Renvoyer le code
+              </button>
+            </div>
+          </>
+        ) : mode === 'verify' ? (
           <>
             <div style={styles.field}>
               <label style={styles.label}>Code de vérification</label>
@@ -167,7 +258,15 @@ export default function Login() {
             </div>
 
             <div style={styles.field}>
-              <label style={styles.label}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <label style={styles.label}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}</label>
+                {!isSignup && (
+                  <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); setPassword(''); }}
+                    style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: 0 }}>
+                    Mot de passe oublié ?
+                  </button>
+                )}
+              </div>
               <div style={styles.inputWrap}>
                 <Lock size={16} style={styles.icon} />
                 <input type="password" required minLength={isSignup ? 6 : undefined} value={password} onChange={e => setPassword(e.target.value)}

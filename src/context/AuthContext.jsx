@@ -91,13 +91,36 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  // Mot de passe oublié
+  const forgotPassword = async (email) => {
+    const res = await fetch(`${BASE}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur');
+    return data;
+  };
+
+  const resetPassword = async (email, code, newPassword) => {
+    const res = await fetch(`${BASE}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code, newPassword }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur');
+    return data;
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signupRequest, signupVerify, signupResend, logout, refreshUser: fetchMe }}>
+    <AuthContext.Provider value={{ user, loading, login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword, logout, refreshUser: fetchMe }}>
       {children}
     </AuthContext.Provider>
   );
