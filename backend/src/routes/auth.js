@@ -78,8 +78,11 @@ router.post('/signup-request', async (req, res) => {
     try {
       await sendVerificationCode({ to: cleanEmail, code, name: name.trim() });
     } catch (err) {
-      console.error('[signup-request] Erreur envoi email:', err.message);
-      return res.status(500).json({ error: "Impossible d'envoyer l'email de vérification. Réessayez plus tard ou contactez l'administrateur." });
+      console.error('[signup-request] Erreur envoi email:', err);
+      const debugDetails = process.env.SMTP_DEBUG === 'true'
+        ? ` [${err.code || ''} ${err.responseCode || ''}: ${err.response || err.message}]`
+        : '';
+      return res.status(500).json({ error: "Impossible d'envoyer l'email de vérification." + debugDetails });
     }
 
     res.json({ ok: true, email: cleanEmail, message: 'Code envoyé par email' });
