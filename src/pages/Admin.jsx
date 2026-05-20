@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck, Calendar, Check, X, Lock, Unlock, Plus, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Calendar, Check, X, Lock, Unlock, Plus, RefreshCw, Search } from 'lucide-react';
 import { format, parseISO, addMonths, addYears, isAfter, isBefore } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import * as api from '../services/api';
@@ -12,6 +12,8 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editing, setEditing] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const load = async () => {
     try {
@@ -36,6 +38,25 @@ export default function Admin() {
   }
 
   const today = new Date();
+
+  // Filtrage utilisateurs
+  const filtered = users.filter(u => {
+    const q = search.trim().toLowerCase();
+    const matchSearch = !q
+      || u.email?.toLowerCase().includes(q)
+      || u.name?.toLowerCase().includes(q);
+    let matchStatus = true;
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'super') matchStatus = !!u.isSuperAdmin;
+      else if (statusFilter === 'active') matchStatus = u.subscriptionStatus === 'active' && u.subscriptionEnd && new Date(u.subscriptionEnd) >= today;
+      else if (statusFilter === 'trial')  matchStatus = u.subscriptionStatus === 'trial'  && u.subscriptionEnd && new Date(u.subscriptionEnd) >= today;
+      else if (statusFilter === 'expired') matchStatus = u.subscriptionEnd && new Date(u.subscriptionEnd) < today;
+      else if (statusFilter === 'none')    matchStatus = !u.subscriptionEnd && !u.isSuperAdmin;
+      else if (statusFilter === 'blocked') matchStatus = !!u.blocked;
+    }
+    return matchSearch && matchStatus;
+  });
+
   const statusOf = (u) => {
     if (u.isSuperAdmin) return { label: '👑 Super Admin', color: 'var(--primary)', cls: 'badge-warning' };
     if (u.blocked) return { label: '🚫 Bloqué', color: 'var(--danger)', cls: 'badge-danger' };
@@ -56,6 +77,38 @@ export default function Admin() {
       </div>
 
       {error && <div style={{ padding: 12, background: 'rgba(239,68,68,0.12)', color: '#ef4444', borderRadius: 10, marginBottom: 16 }}>{error}</div>}
+
+      {/* Recherche + filtres */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="search-bar" style={{ flex: 1, minWidth: 260 }}>
+          <Search size={16} />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Chercher par email ou nom…"
+          />
+        </div>
+        <select
+          className="form-select"
+          style={{ maxWidth: 220 }}
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+        >
+          <option value="all">Tous les statuts</option>
+          <option value="super">👑 Super Admin</option>
+          <option value="active">✓ Actif</option>
+          <option value="trial">🎁 Essai</option>
+          <option value="expired">⏰ Expiré</option>
+          <option value="none">— Aucun</option>
+          <option value="blocked">🚫 Bloqué</option>
+        </select>
+        {search || statusFilter !== 'all' ? (
+          <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
+            {filtered.length} / {users.length}
+          </div>
+        ) : null}
+      </div>
+
       {loading ? <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-3)' }}>Chargement…</div> : (
         <div className="card">
           <div style={{ overflowX: 'auto' }}>
@@ -73,7 +126,10 @@ export default function Admin() {
                 </tr>
               </thead>
               <tbody>
-                {users.map(u => {
+                {filtered.length === 0 && (
+                  <tr><td colSpan={8} style={{ padding: 30, textAlign: 'center', color: 'var(--text-3)' }}>Aucun utilisateur ne correspond à la recherche</td></tr>
+                )}
+                {filtered.map(u => {
                   const s = statusOf(u);
                   return (
                     <tr key={u.id}>
