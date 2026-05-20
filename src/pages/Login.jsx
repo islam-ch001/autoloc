@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 
 export default function Login() {
-  const { login, register } = useAuth();
+  const { login, signupRequest, signupVerify, signupResend } = useAuth();
   const { t } = useT();
   const navigate = useNavigate();
-  const [mode, setMode]         = useState('login'); // 'login' | 'signup'
+  const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'verify'
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode]         = useState('');
   const [error, setError]       = useState(null);
   const [loading, setLoading]   = useState(false);
+  const [resending, setResending] = useState(false);
 
   // Validation email côté client (cohérente avec le backend)
   const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -39,19 +41,37 @@ export default function Login() {
       if (password.length < 6) { setError('Le mot de passe doit faire au moins 6 caractères'); return; }
       if (!name.trim() || name.trim().length < 2) { setError('Nom invalide (minimum 2 caractères)'); return; }
     }
+    if (mode === 'verify') {
+      if (!/^\d{6}$/.test(code.trim())) { setError('Le code doit contenir 6 chiffres'); return; }
+    }
     setLoading(true);
     try {
       if (mode === 'signup') {
-        await register(name, email, password);
+        await signupRequest(name, email, password);
+        setMode('verify');
+      } else if (mode === 'verify') {
+        await signupVerify(email, code);
+        navigate('/');
       } else {
         await login(email, password);
+        navigate('/');
       }
-      navigate('/');
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResend = async () => {
+    setError(null);
+    setResending(true);
+    try {
+      await signupResend(email);
+      setError(null);
+      alert('Un nouveau code a été envoyé à votre email');
+    } catch (err) { setError(err.message); }
+    finally { setResending(false); }
   };
 
   const isSignup = mode === 'signup';
@@ -64,61 +84,112 @@ export default function Login() {
           <span style={styles.brand}>AutoLoc</span>
         </div>
 
-        <div style={styles.tabs}>
-          <button type="button" onClick={() => { setMode('login'); setError(null); }}
-            style={{ ...styles.tab, ...(mode === 'login' ? styles.tabActive : {}) }}>
-            {t('auth.login')}
-          </button>
-          <button type="button" onClick={() => { setMode('signup'); setError(null); }}
-            style={{ ...styles.tab, ...(mode === 'signup' ? styles.tabActive : {}) }}>
-            {t('auth.signup')}
-          </button>
-        </div>
-
-        <p style={styles.subtitle}>
-          {isSignup ? t('auth.createSpace') : t('auth.welcomeBack')}
-        </p>
-
-        {isSignup && (
-          <div style={styles.field}>
-            <label style={styles.label}>{t('auth.name')}</label>
-            <div style={styles.inputWrap}>
-              <User size={16} style={styles.icon} />
-              <input type="text" required value={name} onChange={e => setName(e.target.value)}
-                placeholder="Votre nom" style={styles.input} />
-            </div>
+        {mode !== 'verify' && (
+          <div style={styles.tabs}>
+            <button type="button" onClick={() => { setMode('login'); setError(null); }}
+              style={{ ...styles.tab, ...(mode === 'login' ? styles.tabActive : {}) }}>
+              {t('auth.login')}
+            </button>
+            <button type="button" onClick={() => { setMode('signup'); setError(null); }}
+              style={{ ...styles.tab, ...(mode === 'signup' ? styles.tabActive : {}) }}>
+              {t('auth.signup')}
+            </button>
           </div>
         )}
 
-        <div style={styles.field}>
-          <label style={styles.label}>{t('auth.email')}</label>
-          <div style={styles.inputWrap}>
-            <Mail size={16} style={styles.icon} />
-            <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="vous@exemple.com" style={styles.input} autoComplete="email" />
-          </div>
-        </div>
-
-        <div style={styles.field}>
-          <label style={styles.label}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}</label>
-          <div style={styles.inputWrap}>
-            <Lock size={16} style={styles.icon} />
-            <input type="password" required minLength={isSignup ? 6 : undefined} value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••" style={styles.input} autoComplete={isSignup ? 'new-password' : 'current-password'} />
-          </div>
-        </div>
-
-        {error && <div style={styles.error}>{error}</div>}
-
-        <button type="submit" disabled={loading} style={{ ...styles.button, opacity: loading ? 0.7 : 1 }}>
-          {loading ? <><Loader2 size={16} className="spin" /> {isSignup ? t('auth.creating') : t('auth.signingIn')}</> : (isSignup ? t('auth.createAccount') : t('auth.signIn'))}
-        </button>
-
-        <p style={styles.footer}>
-          {isSignup
-            ? <>{t('auth.haveAccount')} <a onClick={() => setMode('login')} style={styles.link}>{t('auth.signIn')}</a></>
-            : <>{t('auth.noAccount')} <a onClick={() => setMode('signup')} style={styles.link}>{t('auth.signupFree')}</a></>}
+        <p style={styles.subtitle}>
+          {mode === 'verify'
+            ? <>📧 Un code à 6 chiffres a été envoyé à<br/><strong style={{ color: '#f0f0f5' }}>{email}</strong></>
+            : (isSignup ? t('auth.createSpace') : t('auth.welcomeBack'))}
         </p>
+
+        {mode === 'verify' ? (
+          <>
+            <div style={styles.field}>
+              <label style={styles.label}>Code de vérification</label>
+              <div style={styles.inputWrap}>
+                <KeyRound size={16} style={styles.icon} />
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  value={code}
+                  onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  style={{ ...styles.input, letterSpacing: 8, fontSize: 20, fontWeight: 700, textAlign: 'center', fontFamily: 'Courier New, monospace' }}
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {error && <div style={styles.error}>{error}</div>}
+
+            <button type="submit" disabled={loading || code.length !== 6} style={{ ...styles.button, opacity: (loading || code.length !== 6) ? 0.6 : 1 }}>
+              {loading ? <><Loader2 size={16} className="spin" /> Vérification…</> : 'Valider et créer mon compte'}
+            </button>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
+              <button type="button" onClick={() => { setMode('signup'); setError(null); setCode(''); }}
+                style={{ background: 'none', border: 'none', color: '#707088', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <ArrowLeft size={12} /> Retour
+              </button>
+              <button type="button" onClick={handleResend} disabled={resending}
+                style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontWeight: 600 }}>
+                {resending ? 'Envoi…' : 'Renvoyer le code'}
+              </button>
+            </div>
+            <p style={{ fontSize: 11, color: '#707088', textAlign: 'center', margin: '8px 0 0' }}>
+              Vérifiez aussi le dossier spam/courrier indésirable
+            </p>
+          </>
+        ) : (
+          <>
+            {isSignup && (
+              <div style={styles.field}>
+                <label style={styles.label}>{t('auth.name')}</label>
+                <div style={styles.inputWrap}>
+                  <User size={16} style={styles.icon} />
+                  <input type="text" required value={name} onChange={e => setName(e.target.value)}
+                    placeholder="Votre nom" style={styles.input} />
+                </div>
+              </div>
+            )}
+
+            <div style={styles.field}>
+              <label style={styles.label}>{t('auth.email')}</label>
+              <div style={styles.inputWrap}>
+                <Mail size={16} style={styles.icon} />
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="vous@exemple.com" style={styles.input} autoComplete="email" />
+              </div>
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.label}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}</label>
+              <div style={styles.inputWrap}>
+                <Lock size={16} style={styles.icon} />
+                <input type="password" required minLength={isSignup ? 6 : undefined} value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••" style={styles.input} autoComplete={isSignup ? 'new-password' : 'current-password'} />
+              </div>
+            </div>
+
+            {error && <div style={styles.error}>{error}</div>}
+
+            <button type="submit" disabled={loading} style={{ ...styles.button, opacity: loading ? 0.7 : 1 }}>
+              {loading
+                ? <><Loader2 size={16} className="spin" /> {isSignup ? 'Envoi du code…' : t('auth.signingIn')}</>
+                : (isSignup ? 'Recevoir le code par email' : t('auth.signIn'))}
+            </button>
+
+            <p style={styles.footer}>
+              {isSignup
+                ? <>{t('auth.haveAccount')} <a onClick={() => setMode('login')} style={styles.link}>{t('auth.signIn')}</a></>
+                : <>{t('auth.noAccount')} <a onClick={() => setMode('signup')} style={styles.link}>{t('auth.signupFree')}</a></>}
+            </p>
+          </>
+        )}
       </form>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } } .spin { animation: spin 0.8s linear infinite; }`}</style>
     </div>

@@ -55,16 +55,40 @@ export function AuthProvider({ children }) {
     setUser(camelize(data.user));
   };
 
-  const register = async (name, email, password) => {
-    const res = await fetch(`${BASE}/auth/register`, {
+  // Étape 1 : demander l'envoi du code par email
+  const signupRequest = async (name, email, password) => {
+    const res = await fetch(`${BASE}/auth/signup-request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erreur d\'inscription');
+    return data;
+  };
+
+  // Étape 2 : vérifier le code → compte créé + auto-login
+  const signupVerify = async (email, code) => {
+    const res = await fetch(`${BASE}/auth/signup-verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Code invalide');
     setToken(data.token);
     setUser(camelize(data.user));
+  };
+
+  const signupResend = async (email) => {
+    const res = await fetch(`${BASE}/auth/signup-resend`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur');
+    return data;
   };
 
   const logout = () => {
@@ -73,7 +97,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser: fetchMe }}>
+    <AuthContext.Provider value={{ user, loading, login, signupRequest, signupVerify, signupResend, logout, refreshUser: fetchMe }}>
       {children}
     </AuthContext.Provider>
   );

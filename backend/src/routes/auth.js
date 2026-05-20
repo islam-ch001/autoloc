@@ -1,7 +1,9 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const pool = require('../db/pool');
 const { requireAuth, requireAuthOnly, signToken } = require('../middleware/auth');
+const { sendVerificationCode } = require('../lib/mailer');
 
 // Validation email RFC-light : local@domaine.tld
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -43,19 +45,14 @@ function validateEmail(email) {
   return { ok: true, email: clean };
 }
 
-// POST /api/auth/register — inscription publique (chaque compte = espace isolé)
-router.post('/register', async (req, res) => {
+// POST /api/auth/signup-request — Étape 1 : valider, envoyer code de vérification par email
+router.post('/signup-request', async (req, res) => {
   try {
     const { email, password, name } = req.body;
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Email, mot de passe et nom requis' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
-    }
-    if (!name.trim() || name.trim().length < 2) {
-      return res.status(400).json({ error: 'Nom invalide (minimum 2 caractères)' });
-    }
+    if (!email || !password || !name) return res.status(400).json({ error: 'Email, mot de passe et nom requis' });
+    if (password.length < 6) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    if (!name.trim() || name.trim().length < 2) return res.status(400).json({ error: 'Nom invalide (minimum 2 caractères)' });
+
     const check = validateEmail(email);
     if (!check.ok) return res.status(400).json({ error: check.error });
     const cleanEmail = check.email;
@@ -63,17 +60,112 @@ router.post('/register', async (req, res) => {
     const { rows: existing } = await pool.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
     if (existing.length) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
 
-    const hash = await bcrypt.hash(password, 10);
-    // Donner automatiquement un essai gratuit de 3 jours à tout nouveau compte
+    // Nettoyer les anciennes demandes pour cet email
+    await pool.query('DELETE FROM email_verifications WHERE email = $1 OR expires_at < NOW()', [cleanEmail]);
+
+    // Générer un code 6 chiffres + hasher
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const codeHash = crypto.createHash('sha256').update(code).digest('hex');
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      `INSERT INTO email_verifications (email, code_hash, name, password_hash, expires_at)
+       VALUES ($1,$2,$3,$4, NOW() + INTERVAL '10 minutes')`,
+      [cleanEmail, codeHash, name.trim(), passwordHash]
+    );
+
+    // Envoyer l'email (si SMTP configuré)
+    try {
+      await sendVerificationCode({ to: cleanEmail, code, name: name.trim() });
+    } catch (err) {
+      console.error('[signup-request] Erreur envoi email:', err.message);
+      return res.status(500).json({ error: "Impossible d'envoyer l'email de vérification. Réessayez plus tard ou contactez l'administrateur." });
+    }
+
+    res.json({ ok: true, email: cleanEmail, message: 'Code envoyé par email' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/auth/signup-verify — Étape 2 : vérifier code et créer compte
+router.post('/signup-verify', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).json({ error: 'Email et code requis' });
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanCode = String(code).trim();
+
     const { rows } = await pool.query(
+      'SELECT * FROM email_verifications WHERE email = $1 AND expires_at > NOW() ORDER BY id DESC LIMIT 1',
+      [cleanEmail]
+    );
+    if (!rows.length) return res.status(400).json({ error: 'Code expiré ou introuvable. Recommencez l\'inscription.' });
+
+    const verif = rows[0];
+    if (verif.attempts >= 5) {
+      await pool.query('DELETE FROM email_verifications WHERE id = $1', [verif.id]);
+      return res.status(429).json({ error: 'Trop de tentatives. Recommencez l\'inscription.' });
+    }
+
+    const codeHash = crypto.createHash('sha256').update(cleanCode).digest('hex');
+    if (codeHash !== verif.code_hash) {
+      await pool.query('UPDATE email_verifications SET attempts = attempts + 1 WHERE id = $1', [verif.id]);
+      return res.status(400).json({ error: 'Code incorrect' });
+    }
+
+    // Code OK → créer le compte
+    const { rows: existing } = await pool.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
+    if (existing.length) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
+
+    const { rows: created } = await pool.query(
       `INSERT INTO users (email, password_hash, name, role, subscription_status, subscription_end, subscription_plan)
        VALUES ($1,$2,$3,'admin','trial', (CURRENT_DATE + INTERVAL '3 days')::date, 'Essai 3 jours')
        RETURNING id, email, name, role, is_super_admin, subscription_status, subscription_end, subscription_plan, created_at`,
-      [cleanEmail, hash, name.trim()]
+      [cleanEmail, verif.password_hash, verif.name]
     );
-    const user = rows[0];
+    const user = created[0];
+    await pool.query('DELETE FROM email_verifications WHERE email = $1', [cleanEmail]);
+
     const token = signToken({ id: user.id, email: user.email, role: user.role });
     res.status(201).json({ token, user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/auth/signup-resend — Renvoyer un nouveau code
+router.post('/signup-resend', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email requis' });
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    const { rows } = await pool.query(
+      'SELECT name, password_hash FROM email_verifications WHERE email = $1 ORDER BY id DESC LIMIT 1',
+      [cleanEmail]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Aucune demande en cours. Recommencez l\'inscription.' });
+
+    const { name, password_hash } = rows[0];
+    await pool.query('DELETE FROM email_verifications WHERE email = $1', [cleanEmail]);
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const codeHash = crypto.createHash('sha256').update(code).digest('hex');
+
+    await pool.query(
+      `INSERT INTO email_verifications (email, code_hash, name, password_hash, expires_at)
+       VALUES ($1,$2,$3,$4, NOW() + INTERVAL '10 minutes')`,
+      [cleanEmail, codeHash, name, password_hash]
+    );
+
+    try {
+      await sendVerificationCode({ to: cleanEmail, code, name });
+    } catch (err) {
+      console.error('[signup-resend] Erreur:', err.message);
+      return res.status(500).json({ error: "Impossible d'envoyer l'email." });
+    }
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
