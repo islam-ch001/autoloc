@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { LogOut, Moon, ShieldCheck, Sun } from 'lucide-react';
 import { AppProvider, useApp } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { useTheme } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
@@ -115,6 +117,80 @@ function AppShell() {
   );
 }
 
+function SuperAdminShell() {
+  const { user, logout } = useAuth();
+  const { theme, toggle } = useTheme();
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <header style={{
+        height: 68,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 16,
+        padding: '0 24px',
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--surface)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 20,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+          <div style={{
+            width: 42,
+            height: 42,
+            borderRadius: 12,
+            background: 'var(--primary-soft)',
+            color: 'var(--primary)',
+            display: 'grid',
+            placeItems: 'center',
+            flexShrink: 0,
+          }}>
+            <ShieldCheck size={22} />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 800, color: 'var(--text)', fontFamily: 'Space Grotesk, sans-serif' }}>AutoLoc Admin</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button className="btn" onClick={toggle}>
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+            {theme === 'dark' ? 'Clair' : 'Sombre'}
+          </button>
+          <button className="btn" onClick={logout} style={{ color: 'var(--danger)' }}>
+            <LogOut size={15} />
+            Déconnexion
+          </button>
+        </div>
+      </header>
+
+      <main style={{ padding: 24, maxWidth: 1280, margin: '0 auto' }}>
+        <Routes>
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+function AuthenticatedApp() {
+  const { user } = useAuth();
+
+  if (user?.isSuperAdmin) return <SuperAdminShell />;
+
+  return (
+    <SettingsProvider>
+      <AppProvider>
+        <AppShell />
+      </AppProvider>
+    </SettingsProvider>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -125,11 +201,7 @@ export default function App() {
           <Route path="/login"    element={<Login />} />
           <Route path="/*" element={
             <RequireAuth>
-              <SettingsProvider>
-                <AppProvider>
-                  <AppShell />
-                </AppProvider>
-              </SettingsProvider>
+              <AuthenticatedApp />
             </RequireAuth>
           } />
         </Routes>
