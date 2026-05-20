@@ -4,9 +4,6 @@ const crypto = require('crypto');
 const pool = require('../db/pool');
 const { requireAuth, requireAuthOnly, signToken } = require('../middleware/auth');
 const { sendVerificationCode, sendPasswordReset } = require('../lib/mailer');
-const { OAuth2Client } = require('google-auth-library');
-
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Validation email RFC-light : local@domaine.tld
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -230,68 +227,6 @@ router.put('/settings', requireAuthOnly, async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'Utilisateur introuvable' });
     res.json(rows[0].settings);
   } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// POST /api/auth/google — connexion/inscription via Google
-router.post('/google', async (req, res) => {
-  try {
-    const { credential } = req.body;
-    if (!credential) return res.status(400).json({ error: 'Credential Google manquant' });
-    if (!process.env.GOOGLE_CLIENT_ID) return res.status(500).json({ error: 'Google OAuth non configuré côté serveur' });
-
-    // Vérifier le token Google
-    let payload;
-    try {
-      const ticket = await googleClient.verifyIdToken({
-        idToken: credential,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-      payload = ticket.getPayload();
-    } catch {
-      return res.status(401).json({ error: 'Token Google invalide' });
-    }
-    if (!payload?.email || !payload.email_verified) {
-      return res.status(400).json({ error: 'Email Google non vérifié' });
-    }
-
-    const email = payload.email.toLowerCase();
-    const name  = payload.name || payload.given_name || email.split('@')[0];
-
-    // Chercher l'utilisateur
-    let { rows } = await pool.query(
-      'SELECT id, email, name, role, password_hash, blocked, blocked_reason, is_super_admin, subscription_status, subscription_end, subscription_plan FROM users WHERE email = $1',
-      [email]
-    );
-    let user;
-    if (rows.length) {
-      user = rows[0];
-      if (user.blocked) return res.status(403).json({ error: user.blocked_reason || 'Compte bloqué' });
-      await pool.query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [user.id]);
-    } else {
-      // Création du compte : pas de mot de passe (random pour la sécurité — ne sera jamais utilisé)
-      const randomPassHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
-      const { rows: created } = await pool.query(
-        `INSERT INTO users (email, password_hash, name, role, subscription_status, subscription_end, subscription_plan)
-         VALUES ($1,$2,$3,'admin','trial', (CURRENT_DATE + INTERVAL '3 days')::date, 'Essai 3 jours')
-         RETURNING id, email, name, role, is_super_admin, subscription_status, subscription_end, subscription_plan, created_at`,
-        [email, randomPassHash, name]
-      );
-      user = created[0];
-    }
-
-    const safeUser = {
-      id: user.id, email: user.email, name: user.name, role: user.role,
-      is_super_admin: user.is_super_admin,
-      subscription_status: user.subscription_status,
-      subscription_end: user.subscription_end,
-      subscription_plan: user.subscription_plan,
-    };
-    const token = signToken({ id: user.id, email: user.email, role: user.role });
-    res.json({ token, user: safeUser });
-  } catch (err) {
-    console.error('[google] Erreur:', err);
-    res.status(500).json({ error: err.message });
-  }
 });
 
 // ─── MOT DE PASSE OUBLIÉ ─────────────────────────────────────

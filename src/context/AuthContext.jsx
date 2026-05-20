@@ -103,19 +103,6 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  // Connexion / inscription Google
-  const googleSignIn = async (credential) => {
-    const res = await fetch(`${BASE}/auth/google`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Erreur Google');
-    setToken(data.token);
-    setUser(camelize(data.user));
-  };
-
   const resetPassword = async (email, code, newPassword) => {
     const res = await fetch(`${BASE}/auth/reset-password`, {
       method: 'POST',
@@ -133,7 +120,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, googleSignIn, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword, logout, refreshUser: fetchMe }}>
+    <AuthContext.Provider value={{ user, loading, login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword, logout, refreshUser: fetchMe }}>
       {children}
     </AuthContext.Provider>
   );
