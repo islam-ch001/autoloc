@@ -197,6 +197,11 @@ export default function Login() {
                     ...styles.input, paddingRight: 40,
                     borderColor: confirmPassword && confirmPassword !== password ? 'rgba(239,68,68,0.5)' : (confirmPassword && confirmPassword === password ? 'rgba(16,185,129,0.5)' : undefined),
                   }} autoComplete="new-password" />
+                <button type="button" onClick={() => setShowPassword(s => !s)}
+                  title={showPassword ? 'Masquer' : 'Afficher'}
+                  style={styles.eyeBtn}>
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
               {confirmPassword && confirmPassword !== password && (
                 <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
@@ -314,6 +319,11 @@ export default function Login() {
                       ...styles.input, paddingRight: 40,
                       borderColor: confirmPassword && confirmPassword !== password ? 'rgba(239,68,68,0.5)' : (confirmPassword && confirmPassword === password ? 'rgba(16,185,129,0.5)' : undefined),
                     }} autoComplete="new-password" />
+                  <button type="button" onClick={() => setShowPassword(s => !s)}
+                    title={showPassword ? 'Masquer' : 'Afficher'}
+                    style={styles.eyeBtn}>
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
                 {confirmPassword && confirmPassword !== password && (
                   <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
