@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Login() {
   const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
   const { t } = useT();
+  const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'verify' | 'forgot' | 'reset'
   const [name, setName]         = useState('');
@@ -101,6 +103,15 @@ export default function Login() {
 
   return (
     <div style={styles.shell}>
+      <button
+        type="button"
+        onClick={toggle}
+        title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+        style={styles.themeButton}
+      >
+        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        <span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span>
+      </button>
       <form onSubmit={handleSubmit} style={styles.card}>
         <div style={styles.logo}>
           <Car size={32} style={{ color: 'var(--primary)' }} />
@@ -353,7 +364,27 @@ export default function Login() {
 }
 
 const styles = {
-  shell: { minHeight: '100vh', background: 'radial-gradient(circle at 20% 20%, var(--surface) 0%, var(--bg) 60%)', display: 'grid', placeItems: 'center', padding: 20 },
+  shell: { minHeight: '100vh', background: 'radial-gradient(circle at 20% 20%, var(--surface) 0%, var(--bg) 60%)', display: 'grid', placeItems: 'center', padding: 20, position: 'relative' },
+  themeButton: {
+    position: 'fixed',
+    top: 18,
+    right: 18,
+    zIndex: 5,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 40,
+    padding: '0 14px',
+    borderRadius: 10,
+    border: '1px solid var(--border)',
+    background: 'var(--bg-2)',
+    color: 'var(--text)',
+    boxShadow: 'var(--shadow)',
+    cursor: 'pointer',
+    fontSize: 13,
+    fontWeight: 700,
+  },
   card: { width: '100%', maxWidth: 420, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, padding: 36, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: 'var(--shadow-lg)' },
   logo: { display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 4 },
   brand: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--primary)', letterSpacing: -0.5 },
