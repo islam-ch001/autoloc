@@ -77,10 +77,14 @@ router.post('/', async (req, res) => {
     const days = Math.ceil((new Date(end_date) - new Date(start_date)) / 86400000);
     const total_price = days * veh[0].price_per_day;
 
+    // Numéro de réservation par utilisateur (commence à 1)
+    const { rows: maxRows } = await client.query('SELECT COALESCE(MAX(display_id), 0) AS m FROM reservations WHERE user_id = $1', [req.user.id]);
+    const display_id = maxRows[0].m + 1;
+
     const { rows } = await client.query(
-      `INSERT INTO reservations (user_id, client_id, vehicle_id, start_date, end_date, total_price, paid_amount, deposit, payment_method, km_limit, extra_km_price, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
-      [req.user.id, client_id, vehicle_id, start_date, end_date, total_price, paid_amount ?? 0, deposit ?? 0, payment_method, km_limit ?? 200, extra_km_price ?? 50, notes]
+      `INSERT INTO reservations (user_id, display_id, client_id, vehicle_id, start_date, end_date, total_price, paid_amount, deposit, payment_method, km_limit, extra_km_price, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+      [req.user.id, display_id, client_id, vehicle_id, start_date, end_date, total_price, paid_amount ?? 0, deposit ?? 0, payment_method, km_limit ?? 200, extra_km_price ?? 50, notes]
     );
 
     await client.query('COMMIT');

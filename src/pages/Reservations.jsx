@@ -28,7 +28,7 @@ export default function Reservations() {
   const [editing, setEditing]   = useState(null);
 
   const handleDelete = async (r) => {
-    if (!confirm(`Supprimer la réservation #${r.id} ?\nCette action est irréversible.`)) return;
+    if (!confirm(`Supprimer la réservation #${r.displayId || r.id} ?\nCette action est irréversible.`)) return;
     try { await removeReservation(r.id); }
     catch (e) { alert('Erreur : ' + e.message); }
   };
@@ -111,7 +111,7 @@ export default function Reservations() {
                 const remaining = r.totalPrice - r.paidAmount;
                 return (
                   <tr key={r.id}>
-                    <td style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.id}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.displayId || r.id}</td>
                     <td>
                       <div style={{ fontWeight: 600 }}>{client?.firstName} {client?.lastName}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{client?.phone}</div>
@@ -245,7 +245,7 @@ function EditReservationModal({ reservation: r, onClose, onSave }) {
   };
 
   return (
-    <Modal title={`Modifier la réservation #${r.id}`} onClose={onClose} footer={
+    <Modal title={`Modifier la réservation #${r.displayId || r.id}`} onClose={onClose} footer={
       <>
         <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
         <button className="btn btn-primary" disabled={saving} onClick={handleSubmit}>
@@ -388,7 +388,7 @@ function ReservationDetailModal({ reservation: r, onClose, onPrint }) {
   const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
 
   return (
-    <Modal title={`Réservation #${r.id}`} onClose={onClose} footer={
+    <Modal title={`Réservation #${r.displayId || r.id}`} onClose={onClose} footer={
       <>
         <button className="btn" onClick={onClose}>{t('action.close')}</button>
         <button className="btn btn-primary" onClick={onPrint}>

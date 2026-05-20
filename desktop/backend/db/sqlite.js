@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS clients (
 CREATE TABLE IF NOT EXISTS reservations (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  display_id      INTEGER NOT NULL DEFAULT 1,
   client_id       INTEGER NOT NULL REFERENCES clients(id) ON DELETE RESTRICT,
   vehicle_id      INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE RESTRICT,
   start_date      TEXT NOT NULL,
@@ -154,6 +155,19 @@ try {
 
   const retCols = db.prepare("PRAGMA table_info(returns)").all().map(c => c.name);
   if (!retCols.includes('extra_paid')) db.exec("ALTER TABLE returns ADD COLUMN extra_paid INTEGER NOT NULL DEFAULT 0");
+
+  // Migration : ajouter display_id sur reservations
+  const resCols = db.prepare("PRAGMA table_info(reservations)").all().map(c => c.name);
+  if (!resCols.includes('display_id')) {
+    db.exec("ALTER TABLE reservations ADD COLUMN display_id INTEGER NOT NULL DEFAULT 1");
+    // Backfill : numéroter les réservations existantes par utilisateur
+    db.exec(`
+      WITH numbered AS (
+        SELECT id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY id) AS rn FROM reservations
+      )
+      UPDATE reservations SET display_id = (SELECT rn FROM numbered WHERE numbered.id = reservations.id)
+    `);
+  }
 } catch (err) { console.error('[DB] Migration error:', err); }
 
 // Migration : relaxer la contrainte CHECK sur returns.condition (nouveaux libellés)

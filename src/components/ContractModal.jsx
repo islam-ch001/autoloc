@@ -22,7 +22,7 @@ export default function ContractModal({ reservation, onClose }) {
   const kmLimit  = reservation.kmLimit || 0;
   const extraKm  = reservation.extraKmPrice || 0;
 
-  const contractNum = `CONT-${String(reservation.id).padStart(5, '0')}`;
+  const contractNum = `CONT-${String(reservation.displayId || reservation.id).padStart(5, '0')}`;
   const issueDate  = format(new Date(), 'dd MMMM yyyy', { locale: fr });
   const lieu = settings.address?.split(',').pop()?.trim() || 'Algérie';
 

@@ -23,7 +23,7 @@ export default function InvoiceModal({ reservation, onClose }) {
   const remaining = total - paid;
   const deposit  = reservation.deposit || 0;
 
-  const invoiceNum = `FAC-${String(reservation.id).padStart(5, '0')}`;
+  const invoiceNum = `FAC-${String(reservation.displayId || reservation.id).padStart(5, '0')}`;
   const issueDate  = format(new Date(), 'dd MMMM yyyy', { locale: fr });
 
   const buildPrintableHtml = () => {
