@@ -103,7 +103,7 @@ export default function Login() {
     <div style={styles.shell}>
       <form onSubmit={handleSubmit} style={styles.card}>
         <div style={styles.logo}>
-          <Car size={32} style={{ color: '#f59e0b' }} />
+          <Car size={32} style={{ color: 'var(--primary)' }} />
           <span style={styles.brand}>AutoLoc</span>
         </div>
 
@@ -122,15 +122,15 @@ export default function Login() {
 
         <p style={styles.subtitle}>
           {mode === 'verify'
-            ? <>📧 Un code à 6 chiffres a été envoyé à<br/><strong style={{ color: '#f0f0f5' }}>{email}</strong></>
+            ? <>📧 Un code à 6 chiffres a été envoyé à<br/><strong style={{ color: 'var(--text)' }}>{email}</strong></>
             : mode === 'forgot'
               ? <>🔐 Saisissez votre email — nous vous enverrons un code de réinitialisation.</>
               : mode === 'reset'
-                ? <>🔑 Saisissez le code reçu par email et votre <strong style={{ color: '#f0f0f5' }}>nouveau mot de passe</strong>.</>
+                ? <>🔑 Saisissez le code reçu par email et votre <strong style={{ color: 'var(--text)' }}>nouveau mot de passe</strong>.</>
                 : (isSignup ? t('auth.createSpace') : t('auth.welcomeBack'))}
         </p>
 
-        {success && <div style={{ ...styles.error, background: 'rgba(16,185,129,0.12)', borderColor: 'rgba(16,185,129,0.3)', color: '#10b981' }}>{success}</div>}
+        {success && <div style={{ ...styles.error, background: 'var(--success-soft)', borderColor: 'rgba(16,185,129,0.3)', color: 'var(--success)' }}>{success}</div>}
 
         {mode === 'forgot' ? (
           <>
@@ -147,7 +147,7 @@ export default function Login() {
               {loading ? <><Loader2 size={16} className="spin" /> Envoi…</> : 'Recevoir le code par email'}
             </button>
             <button type="button" onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
-              style={{ background: 'none', border: 'none', color: '#707088', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 12 }}>
+              style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 12 }}>
               <ArrowLeft size={12} /> Retour à la connexion
             </button>
           </>
@@ -204,7 +204,7 @@ export default function Login() {
                 </button>
               </div>
               {confirmPassword && confirmPassword !== password && (
-                <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
+                <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
               )}
             </div>
             {error && <div style={styles.error}>{error}</div>}
@@ -214,12 +214,12 @@ export default function Login() {
             </button>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
               <button type="button" onClick={() => { setMode('login'); setError(null); setSuccess(null); setCode(''); setPassword(''); }}
-                style={{ background: 'none', border: 'none', color: '#707088', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <ArrowLeft size={12} /> Retour
               </button>
               <button type="button" onClick={async () => {
                 try { await forgotPassword(email); setSuccess('Nouveau code envoyé !'); } catch (e) { setError(e.message); }
-              }} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontWeight: 600 }}>
+              }} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>
                 Renvoyer le code
               </button>
             </div>
@@ -253,15 +253,15 @@ export default function Login() {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
               <button type="button" onClick={() => { setMode('signup'); setError(null); setCode(''); }}
-                style={{ background: 'none', border: 'none', color: '#707088', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <ArrowLeft size={12} /> Retour
               </button>
               <button type="button" onClick={handleResend} disabled={resending}
-                style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontWeight: 600 }}>
+                style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>
                 {resending ? 'Envoi…' : 'Renvoyer le code'}
               </button>
             </div>
-            <p style={{ fontSize: 11, color: '#707088', textAlign: 'center', margin: '8px 0 0' }}>
+            <p style={{ fontSize: 11, color: 'var(--text-3)', textAlign: 'center', margin: '8px 0 0' }}>
               Vérifiez aussi le dossier spam/courrier indésirable
             </p>
           </>
@@ -292,7 +292,7 @@ export default function Login() {
                 <label style={styles.label}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}</label>
                 {!isSignup && (
                   <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); setPassword(''); }}
-                    style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: 0 }}>
+                    style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: 0 }}>
                     Mot de passe oublié ?
                   </button>
                 )}
@@ -326,7 +326,7 @@ export default function Login() {
                   </button>
                 </div>
                 {confirmPassword && confirmPassword !== password && (
-                  <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
+                  <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
                 )}
               </div>
             )}
@@ -353,27 +353,27 @@ export default function Login() {
 }
 
 const styles = {
-  shell: { minHeight: '100vh', background: 'radial-gradient(circle at 20% 20%, #1a1a28 0%, #0a0a0f 60%)', display: 'grid', placeItems: 'center', padding: 20 },
-  card: { width: '100%', maxWidth: 420, background: '#12121a', border: '1px solid #2a2a3e', borderRadius: 16, padding: 36, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.4)' },
+  shell: { minHeight: '100vh', background: 'radial-gradient(circle at 20% 20%, var(--surface) 0%, var(--bg) 60%)', display: 'grid', placeItems: 'center', padding: 20 },
+  card: { width: '100%', maxWidth: 420, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, padding: 36, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: 'var(--shadow-lg)' },
   logo: { display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 4 },
-  brand: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: '#f59e0b', letterSpacing: -0.5 },
-  tabs: { display: 'flex', background: '#0a0a0f', padding: 4, borderRadius: 10, border: '1px solid #2a2a3e' },
-  tab: { flex: 1, padding: '8px 12px', background: 'transparent', border: 'none', color: '#707088', fontWeight: 600, fontSize: 13, cursor: 'pointer', borderRadius: 7 },
-  tabActive: { background: '#f59e0b', color: '#0a0a0f' },
-  subtitle: { margin: 0, fontSize: 13, color: '#707088', textAlign: 'center', marginBottom: 4 },
+  brand: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--primary)', letterSpacing: -0.5 },
+  tabs: { display: 'flex', background: 'var(--bg)', padding: 4, borderRadius: 10, border: '1px solid var(--border)' },
+  tab: { flex: 1, padding: '8px 12px', background: 'transparent', border: 'none', color: 'var(--text-3)', fontWeight: 600, fontSize: 13, cursor: 'pointer', borderRadius: 7 },
+  tabActive: { background: 'var(--primary)', color: '#0a0a0f' },
+  subtitle: { margin: 0, fontSize: 13, color: 'var(--text-3)', textAlign: 'center', marginBottom: 4 },
   field: { display: 'flex', flexDirection: 'column', gap: 6 },
-  label: { fontSize: 12, fontWeight: 600, color: '#b0b0c0' },
+  label: { fontSize: 12, fontWeight: 600, color: 'var(--text-2)' },
   inputWrap: { position: 'relative' },
-  icon: { position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#707088' },
+  icon: { position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' },
   eyeBtn: {
     position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
     background: 'transparent', border: 'none', cursor: 'pointer',
-    color: '#707088', padding: 6, borderRadius: 6,
+    color: 'var(--text-3)', padding: 6, borderRadius: 6,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
-  input: { width: '100%', padding: '11px 14px 11px 38px', background: '#0a0a0f', border: '1px solid #2a2a3e', borderRadius: 10, color: '#f0f0f5', fontSize: 14, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
-  button: { padding: '12px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#f59e0b', color: '#0a0a0f', fontWeight: 700, fontSize: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 },
-  error: { padding: '10px 12px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', color: '#ef4444', borderRadius: 10, fontSize: 13 },
-  footer: { textAlign: 'center', fontSize: 12, color: '#707088', margin: 0, paddingTop: 4 },
-  link: { color: '#f59e0b', textDecoration: 'none', fontWeight: 600, cursor: 'pointer' },
+  input: { width: '100%', padding: '11px 14px 11px 38px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text)', fontSize: 14, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
+  button: { padding: '12px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'var(--primary)', color: '#0a0a0f', fontWeight: 700, fontSize: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 },
+  error: { padding: '10px 12px', background: 'var(--danger-soft)', border: '1px solid rgba(239,68,68,0.25)', color: 'var(--danger)', borderRadius: 10, fontSize: 13 },
+  footer: { textAlign: 'center', fontSize: 12, color: 'var(--text-3)', margin: 0, paddingTop: 4 },
+  link: { color: 'var(--primary)', textDecoration: 'none', fontWeight: 600, cursor: 'pointer' },
 };

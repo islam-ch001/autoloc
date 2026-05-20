@@ -11,26 +11,26 @@ export default function SubscriptionRequired() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'radial-gradient(circle at 20% 20%, #1a1a28 0%, #0a0a0f 60%)',
+      background: 'radial-gradient(circle at 20% 20%, var(--surface) 0%, var(--bg) 60%)',
       display: 'grid', placeItems: 'center', padding: 20,
     }}>
       <div style={{
-        maxWidth: 480, background: '#12121a', border: '1px solid #2a2a3e',
-        borderRadius: 16, padding: 36, color: '#f0f0f5',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+        maxWidth: 480, background: 'var(--bg-2)', border: '1px solid var(--border)',
+        borderRadius: 16, padding: 36, color: 'var(--text)',
+        boxShadow: 'var(--shadow-lg)',
       }}>
         <div style={{
           width: 64, height: 64, borderRadius: '50%',
-          background: 'rgba(245,158,11,0.15)', border: '2px solid rgba(245,158,11,0.3)',
+          background: 'var(--primary-soft)', border: '2px solid rgba(245,158,11,0.3)',
           display: 'grid', placeItems: 'center', margin: '0 auto 20px',
         }}>
-          <Lock size={28} style={{ color: '#f59e0b' }} />
+          <Lock size={28} style={{ color: 'var(--primary)' }} />
         </div>
 
         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, textAlign: 'center', marginBottom: 8 }}>
           {isExpired ? 'Abonnement expiré' : "Accès non autorisé"}
         </h1>
-        <p style={{ textAlign: 'center', color: '#b0b0c0', marginBottom: 24, fontSize: 14, lineHeight: 1.6 }}>
+        <p style={{ textAlign: 'center', color: 'var(--text-2)', marginBottom: 24, fontSize: 14, lineHeight: 1.6 }}>
           {isExpired
             ? `Votre abonnement a expiré le ${format(end, 'dd MMMM yyyy', { locale: fr })}.`
             : "Votre compte n'a pas encore d'abonnement actif."}
@@ -39,10 +39,10 @@ export default function SubscriptionRequired() {
         </p>
 
         <div style={{
-          padding: 16, background: '#0a0a0f', borderRadius: 10, marginBottom: 20,
-          fontSize: 13, color: '#b0b0c0',
+          padding: 16, background: 'var(--bg)', borderRadius: 10, marginBottom: 20,
+          fontSize: 13, color: 'var(--text-2)',
         }}>
-          <div style={{ marginBottom: 4 }}><strong style={{ color: '#f0f0f5' }}>{user?.name}</strong></div>
+          <div style={{ marginBottom: 4 }}><strong style={{ color: 'var(--text)' }}>{user?.name}</strong></div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Mail size={12} /> {user?.email}
           </div>
@@ -64,7 +64,7 @@ export default function SubscriptionRequired() {
         </a>
         <button onClick={logout} style={{
           width: '100%', padding: '10px 16px', borderRadius: 10,
-          border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: '#fff',
+          border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)',
           cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13,
         }}>
           <LogOut size={14} /> Se déconnecter
