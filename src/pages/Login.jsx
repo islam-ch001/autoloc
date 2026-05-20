@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export default function Login() {
-  const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
+  const { login, googleSignIn, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const { t } = useT();
   const navigate = useNavigate();
   const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'verify' | 'forgot' | 'reset'
@@ -131,6 +133,29 @@ export default function Login() {
         </p>
 
         {success && <div style={{ ...styles.error, background: 'rgba(16,185,129,0.12)', borderColor: 'rgba(16,185,129,0.3)', color: '#10b981' }}>{success}</div>}
+
+        {(mode === 'login' || mode === 'signup') && googleClientId && (
+          <>
+            <div style={{ marginTop: 4 }}>
+              <GoogleSignInButton
+                clientId={googleClientId}
+                onCredential={async (cred) => {
+                  setError(null);
+                  setLoading(true);
+                  try { await googleSignIn(cred); navigate('/'); }
+                  catch (err) { setError(err.message); }
+                  finally { setLoading(false); }
+                }}
+                onError={(msg) => setError(msg)}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#707088', fontSize: 11, margin: '4px 0' }}>
+              <div style={{ flex: 1, height: 1, background: '#2a2a3e' }} />
+              OU
+              <div style={{ flex: 1, height: 1, background: '#2a2a3e' }} />
+            </div>
+          </>
+        )}
 
         {mode === 'forgot' ? (
           <>
