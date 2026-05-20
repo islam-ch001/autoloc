@@ -37,10 +37,11 @@ async function requireAuth(req, res, next) {
     const u = rows[0];
     if (u.blocked) return res.status(403).json({ error: u.blocked_reason || 'Compte bloqué', blocked: true });
 
-    // Vérification abonnement (super-admin bypassé)
+    // Vérification abonnement (super-admin bypassé) — accepte 'active' ET 'trial' valides
     if (!u.is_super_admin) {
       const exp = u.subscription_end ? new Date(u.subscription_end) : null;
-      const isActive = u.subscription_status === 'active' && exp && exp >= new Date();
+      const validStatus = u.subscription_status === 'active' || u.subscription_status === 'trial';
+      const isActive = validStatus && exp && exp >= new Date();
       if (!isActive) {
         return res.status(402).json({
           error: 'Abonnement requis ou expiré',

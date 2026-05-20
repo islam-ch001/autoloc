@@ -19,8 +19,11 @@ router.post('/register', async (req, res) => {
     if (existing.length) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
 
     const hash = await bcrypt.hash(password, 10);
+    // Donner automatiquement un essai gratuit de 3 jours à tout nouveau compte
     const { rows } = await pool.query(
-      "INSERT INTO users (email, password_hash, name, role) VALUES ($1,$2,$3,'admin') RETURNING id, email, name, role, created_at",
+      `INSERT INTO users (email, password_hash, name, role, subscription_status, subscription_end, subscription_plan)
+       VALUES ($1,$2,$3,'admin','trial', (CURRENT_DATE + INTERVAL '3 days')::date, 'Essai 3 jours')
+       RETURNING id, email, name, role, is_super_admin, subscription_status, subscription_end, subscription_plan, created_at`,
       [cleanEmail, hash, name.trim()]
     );
     const user = rows[0];

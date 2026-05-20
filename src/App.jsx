@@ -37,14 +37,42 @@ function RequireAuth({ children }) {
   if (loading) return <FullScreenLoader text="Vérification de la session…" />;
   if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
 
-  // Vérifier l'abonnement (super-admin bypassé)
+  // Vérifier l'abonnement (super-admin bypassé) — 'active' ou 'trial' valides
+  const validStatus = user.subscriptionStatus === 'active' || user.subscriptionStatus === 'trial';
   const isSubActive = user.isSuperAdmin
-    || (user.subscriptionStatus === 'active'
+    || (validStatus
         && user.subscriptionEnd
         && new Date(user.subscriptionEnd) >= new Date());
   if (!isSubActive) return <SubscriptionRequired />;
 
   return children;
+}
+
+function TrialBanner() {
+  const { user } = useAuth();
+  if (!user || user.isSuperAdmin || user.subscriptionStatus !== 'trial' || !user.subscriptionEnd) return null;
+  const daysLeft = Math.ceil((new Date(user.subscriptionEnd) - new Date()) / 86400000);
+  if (daysLeft <= 0) return null;
+  return (
+    <div style={{
+      padding: '10px 14px',
+      background: 'linear-gradient(90deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05))',
+      border: '1px solid rgba(245,158,11,0.3)',
+      borderRadius: 10,
+      marginBottom: 16,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
+      fontSize: 13,
+    }}>
+      <div style={{ color: 'var(--text-2)' }}>
+        🎁 <strong style={{ color: 'var(--primary)' }}>Essai gratuit</strong> · Il vous reste <strong>{daysLeft} jour{daysLeft > 1 ? 's' : ''}</strong>
+      </div>
+      <a href={`https://wa.me/213554214999?text=${encodeURIComponent(`Bonjour, je souhaite activer mon abonnement AutoLoc.\nCompte: ${user.email}\nNom: ${user.name}`)}`}
+         target="_blank" rel="noopener noreferrer"
+         style={{ padding: '6px 12px', background: '#25D366', color: '#fff', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 700 }}>
+        💬 Contacter l'administrateur
+      </a>
+    </div>
+  );
 }
 
 function AppShell() {
@@ -70,6 +98,7 @@ function AppShell() {
     <div className="app-layout">
       <Sidebar />
       <main className="main-content">
+        <TrialBanner />
         <Routes>
           <Route path="/"             element={<Dashboard />} />
           <Route path="/vehicles"     element={<Vehicles />} />
