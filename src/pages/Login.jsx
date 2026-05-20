@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft } from 'lucide-react';
+import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 
@@ -17,6 +17,7 @@ export default function Login() {
   const [success, setSuccess]   = useState(null);
   const [loading, setLoading]   = useState(false);
   const [resending, setResending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Validation email côté client (cohérente avec le backend)
   const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -173,8 +174,13 @@ export default function Login() {
               <label style={styles.label}>Nouveau mot de passe (min. 6 caractères)</label>
               <div style={styles.inputWrap}>
                 <Lock size={16} style={styles.icon} />
-                <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" style={styles.input} autoComplete="new-password" />
+                <input type={showPassword ? 'text' : 'password'} required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••" style={{ ...styles.input, paddingRight: 40 }} autoComplete="new-password" />
+                <button type="button" onClick={() => setShowPassword(s => !s)}
+                  title={showPassword ? 'Masquer' : 'Afficher'}
+                  style={styles.eyeBtn}>
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
             {error && <div style={styles.error}>{error}</div>}
@@ -269,8 +275,13 @@ export default function Login() {
               </div>
               <div style={styles.inputWrap}>
                 <Lock size={16} style={styles.icon} />
-                <input type="password" required minLength={isSignup ? 6 : undefined} value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" style={styles.input} autoComplete={isSignup ? 'new-password' : 'current-password'} />
+                <input type={showPassword ? 'text' : 'password'} required minLength={isSignup ? 6 : undefined} value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••" style={{ ...styles.input, paddingRight: 40 }} autoComplete={isSignup ? 'new-password' : 'current-password'} />
+                <button type="button" onClick={() => setShowPassword(s => !s)}
+                  title={showPassword ? 'Masquer' : 'Afficher'}
+                  style={styles.eyeBtn}>
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
@@ -308,6 +319,12 @@ const styles = {
   label: { fontSize: 12, fontWeight: 600, color: '#b0b0c0' },
   inputWrap: { position: 'relative' },
   icon: { position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#707088' },
+  eyeBtn: {
+    position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+    background: 'transparent', border: 'none', cursor: 'pointer',
+    color: '#707088', padding: 6, borderRadius: 6,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  },
   input: { width: '100%', padding: '11px 14px 11px 38px', background: '#0a0a0f', border: '1px solid #2a2a3e', borderRadius: 10, color: '#f0f0f5', fontSize: 14, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
   button: { padding: '12px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#f59e0b', color: '#0a0a0f', fontWeight: 700, fontSize: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4 },
   error: { padding: '10px 12px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', color: '#ef4444', borderRadius: 10, fontSize: 13 },
