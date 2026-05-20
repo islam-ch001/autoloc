@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Plus, Search, Eye, Edit, FileText, CalendarDays, DollarSign, Printer, Play, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Eye, Edit, FileText, CalendarDays, DollarSign, Printer, Play, Pencil, Trash2, FileSignature } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useT } from '../context/LanguageContext';
 import Modal from '../components/Modal';
 import InvoiceModal from '../components/InvoiceModal';
+import ContractModal from '../components/ContractModal';
 import ClientAutocomplete from '../components/ClientAutocomplete';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -23,6 +24,7 @@ export default function Reservations() {
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState(null);
   const [invoice, setInvoice]   = useState(null);
+  const [contract, setContract] = useState(null);
   const [editing, setEditing]   = useState(null);
 
   const handleDelete = async (r) => {
@@ -135,6 +137,19 @@ export default function Reservations() {
                       <div className="actions-cell" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                         <button className="action-btn" title={t('action.view')} onClick={() => setSelected(r)}><Eye size={14} /></button>
                         <button
+                          title="Contrat de location"
+                          onClick={() => setContract(r)}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            padding: '5px 10px', borderRadius: 6,
+                            background: 'rgba(59,130,246,0.10)', border: '1px solid rgba(59,130,246,0.35)',
+                            color: 'var(--accent)', cursor: 'pointer',
+                            fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <FileSignature size={12} /> Contrat
+                        </button>
+                        <button
                           title={t('res.invoice')}
                           onClick={() => setInvoice(r)}
                           style={{
@@ -175,6 +190,7 @@ export default function Reservations() {
       {showAdd && <AddReservationModal onClose={() => setShowAdd(false)} />}
       {selected && <ReservationDetailModal reservation={selected} onClose={() => setSelected(null)} onPrint={() => { setInvoice(selected); setSelected(null); }} />}
       {invoice && <InvoiceModal reservation={invoice} onClose={() => setInvoice(null)} />}
+      {contract && <ContractModal reservation={contract} onClose={() => setContract(null)} />}
       {editing && <EditReservationModal
         reservation={editing}
         onClose={() => setEditing(null)}
