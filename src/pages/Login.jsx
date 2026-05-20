@@ -15,13 +15,33 @@ export default function Login() {
   const [error, setError]       = useState(null);
   const [loading, setLoading]   = useState(false);
 
+  // Validation email côté client (cohérente avec le backend)
+  const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+  const DISPOSABLE = ['10minutemail','mailinator','tempmail','temp-mail','guerrillamail','sharklasers','grr.la','spam4.me','yopmail','throwaway','fakeinbox','trashmail','dispostable','maildrop','getnada','mail.tm','tempr.email','tempinbox','tmpmail','mintemail','spambog','fakemail','jetable','tempemail','disposablemail','wegwerfmail','airmail.cc','inboxbear','mohmal'];
+  const TYPOS = { 'gmial.com':'gmail.com','gmai.com':'gmail.com','gmal.com':'gmail.com','gnail.com':'gmail.com','gmaill.com':'gmail.com','gmail.co':'gmail.com','gmail.con':'gmail.com','yaho.com':'yahoo.com','yhaoo.com':'yahoo.com','yahoo.con':'yahoo.com','hotmial.com':'hotmail.com','hotmal.com':'hotmail.com','outlok.com':'outlook.com' };
+
+  const validateEmail = (raw) => {
+    const clean = (raw || '').trim().toLowerCase();
+    if (!clean) return 'Email requis';
+    if (!EMAIL_REGEX.test(clean)) return "Format d'email invalide (ex: nom@exemple.com)";
+    const domain = clean.split('@')[1];
+    if (DISPOSABLE.some(d => domain.includes(d))) return 'Les emails temporaires ne sont pas autorisés. Utilisez votre vraie adresse.';
+    if (TYPOS[domain]) return `Vouliez-vous dire ${clean.split('@')[0]}@${TYPOS[domain]} ?`;
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    if (mode === 'signup') {
+      const emailErr = validateEmail(email);
+      if (emailErr) { setError(emailErr); return; }
+      if (password.length < 6) { setError('Le mot de passe doit faire au moins 6 caractères'); return; }
+      if (!name.trim() || name.trim().length < 2) { setError('Nom invalide (minimum 2 caractères)'); return; }
+    }
     setLoading(true);
     try {
       if (mode === 'signup') {
-        if (password.length < 6) throw new Error('Le mot de passe doit faire au moins 6 caractères');
         await register(name, email, password);
       } else {
         await login(email, password);

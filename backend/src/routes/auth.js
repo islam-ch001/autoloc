@@ -3,6 +3,46 @@ const bcrypt = require('bcryptjs');
 const pool = require('../db/pool');
 const { requireAuth, requireAuthOnly, signToken } = require('../middleware/auth');
 
+// Validation email RFC-light : local@domaine.tld
+const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+// Liste de domaines temporaires/jetables fréquemment utilisés
+const DISPOSABLE_DOMAINS = new Set([
+  '10minutemail.com','10minutemail.net','mailinator.com','mailinator.net','tempmail.com',
+  'temp-mail.org','tempmail.net','guerrillamail.com','guerrillamail.info','guerrillamail.biz',
+  'guerrillamail.net','guerrillamail.org','sharklasers.com','grr.la','spam4.me','yopmail.com',
+  'yopmail.fr','yopmail.net','throwaway.email','throwawaymail.com','fakeinbox.com','trashmail.com',
+  'trashmail.net','trashmail.de','dispostable.com','maildrop.cc','getnada.com','nada.email',
+  'mail.tm','tempr.email','minuteinbox.com','emailondeck.com','mohmal.com','mytemp.email',
+  'tempmailaddress.com','tempinbox.com','tmail.ws','tmpmail.org','mintemail.com','spambog.com',
+  'fakemail.net','jetable.org','tempemail.com','disposablemail.com','linshiyou.com',
+  'temporary-mail.net','tempr.email','wegwerfmail.de','airmail.cc','inboxbear.com',
+]);
+
+// Faute de frappe fréquente : suggérer la correction
+const TYPO_SUGGESTIONS = {
+  'gmial.com':'gmail.com','gmai.com':'gmail.com','gmal.com':'gmail.com','gnail.com':'gmail.com',
+  'gmaill.com':'gmail.com','gmail.co':'gmail.com','gmail.con':'gmail.com',
+  'yaho.com':'yahoo.com','yhaoo.com':'yahoo.com','yahoo.con':'yahoo.com','yahooo.com':'yahoo.com',
+  'hotmial.com':'hotmail.com','hotmal.com':'hotmail.com','hotmail.co':'hotmail.com',
+  'outlok.com':'outlook.com','outloo.com':'outlook.com',
+};
+
+function validateEmail(email) {
+  if (!email || typeof email !== 'string') return { ok: false, error: 'Email requis' };
+  const clean = email.trim().toLowerCase();
+  if (clean.length > 120) return { ok: false, error: 'Email trop long' };
+  if (!EMAIL_REGEX.test(clean)) return { ok: false, error: 'Format d\'email invalide (ex: nom@exemple.com)' };
+  const domain = clean.split('@')[1];
+  if (DISPOSABLE_DOMAINS.has(domain)) {
+    return { ok: false, error: 'Les emails temporaires/jetables ne sont pas autorisés. Utilisez votre vraie adresse email.' };
+  }
+  if (TYPO_SUGGESTIONS[domain]) {
+    return { ok: false, error: `Vouliez-vous dire ${clean.split('@')[0]}@${TYPO_SUGGESTIONS[domain]} ?` };
+  }
+  return { ok: true, email: clean };
+}
+
 // POST /api/auth/register — inscription publique (chaque compte = espace isolé)
 router.post('/register', async (req, res) => {
   try {
@@ -13,7 +53,12 @@ router.post('/register', async (req, res) => {
     if (password.length < 6) {
       return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
     }
-    const cleanEmail = String(email).trim().toLowerCase();
+    if (!name.trim() || name.trim().length < 2) {
+      return res.status(400).json({ error: 'Nom invalide (minimum 2 caractères)' });
+    }
+    const check = validateEmail(email);
+    if (!check.ok) return res.status(400).json({ error: check.error });
+    const cleanEmail = check.email;
 
     const { rows: existing } = await pool.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
     if (existing.length) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
