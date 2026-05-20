@@ -22,9 +22,14 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   name          TEXT NOT NULL,
   role          TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('admin','user')),
+  is_super_admin INTEGER NOT NULL DEFAULT 0,
   settings      TEXT NOT NULL DEFAULT '{}',
   blocked       INTEGER NOT NULL DEFAULT 0,
   blocked_reason TEXT,
+  subscription_status TEXT NOT NULL DEFAULT 'trial',
+  subscription_end TEXT,
+  subscription_plan TEXT,
+  subscription_notes TEXT,
   created_at    TEXT NOT NULL DEFAULT (datetime('now')),
   last_login_at TEXT
 );
@@ -152,6 +157,19 @@ try {
   if (!cols.includes('settings'))       db.exec("ALTER TABLE users ADD COLUMN settings TEXT NOT NULL DEFAULT '{}'");
   if (!cols.includes('blocked'))        db.exec("ALTER TABLE users ADD COLUMN blocked INTEGER NOT NULL DEFAULT 0");
   if (!cols.includes('blocked_reason')) db.exec("ALTER TABLE users ADD COLUMN blocked_reason TEXT");
+  if (!cols.includes('is_super_admin')) db.exec("ALTER TABLE users ADD COLUMN is_super_admin INTEGER NOT NULL DEFAULT 0");
+  if (!cols.includes('subscription_status')) db.exec("ALTER TABLE users ADD COLUMN subscription_status TEXT NOT NULL DEFAULT 'trial'");
+  if (!cols.includes('subscription_end')) db.exec("ALTER TABLE users ADD COLUMN subscription_end TEXT");
+  if (!cols.includes('subscription_plan')) db.exec("ALTER TABLE users ADD COLUMN subscription_plan TEXT");
+  if (!cols.includes('subscription_notes')) db.exec("ALTER TABLE users ADD COLUMN subscription_notes TEXT");
+  db.prepare(`
+    UPDATE users
+    SET is_super_admin = 1,
+        subscription_status = 'active',
+        subscription_end = date('now', '+20 years'),
+        subscription_plan = 'Super Admin'
+    WHERE lower(email) = 'islamac.hd@gmail.com'
+  `).run();
 
   const retCols = db.prepare("PRAGMA table_info(returns)").all().map(c => c.name);
   if (!retCols.includes('extra_paid')) db.exec("ALTER TABLE returns ADD COLUMN extra_paid INTEGER NOT NULL DEFAULT 0");
