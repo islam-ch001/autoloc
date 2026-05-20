@@ -19,10 +19,9 @@ function getTransporter() {
   return transporter;
 }
 
-// Envoie via l'API HTTP de Resend (passe outre les bloquages SMTP des hébergeurs)
+// Envoie via l'API HTTP de Resend
 async function sendViaResend({ to, from, subject, text, html }) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error('RESEND_API_KEY non défini');
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -35,8 +34,37 @@ async function sendViaResend({ to, from, subject, text, html }) {
   return res.json();
 }
 
+// Envoie via l'API HTTP de Brevo (300/jour gratuit, sans restriction de destinataire)
+async function sendViaBrevo({ to, fromEmail, fromName, subject, text, html }) {
+  const apiKey = process.env.BREVO_API_KEY;
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({
+      sender: { name: fromName || 'AutoLoc', email: fromEmail },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+      textContent: text,
+    }),
+  });
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Brevo ${res.status}: ${errBody.slice(0, 300)}`);
+  }
+  return res.json();
+}
+
+// Parse "Nom <email@domain>" → { name, email }
+function parseFrom(s) {
+  const m = (s || '').match(/^\s*(?:"?([^"<]+?)"?\s*)?<?([^>\s]+@[^>\s]+)>?\s*$/);
+  if (!m) return { name: 'AutoLoc', email: s };
+  return { name: (m[1] || 'AutoLoc').trim(), email: m[2].trim() };
+}
+
 async function sendVerificationCode({ to, code, name }) {
-  const useResend = !!process.env.RESEND_API_KEY;
+  const useBrevo  = !!process.env.BREVO_API_KEY;
+  const useResend = !useBrevo && !!process.env.RESEND_API_KEY;
   const from = process.env.MAIL_FROM
     || (useResend ? 'AutoLoc <onboarding@resend.dev>' : (process.env.SMTP_FROM || `AutoLoc <${process.env.SMTP_USER}>`));
   const html = `
@@ -68,6 +96,11 @@ async function sendVerificationCode({ to, code, name }) {
   const subject = `Votre code de vérification AutoLoc : ${code}`;
   const text    = `Votre code de vérification AutoLoc est : ${code}\n\nCe code expire dans 10 minutes.`;
 
+  if (useBrevo) {
+    const { name: fromName, email: fromEmail } = parseFrom(from);
+    await sendViaBrevo({ to, fromEmail, fromName, subject, text, html });
+    return;
+  }
   if (useResend) {
     await sendViaResend({ from, to, subject, text, html });
     return;
