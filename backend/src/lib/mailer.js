@@ -6,10 +6,7 @@ function getTransporter() {
   if (transporter) return transporter;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  if (!user || !pass) {
-    console.warn('[Mailer] SMTP_USER / SMTP_PASS non définis — emails non envoyés');
-    return null;
-  }
+  if (!user || !pass) return null;
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '465'),
@@ -22,11 +19,26 @@ function getTransporter() {
   return transporter;
 }
 
-async function sendVerificationCode({ to, code, name }) {
-  const t = getTransporter();
-  if (!t) throw new Error('Service email non configuré');
+// Envoie via l'API HTTP de Resend (passe outre les bloquages SMTP des hébergeurs)
+async function sendViaResend({ to, from, subject, text, html }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error('RESEND_API_KEY non défini');
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to, subject, text, html }),
+  });
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Resend ${res.status}: ${errBody.slice(0, 300)}`);
+  }
+  return res.json();
+}
 
-  const from = process.env.SMTP_FROM || `AutoLoc <${process.env.SMTP_USER}>`;
+async function sendVerificationCode({ to, code, name }) {
+  const useResend = !!process.env.RESEND_API_KEY;
+  const from = process.env.MAIL_FROM
+    || (useResend ? 'AutoLoc <onboarding@resend.dev>' : (process.env.SMTP_FROM || `AutoLoc <${process.env.SMTP_USER}>`));
   const html = `
   <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #f5f5f7;">
     <div style="background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
@@ -53,13 +65,16 @@ async function sendVerificationCode({ to, code, name }) {
     </div>
   </div>`;
 
-  await t.sendMail({
-    from,
-    to,
-    subject: `Votre code de vérification AutoLoc : ${code}`,
-    text: `Votre code de vérification AutoLoc est : ${code}\n\nCe code expire dans 10 minutes.`,
-    html,
-  });
+  const subject = `Votre code de vérification AutoLoc : ${code}`;
+  const text    = `Votre code de vérification AutoLoc est : ${code}\n\nCe code expire dans 10 minutes.`;
+
+  if (useResend) {
+    await sendViaResend({ from, to, subject, text, html });
+    return;
+  }
+  const t = getTransporter();
+  if (!t) throw new Error('Service email non configuré');
+  await t.sendMail({ from, to, subject, text, html });
 }
 
 module.exports = { sendVerificationCode, getTransporter };
