@@ -18,6 +18,7 @@ export default function Login() {
   const [loading, setLoading]   = useState(false);
   const [resending, setResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Validation email côté client (cohérente avec le backend)
   const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -42,6 +43,7 @@ export default function Login() {
       const emailErr = validateEmail(email);
       if (emailErr) { setError(emailErr); return; }
       if (password.length < 6) { setError('Le mot de passe doit faire au moins 6 caractères'); return; }
+      if (password !== confirmPassword) { setError('Les deux mots de passe ne correspondent pas'); return; }
       if (!name.trim() || name.trim().length < 2) { setError('Nom invalide (minimum 2 caractères)'); return; }
     }
     if (mode === 'verify' || mode === 'reset') {
@@ -49,6 +51,7 @@ export default function Login() {
     }
     if (mode === 'reset') {
       if (password.length < 6) { setError('Le nouveau mot de passe doit faire au moins 6 caractères'); return; }
+      if (password !== confirmPassword) { setError('Les deux mots de passe ne correspondent pas'); return; }
     }
     setLoading(true);
     try {
@@ -64,12 +67,14 @@ export default function Login() {
         setMode('reset');
         setCode('');
         setPassword('');
+        setConfirmPassword('');
       } else if (mode === 'reset') {
         await resetPassword(email, code, password);
         setSuccess('Mot de passe modifié avec succès. Vous pouvez maintenant vous connecter.');
         setMode('login');
         setCode('');
         setPassword('');
+        setConfirmPassword('');
       } else {
         await login(email, password);
         navigate('/');
@@ -104,11 +109,11 @@ export default function Login() {
 
         {(mode === 'login' || mode === 'signup') && (
           <div style={styles.tabs}>
-            <button type="button" onClick={() => { setMode('login'); setError(null); }}
+            <button type="button" onClick={() => { setMode('login'); setError(null); setSuccess(null); setConfirmPassword(''); }}
               style={{ ...styles.tab, ...(mode === 'login' ? styles.tabActive : {}) }}>
               {t('auth.login')}
             </button>
-            <button type="button" onClick={() => { setMode('signup'); setError(null); }}
+            <button type="button" onClick={() => { setMode('signup'); setError(null); setSuccess(null); setConfirmPassword(''); }}
               style={{ ...styles.tab, ...(mode === 'signup' ? styles.tabActive : {}) }}>
               {t('auth.signup')}
             </button>
@@ -183,9 +188,23 @@ export default function Login() {
                 </button>
               </div>
             </div>
+            <div style={styles.field}>
+              <label style={styles.label}>Confirmer le mot de passe</label>
+              <div style={styles.inputWrap}>
+                <Lock size={16} style={styles.icon} />
+                <input type={showPassword ? 'text' : 'password'} required minLength={6} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••" style={{
+                    ...styles.input, paddingRight: 40,
+                    borderColor: confirmPassword && confirmPassword !== password ? 'rgba(239,68,68,0.5)' : (confirmPassword && confirmPassword === password ? 'rgba(16,185,129,0.5)' : undefined),
+                  }} autoComplete="new-password" />
+              </div>
+              {confirmPassword && confirmPassword !== password && (
+                <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
+              )}
+            </div>
             {error && <div style={styles.error}>{error}</div>}
-            <button type="submit" disabled={loading || code.length !== 6 || password.length < 6}
-              style={{ ...styles.button, opacity: (loading || code.length !== 6 || password.length < 6) ? 0.6 : 1 }}>
+            <button type="submit" disabled={loading || code.length !== 6 || password.length < 6 || password !== confirmPassword}
+              style={{ ...styles.button, opacity: (loading || code.length !== 6 || password.length < 6 || password !== confirmPassword) ? 0.6 : 1 }}>
               {loading ? <><Loader2 size={16} className="spin" /> Réinitialisation…</> : 'Changer mon mot de passe'}
             </button>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
@@ -284,6 +303,23 @@ export default function Login() {
                 </button>
               </div>
             </div>
+
+            {isSignup && (
+              <div style={styles.field}>
+                <label style={styles.label}>Confirmer le mot de passe</label>
+                <div style={styles.inputWrap}>
+                  <Lock size={16} style={styles.icon} />
+                  <input type={showPassword ? 'text' : 'password'} required minLength={6} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••" style={{
+                      ...styles.input, paddingRight: 40,
+                      borderColor: confirmPassword && confirmPassword !== password ? 'rgba(239,68,68,0.5)' : (confirmPassword && confirmPassword === password ? 'rgba(16,185,129,0.5)' : undefined),
+                    }} autoComplete="new-password" />
+                </div>
+                {confirmPassword && confirmPassword !== password && (
+                  <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
+                )}
+              </div>
+            )}
 
             {error && <div style={styles.error}>{error}</div>}
 
