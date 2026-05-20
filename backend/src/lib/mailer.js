@@ -15,6 +15,9 @@ function getTransporter() {
     port: parseInt(process.env.SMTP_PORT || '465'),
     secure: (process.env.SMTP_SECURE ?? 'true') === 'true',
     auth: { user, pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 5000,
+    socketTimeout: 10000,
   });
   return transporter;
 }
