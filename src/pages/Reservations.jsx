@@ -39,7 +39,7 @@ export default function Reservations() {
     const matchSearch = `${client?.firstName} ${client?.lastName} ${vehicle?.brand} ${vehicle?.model}`.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'Tous' || r.status === statusFilter;
     return matchSearch && matchStatus;
-  }).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  }).sort((a, b) => (b.displayId || b.id) - (a.displayId || a.id));
 
   const totalRevenue = reservations.filter(r => r.status !== 'cancelled').reduce((s, r) => s + r.paidAmount, 0);
   const pendingPayment = reservations.filter(r => r.status === 'active').reduce((s, r) => s + (r.totalPrice - r.paidAmount), 0);
