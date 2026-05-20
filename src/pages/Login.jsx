@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun } from 'lucide-react';
+import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun, Download, ShieldCheck, Cloud, Gauge } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+
+const WINDOWS_DOWNLOAD_URL = 'https://github.com/islam-ch001/autoloc/releases/download/autoloc-windows-online-2026-05-20/AutoLoc-Windows-Portable.zip';
 
 export default function Login() {
   const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
@@ -112,6 +114,37 @@ export default function Login() {
         {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
         <span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span>
       </button>
+      <div style={styles.stage}>
+        <section style={styles.heroPanel}>
+          <div style={styles.heroTopline}>
+            <span style={styles.heroDot} />
+            AutoLoc Cloud
+          </div>
+          <h1 style={styles.heroTitle}>Pilotez votre agence de location depuis le web ou votre PC.</h1>
+          <p style={styles.heroText}>
+            Reservations, clients, vehicules, contrats et acces utilisateurs restent synchronises avec la base en ligne.
+          </p>
+          <div style={styles.heroActions}>
+            <a href={WINDOWS_DOWNLOAD_URL} style={styles.downloadButton}>
+              <Download size={17} />
+              Telecharger l'app Windows
+            </a>
+            <span style={styles.downloadMeta}>ZIP portable - connecte a la base en ligne</span>
+          </div>
+          <div style={styles.featureGrid}>
+            <div style={styles.featureItem}><ShieldCheck size={18} /><span>Acces controle</span></div>
+            <div style={styles.featureItem}><Cloud size={18} /><span>Donnees en ligne</span></div>
+            <div style={styles.featureItem}><Gauge size={18} /><span>Gestion rapide</span></div>
+          </div>
+          <div style={styles.carPlate}>
+            <div style={styles.carLine} />
+            <div style={styles.carShape}>
+              <Car size={64} />
+            </div>
+            <div style={styles.plateText}>AUTOLOC DZ</div>
+          </div>
+        </section>
+
       <form onSubmit={handleSubmit} style={styles.card}>
         <div style={styles.logo}>
           <Car size={32} style={{ color: 'var(--primary)' }} />
@@ -358,13 +391,14 @@ export default function Login() {
           </>
         )}
       </form>
+      </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } } .spin { animation: spin 0.8s linear infinite; }`}</style>
     </div>
   );
 }
 
 const styles = {
-  shell: { minHeight: '100vh', background: 'radial-gradient(circle at 20% 20%, var(--surface) 0%, var(--bg) 60%)', display: 'grid', placeItems: 'center', padding: 20, position: 'relative' },
+  shell: { height: '100vh', background: 'radial-gradient(circle at 18% 18%, var(--surface-2) 0%, var(--bg) 52%)', display: 'grid', placeItems: 'center', padding: 20, position: 'relative', overflowY: 'auto' },
   themeButton: {
     position: 'fixed',
     top: 18,
@@ -385,7 +419,22 @@ const styles = {
     fontSize: 13,
     fontWeight: 700,
   },
-  card: { width: '100%', maxWidth: 420, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, padding: 36, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: 'var(--shadow-lg)' },
+  stage: { width: '100%', maxWidth: 1120, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22, alignItems: 'stretch' },
+  heroPanel: { minHeight: 560, borderRadius: 18, border: '1px solid var(--border)', background: 'linear-gradient(145deg, var(--surface) 0%, var(--bg-2) 58%, rgba(245,158,11,0.10) 100%)', boxShadow: 'var(--shadow-lg)', padding: 34, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' },
+  heroTopline: { display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--primary)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 18 },
+  heroDot: { width: 9, height: 9, borderRadius: 999, background: 'var(--success)', boxShadow: '0 0 0 6px var(--success-soft)' },
+  heroTitle: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 42, lineHeight: 1.05, letterSpacing: 0, color: 'var(--text)', maxWidth: 560, margin: 0 },
+  heroText: { color: 'var(--text-2)', fontSize: 15, lineHeight: 1.7, maxWidth: 520, margin: '18px 0 0' },
+  heroActions: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 26 },
+  downloadButton: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 44, padding: '0 16px', borderRadius: 10, background: 'var(--primary)', color: '#0a0a0f', textDecoration: 'none', fontWeight: 800, fontSize: 13, boxShadow: '0 12px 28px var(--primary-glow)' },
+  downloadMeta: { color: 'var(--text-3)', fontSize: 12, fontWeight: 600 },
+  featureGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginTop: 24 },
+  featureItem: { minHeight: 58, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', border: '1px solid var(--border)', borderRadius: 10, background: 'rgba(255,255,255,0.03)', color: 'var(--text-2)', fontSize: 12, fontWeight: 700 },
+  carPlate: { marginTop: 'auto', minHeight: 170, borderRadius: 14, border: '1px solid var(--border)', background: 'linear-gradient(180deg, var(--surface-2), var(--bg))', display: 'grid', placeItems: 'center', position: 'relative', overflow: 'hidden' },
+  carLine: { position: 'absolute', left: 0, right: 0, bottom: 42, height: 2, background: 'linear-gradient(90deg, transparent, var(--primary), transparent)', opacity: 0.8 },
+  carShape: { color: 'var(--primary)', filter: 'drop-shadow(0 18px 35px var(--primary-glow))' },
+  plateText: { position: 'absolute', bottom: 14, padding: '5px 14px', borderRadius: 7, background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em' },
+  card: { width: '100%', maxWidth: 430, justifySelf: 'center', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, padding: 36, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: 'var(--shadow-lg)' },
   logo: { display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 4 },
   brand: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--primary)', letterSpacing: -0.5 },
   tabs: { display: 'flex', background: 'var(--bg)', padding: 4, borderRadius: 10, border: '1px solid var(--border)' },
