@@ -434,7 +434,7 @@ const styles = {
     fontWeight: 700,
   },
   stage: { width: '100%', maxWidth: 1120, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22, alignItems: 'stretch' },
-  heroPanel: { minHeight: 'clamp(360px, 50vh, 560px)', borderRadius: 18, border: '1px solid var(--border)', background: 'linear-gradient(145deg, var(--surface) 0%, var(--bg-2) 58%, rgba(245,158,11,0.10) 100%)', boxShadow: 'var(--shadow-lg)', padding: 'clamp(18px, 4vw, 34px)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' },
+  heroPanel: { minHeight: 'clamp(360px, 50vh, 560px)', borderRadius: 18, border: '1px solid var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-lg)', padding: 'clamp(18px, 4vw, 34px)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' },
   heroTopline: { display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--primary)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 18 },
   heroDot: { width: 9, height: 9, borderRadius: 999, background: 'var(--success)', boxShadow: '0 0 0 6px var(--success-soft)' },
   heroTitle: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(24px, 5vw, 42px)', lineHeight: 1.1, letterSpacing: 0, color: 'var(--text)', maxWidth: 560, margin: 0 },
