@@ -1,34 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Cairo:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg: #0a0a0f;
-  --bg-2: #12121a;
-  --surface: #1a1a28;
-  --surface-2: #22223a;
-  --surface-3: #2a2a42;
-  --border: #2a2a3e;
-  --border-2: #363650;
+  /* === MODE SOMBRE — palette Indigo/Violet/Émeraude === */
+  --bg: #09090B;            /* Noir Zinc profond */
+  --bg-2: #111114;
+  --surface: #18181B;
+  --surface-2: #27272A;
+  --surface-3: #3F3F46;
+  --border: #27272A;
+  --border-2: #3F3F46;
 
-  --text: #f0f0f5;
-  --text-2: #b0b0c0;
-  --text-3: #707088;
+  --text: #FAFAFA;
+  --text-2: #A1A1AA;
+  --text-3: #71717A;
 
-  --primary: #f59e0b;
-  --primary-dark: #d97706;
-  --primary-soft: rgba(245, 158, 11, 0.12);
-  --primary-glow: rgba(245, 158, 11, 0.25);
+  --primary: #6366F1;       /* Indigo */
+  --primary-dark: #4F46E5;
+  --primary-soft: rgba(99, 102, 241, 0.14);
+  --primary-glow: rgba(99, 102, 241, 0.30);
 
-  --accent: #3b82f6;
-  --accent-soft: rgba(59, 130, 246, 0.12);
+  --accent: #7C3AED;        /* Violet */
+  --accent-soft: rgba(124, 58, 237, 0.14);
 
-  --success: #10b981;
-  --success-soft: rgba(16, 185, 129, 0.12);
-  --warning: #f59e0b;
-  --warning-soft: rgba(245, 158, 11, 0.12);
-  --danger: #ef4444;
-  --danger-soft: rgba(239, 68, 68, 0.12);
-  --purple: #8b5cf6;
-  --purple-soft: rgba(139, 92, 246, 0.12);
+  --success: #10B981;       /* Émeraude */
+  --success-soft: rgba(16, 185, 129, 0.14);
+  --warning: #F59E0B;
+  --warning-soft: rgba(245, 158, 11, 0.14);
+  --danger: #EF4444;
+  --danger-soft: rgba(239, 68, 68, 0.14);
+  --purple: #7C3AED;
+  --purple-soft: rgba(124, 58, 237, 0.14);
 
   --radius-sm: 8px;
   --radius: 12px;
@@ -40,35 +41,35 @@
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* === Mode clair === */
+/* === MODE CLAIR — palette Indigo/Violet/Émeraude === */
 :root[data-theme="light"] {
-  --bg: #f5f5f7;
-  --bg-2: #ffffff;
-  --surface: #ffffff;
-  --surface-2: #f5f6fa;
-  --surface-3: #eceef5;
-  --border: #e5e7eb;
-  --border-2: #d1d5db;
+  --bg: #F8FAFC;            /* Gris Ardoise très clair */
+  --bg-2: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #F1F5F9;
+  --surface-3: #E2E8F0;
+  --border: #E2E8F0;
+  --border-2: #CBD5E1;
 
-  --text: #111827;
-  --text-2: #4b5563;
-  --text-3: #9ca3af;
+  --text: #0F172A;
+  --text-2: #475569;
+  --text-3: #94A3B8;
 
-  --primary: #f59e0b;
-  --primary-dark: #d97706;
-  --primary-soft: rgba(245, 158, 11, 0.15);
-  --primary-glow: rgba(245, 158, 11, 0.30);
+  --primary: #6366F1;       /* Indigo */
+  --primary-dark: #4F46E5;
+  --primary-soft: rgba(99, 102, 241, 0.10);
+  --primary-glow: rgba(99, 102, 241, 0.25);
 
-  --accent: #2563eb;
-  --accent-soft: rgba(37, 99, 235, 0.10);
+  --accent: #7C3AED;        /* Violet */
+  --accent-soft: rgba(124, 58, 237, 0.10);
 
-  --success: #059669;
-  --success-soft: rgba(5, 150, 105, 0.10);
-  --warning: #d97706;
-  --warning-soft: rgba(217, 119, 6, 0.10);
-  --danger: #dc2626;
+  --success: #10B981;       /* Émeraude */
+  --success-soft: rgba(16, 185, 129, 0.10);
+  --warning: #F59E0B;
+  --warning-soft: rgba(245, 158, 11, 0.10);
+  --danger: #DC2626;
   --danger-soft: rgba(220, 38, 38, 0.10);
-  --purple: #7c3aed;
+  --purple: #7C3AED;
   --purple-soft: rgba(124, 58, 237, 0.10);
 
   --shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
@@ -139,7 +140,7 @@ html, body, #root {
 .logo-icon svg {
   width: 22px;
   height: 22px;
-  color: #0a0a0f;
+  color: #ffffff;
 }
 
 .logo-text {
@@ -199,7 +200,7 @@ html, body, #root {
 .nav-item.active {
   background: var(--primary-soft);
   color: var(--primary);
-  border-color: rgba(245, 158, 11, 0.15);
+  border-color: rgba(99, 102, 241, 0.20);
 }
 
 .nav-item.active::before {
@@ -226,7 +227,7 @@ html, body, #root {
   height: 20px;
   padding: 0 6px;
   background: var(--primary);
-  color: #0a0a0f;
+  color: #ffffff;
   border-radius: 10px;
   font-size: 11px;
   font-weight: 700;
@@ -307,7 +308,7 @@ html, body, #root {
 
 .btn-primary {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #0a0a0f;
+  color: #ffffff;
   border: none;
   box-shadow: 0 4px 16px var(--primary-glow);
 }
@@ -473,7 +474,7 @@ tbody tr:last-child td { border-bottom: none; }
 .filter-btn.active {
   background: var(--primary-soft);
   color: var(--primary);
-  border-color: rgba(245, 158, 11, 0.2);
+  border-color: rgba(99, 102, 241, 0.25);
 }
 
 .modal-overlay {
@@ -989,7 +990,7 @@ img, video { max-width: 100%; height: auto; }
     background: linear-gradient(160deg,
       var(--surface) 0%,
       var(--bg-2) 45%,
-      rgba(245,158,11,0.18) 100%) !important;
+      rgba(99,102,241,0.22) 100%) !important;
     box-shadow: 0 12px 32px rgba(0,0,0,0.25) !important;
     text-align: left;
     position: relative;

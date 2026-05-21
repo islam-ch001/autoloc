@@ -90,7 +90,7 @@ function AppShell() {
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, marginBottom: 8, color: 'var(--text)' }}>Impossible de joindre l'API</h2>
           <p style={{ color: 'var(--text-2)', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>Le serveur backend est peut-être en démarrage. Attendez 30 secondes et réessayez.</p>
           <p style={{ color: 'var(--danger)', fontSize: 12, marginBottom: 20, background: 'var(--danger-soft)', padding: '8px 12px', borderRadius: 8 }}>{error}</p>
-          <button onClick={reload} style={{ background: 'var(--primary)', color: '#0a0a0f', border: 'none', padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>Réessayer</button>
+          <button onClick={reload} style={{ background: 'var(--primary)', color: '#ffffff', border: 'none', padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>Réessayer</button>
         </div>
       </div>
     );
