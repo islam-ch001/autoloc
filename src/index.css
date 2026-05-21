@@ -909,7 +909,7 @@ tbody tr:last-child td { border-bottom: none; }
   touch-action: pan-x pan-y;
 }
 
-/* Layout par défaut des filtres Admin (desktop) : ligne avec recherche flex + boutons */
+/* Layout par défaut des filtres Admin (desktop) */
 .admin-filters {
   display: flex;
   gap: 12px;
@@ -918,7 +918,7 @@ tbody tr:last-child td { border-bottom: none; }
   align-items: center;
 }
 .admin-search-bar { flex: 1; min-width: 260px; }
-.admin-filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.admin-status-filter { max-width: 220px; }
 
 /* Classes utilitaires : afficher/cacher selon la taille d'écran */
 .show-mobile { display: none; }
@@ -938,7 +938,7 @@ tbody tr:last-child td { border-bottom: none; }
     width: 100%;
   }
 
-  /* Filtres Admin : empilés sur mobile */
+  /* Filtres Admin : empilés sur mobile (recherche + select pleine largeur) */
   .admin-filters {
     display: flex !important;
     flex-direction: column !important;
@@ -951,19 +951,10 @@ tbody tr:last-child td { border-bottom: none; }
     width: 100% !important;
     min-width: 0 !important;
   }
-  /* Boutons-pilules de filtre : wrap sur 2 lignes au lieu d'un menu deroulant */
-  .admin-filter-group {
+  .admin-status-filter {
     width: 100% !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-  }
-  .admin-filter-group .filter-btn {
-    flex: 1 1 auto;
-    min-width: max-content;
-    padding: 8px 12px !important;
-    font-size: 12px !important;
-    min-height: 40px;
+    max-width: 100% !important;
+    min-height: 44px;
   }
 
   /* SCROLL NATUREL : la page entiere scrolle comme une page web normale */
