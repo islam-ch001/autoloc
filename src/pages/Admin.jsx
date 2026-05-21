@@ -91,8 +91,8 @@ export default function Admin() {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-        <div className="search-bar" style={{ flex: 1, minWidth: 260 }}>
+      <div className="admin-filters">
+        <div className="search-bar admin-search-bar">
           <Search size={16} />
           <input
             value={search}
@@ -101,8 +101,7 @@ export default function Admin() {
           />
         </div>
         <select
-          className="form-select"
-          style={{ maxWidth: 220 }}
+          className="form-select admin-status-filter"
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
         >

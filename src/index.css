@@ -909,6 +909,17 @@ tbody tr:last-child td { border-bottom: none; }
   touch-action: pan-x pan-y;
 }
 
+/* Layout par défaut des filtres Admin (desktop) : ligne avec recherche flex + select fixe */
+.admin-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.admin-search-bar { flex: 1; min-width: 260px; }
+.admin-status-filter { max-width: 220px; }
+
 /* Classes utilitaires : afficher/cacher selon la taille d'écran */
 .show-mobile { display: none; }
 .hide-mobile { display: revert; }
@@ -925,6 +936,24 @@ tbody tr:last-child td { border-bottom: none; }
   .admin-table-wrap {
     overflow: visible !important;
     width: 100%;
+  }
+
+  /* Filtres Admin : empilés et pleine largeur sur mobile */
+  .admin-filters {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+    width: 100%;
+  }
+  .admin-search-bar {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .admin-status-filter {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 44px;
   }
 
   /* SCROLL NATUREL : la page entiere scrolle comme une page web normale */
