@@ -125,13 +125,15 @@ export default function Login() {
           <p style={styles.heroText}>
             Reservations, clients, vehicules, contrats et acces utilisateurs restent synchronises avec la base en ligne.
           </p>
-          <div style={styles.heroActions}>
-            <a href={WINDOWS_DOWNLOAD_URL} style={styles.downloadButton}>
-              <Download size={17} />
-              Telecharger l'app Windows
-            </a>
-            <span style={styles.downloadMeta}>Installeur Windows - connecte a la base en ligne</span>
-          </div>
+          {!window.autoloc?.isDesktop && (
+            <div style={styles.heroActions}>
+              <a href={WINDOWS_DOWNLOAD_URL} style={styles.downloadButton}>
+                <Download size={17} />
+                Telecharger l'app Windows
+              </a>
+              <span style={styles.downloadMeta}>Installeur Windows - connecte a la base en ligne</span>
+            </div>
+          )}
           <div style={styles.featureGrid} className="login-features">
             <div style={styles.featureItem}><ShieldCheck size={18} /><span>Acces controle</span></div>
             <div style={styles.featureItem}><Cloud size={18} /><span>Donnees securisees</span></div>
