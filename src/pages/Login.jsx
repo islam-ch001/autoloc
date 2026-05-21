@@ -134,7 +134,7 @@ export default function Login() {
           </div>
           <div style={styles.featureGrid} className="login-features">
             <div style={styles.featureItem}><ShieldCheck size={18} /><span>Acces controle</span></div>
-            <div style={styles.featureItem}><Cloud size={18} /><span>Donnees plus securiser</span></div>
+            <div style={styles.featureItem}><Cloud size={18} /><span>Donnees en ligne</span></div>
             <div style={styles.featureItem}><Gauge size={18} /><span>Gestion rapide</span></div>
           </div>
           <div style={styles.carPlate} className="login-car-plate">
@@ -429,7 +429,7 @@ const styles = {
   heroActions: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 26 },
   downloadButton: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 44, padding: '0 16px', borderRadius: 10, background: 'var(--primary)', color: '#0a0a0f', textDecoration: 'none', fontWeight: 800, fontSize: 13, boxShadow: '0 12px 28px var(--primary-glow)' },
   downloadMeta: { color: 'var(--text-3)', fontSize: 12, fontWeight: 600 },
-  featureGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginTop: 48 },
+  featureGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginTop: 24 },
   featureItem: { minHeight: 58, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', border: '1px solid var(--border)', borderRadius: 10, background: 'rgba(255,255,255,0.03)', color: 'var(--text-2)', fontSize: 12, fontWeight: 700 },
   carPlate: { marginTop: 'auto', minHeight: 170, borderRadius: 14, border: '1px solid var(--border)', background: 'linear-gradient(180deg, var(--surface-2), var(--bg))', display: 'grid', placeItems: 'center', position: 'relative', overflow: 'hidden' },
   carLine: { position: 'absolute', left: 0, right: 0, bottom: 42, height: 2, background: 'linear-gradient(90deg, transparent, var(--primary), transparent)', opacity: 0.8 },
