@@ -1071,10 +1071,15 @@ img, video { max-width: 100%; height: auto; }
     gap: 14px !important;
   }
 
-  /* Bouton thème : icône seule, position flottante */
-  .login-theme-btn {
+  /* Container des boutons (thème + langue) en haut à droite */
+  .login-top-buttons {
     top: 14px !important;
     right: 14px !important;
+    gap: 6px !important;
+    z-index: 10 !important;
+  }
+  /* Boutons thème + langue : icône seule, ronds avec blur */
+  .login-theme-btn {
     padding: 0 !important;
     width: 38px !important;
     min-height: 38px !important;
@@ -1083,7 +1088,6 @@ img, video { max-width: 100%; height: auto; }
     backdrop-filter: blur(10px);
     border-color: rgba(255,255,255,0.15) !important;
     color: #fff !important;
-    z-index: 10;
   }
   .login-theme-btn span { display: none !important; }
 }

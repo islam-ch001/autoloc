@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun, Download, ShieldCheck, Cloud, Gauge } from 'lucide-react';
+import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun, Download, ShieldCheck, Cloud, Gauge, Languages } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
@@ -9,7 +9,7 @@ const WINDOWS_DOWNLOAD_URL = 'https://github.com/islam-ch001/autoloc/releases/do
 
 export default function Login() {
   const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
-  const { t } = useT();
+  const { t, lang, toggle: toggleLang } = useT();
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'verify' | 'forgot' | 'reset'
@@ -105,16 +105,28 @@ export default function Login() {
 
   return (
     <div style={styles.shell} className="login-shell">
-      <button
-        type="button"
-        onClick={toggle}
-        title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
-        style={styles.themeButton}
-        className="login-theme-btn"
-      >
-        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        <span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span>
-      </button>
+      <div style={styles.topButtons} className="login-top-buttons">
+        <button
+          type="button"
+          onClick={toggleLang}
+          title={lang === 'fr' ? 'العربية' : 'Français'}
+          style={styles.themeButton}
+          className="login-theme-btn"
+        >
+          <Languages size={16} />
+          <span>{lang === 'fr' ? 'AR' : 'FR'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={toggle}
+          title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+          style={styles.themeButton}
+          className="login-theme-btn"
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          <span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span>
+        </button>
+      </div>
       <div style={styles.stage} className="login-stage">
         <section style={styles.heroPanel} className="login-hero">
           <div style={styles.heroTopline}>
@@ -415,11 +427,15 @@ const styles = {
     position: 'relative',
     overflowY: 'auto',
   },
-  themeButton: {
+  topButtons: {
     position: 'fixed',
     top: 18,
     right: 18,
     zIndex: 5,
+    display: 'flex',
+    gap: 8,
+  },
+  themeButton: {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
