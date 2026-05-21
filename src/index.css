@@ -906,19 +906,28 @@ tbody tr:last-child td { border-bottom: none; }
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x pan-y;     /* permet les deux axes */
+  touch-action: pan-x pan-y;
 }
-@media (max-width: 768px) {
-  table { min-width: 520px; }
 
-  /* CRITIQUE : conteneurs scrollables horizontalement doivent permettre le scroll vertical aussi */
-  .card > div[style*="overflow"],
-  .card div[style*="overflowX"] {
-    touch-action: pan-x pan-y !important;
-    -webkit-overflow-scrolling: touch;
+/* Classes utilitaires : afficher/cacher selon la taille d'écran */
+.show-mobile { display: none; }
+.hide-mobile { display: revert; }
+
+@media (max-width: 768px) {
+  table { min-width: 0; }     /* ne pas forcer la largeur, laisser shrink */
+
+  /* Inverse : afficher mobile / cacher desktop */
+  .show-mobile { display: revert !important; }
+  .hide-mobile { display: none !important; }
+  th.hide-mobile, td.hide-mobile { display: none !important; }
+
+  /* Pages avec tableau Admin : pas de scroll horizontal, on cache des colonnes */
+  .admin-table-wrap {
+    overflow: visible !important;
+    width: 100%;
   }
 
-  /* Le main-content garde le scroll vertical en priorité */
+  /* Le main-content garde le scroll vertical */
   .main-content {
     touch-action: pan-y;
     overscroll-behavior-y: contain;

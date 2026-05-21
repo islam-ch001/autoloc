@@ -123,16 +123,16 @@ export default function Admin() {
       {loading ? (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-3)' }}>Chargement...</div>
       ) : (
-        <div className="card">
-          <div style={{ overflowX: 'auto' }}>
+        <div className="card admin-table-card">
+          <div className="admin-table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Utilisateur</th>
-                  <th>Email</th>
-                  <th>Inscrit le</th>
-                  <th>Derniere connexion</th>
-                  <th>Acces</th>
+                  <th className="hide-mobile">Email</th>
+                  <th className="hide-mobile">Inscrit le</th>
+                  <th className="hide-mobile">Derniere connexion</th>
+                  <th className="hide-mobile">Acces</th>
                   <th>Statut</th>
                   <th>Actions</th>
                 </tr>
@@ -151,18 +151,22 @@ export default function Admin() {
                     <tr key={u.id}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), #d97706)', color: '#0a0a0f', fontWeight: 700, display: 'grid', placeItems: 'center', fontSize: 12 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--accent))', color: '#fff', fontWeight: 700, display: 'grid', placeItems: 'center', fontSize: 12, flexShrink: 0 }}>
                             {(u.name || '?').split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase()}
                           </div>
-                          <div style={{ fontWeight: 600 }}>{u.name}</div>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</div>
+                            {/* email visible uniquement en mobile (sous le nom) */}
+                            <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.email}</div>
+                          </div>
                         </div>
                       </td>
-                      <td style={{ fontSize: 12, color: 'var(--text-2)' }}>{u.email}</td>
-                      <td style={{ fontSize: 12 }}>{u.createdAt ? format(parseISO(u.createdAt), 'dd MMM yyyy', { locale: fr }) : '-'}</td>
-                      <td style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                      <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-2)' }}>{u.email}</td>
+                      <td className="hide-mobile" style={{ fontSize: 12 }}>{u.createdAt ? format(parseISO(u.createdAt), 'dd MMM yyyy', { locale: fr }) : '-'}</td>
+                      <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-3)' }}>
                         {u.lastLoginAt ? format(parseISO(u.lastLoginAt), 'dd/MM HH:mm', { locale: fr }) : '-'}
                       </td>
-                      <td style={{ fontSize: 12 }}>
+                      <td className="hide-mobile" style={{ fontSize: 12 }}>
                         {u.subscriptionPlan && <div style={{ fontWeight: 600 }}>{u.subscriptionPlan}</div>}
                         {u.subscriptionEnd && <div style={{ color: 'var(--text-3)' }}>Jusqu'au {format(parseISO(u.subscriptionEnd), 'dd/MM/yyyy')}</div>}
                         {!u.subscriptionEnd && <span style={{ color: 'var(--text-3)' }}>Aucun acces</span>}
@@ -170,7 +174,7 @@ export default function Admin() {
                       <td><span className={`badge ${s.cls}`}>{s.label}</span></td>
                       <td>
                         <button className="btn btn-sm" onClick={() => setEditing(u)}>
-                          <Calendar size={12} /> Gerer l'acces
+                          <Calendar size={12} /> <span className="hide-mobile">Gerer l'acces</span><span className="show-mobile">Gerer</span>
                         </button>
                       </td>
                     </tr>
