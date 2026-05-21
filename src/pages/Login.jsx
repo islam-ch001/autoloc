@@ -399,7 +399,20 @@ export default function Login() {
 }
 
 const styles = {
-  shell: { minHeight: '100vh', background: 'radial-gradient(circle at 18% 18%, var(--surface-2) 0%, var(--bg) 52%)', display: 'grid', placeItems: 'center', padding: 'clamp(10px, 3vw, 20px)', position: 'relative', overflowY: 'auto' },
+  shell: {
+    minHeight: '100vh',
+    background: `
+      radial-gradient(ellipse 80% 60% at 15% 10%, rgba(245,158,11,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 85% 90%, rgba(59,130,246,0.16) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 40% at 50% 50%, rgba(139,92,246,0.10) 0%, transparent 60%),
+      linear-gradient(135deg, var(--bg) 0%, var(--surface-2) 50%, var(--bg) 100%)
+    `,
+    display: 'grid',
+    placeItems: 'center',
+    padding: 'clamp(10px, 3vw, 20px)',
+    position: 'relative',
+    overflowY: 'auto',
+  },
   themeButton: {
     position: 'fixed',
     top: 18,

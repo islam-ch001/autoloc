@@ -965,9 +965,9 @@ img, video { max-width: 100%; height: auto; }
     padding: 0 !important;
     align-items: start !important;
     place-items: start stretch !important;
-    background: var(--bg) !important;
     overflow: visible !important;     /* le scroll se fait au niveau body */
     display: block !important;        /* simplifier : block scrollable */
+    /* On garde le dégradé du desktop, pas de background plat */
   }
 
   .login-stage {
