@@ -759,16 +759,51 @@ tbody tr:last-child td { border-bottom: none; }
   .vehicle-grid { grid-template-columns: 1fr !important; }
 
   /* Modals plein écran sur mobile */
+  .modal-overlay {
+    place-items: stretch;
+    align-items: stretch;
+    justify-items: stretch;
+  }
   .modal {
     width: 100%;
     max-width: 100%;
-    max-height: 100vh;
     height: 100vh;
+    height: 100dvh;        /* hauteur dynamique : exclut la barre du navigateur */
+    max-height: 100dvh;
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
   }
-  .modal-header { padding: 14px 16px; }
-  .modal-body { padding: 16px; }
-  .modal-footer { padding: 12px 16px; }
+  .modal-header {
+    padding: 14px 16px;
+    padding-top: calc(14px + env(safe-area-inset-top));
+    flex: 0 0 auto;
+  }
+  .modal-body {
+    padding: 16px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* espace pour que le dernier champ ne soit pas caché par le footer sticky */
+    padding-bottom: 20px;
+  }
+  .modal-footer {
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    flex: 0 0 auto;
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 5;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.2);
+  }
+  .modal-footer .btn,
+  .modal-footer button {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
+  }
 
   /* Tableaux scrollables */
   table { font-size: 12px; }
@@ -786,9 +821,103 @@ tbody tr:last-child td { border-bottom: none; }
   .search-bar { width: 100%; min-width: 0 !important; }
 }
 
+/* Petits téléphones (≤ 480px) */
 @media (max-width: 480px) {
-  .main-content { padding: 56px 10px 10px; }
+  .main-content {
+    padding: calc(56px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));
+  }
   .stat-card { padding: 14px; }
   .stat-value { font-size: 20px; }
   .stat-label { font-size: 11px; }
+  .page-title { font-size: 18px; }
+  .card-header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+  .card-body { padding: 14px; }
+  .btn { padding: 10px 14px; font-size: 13px; }
+  .btn-sm { padding: 8px 12px; font-size: 12px; }
+  .grid-3 { grid-template-columns: 1fr !important; }
+  .calendar-cell { min-height: 56px; padding: 4px; }
+  .calendar-day { font-size: 11px; }
+  .calendar-event { font-size: 9px; padding: 1px 4px; }
+  .calendar-header-cell { font-size: 10px; padding: 6px 2px; }
+  .modal-title { font-size: 16px; }
+  .modal-close { width: 36px; height: 36px; }
+  .vehicle-img { height: 160px; }
+  .vehicle-model { font-size: 18px; }
+  .tab-group { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab-btn { white-space: nowrap; padding: 8px 12px; font-size: 12px; }
+}
+
+/* Très petits téléphones (≤ 360px : iPhone SE, Galaxy Fold fermé, etc.) */
+@media (max-width: 360px) {
+  .main-content { padding-left: 8px; padding-right: 8px; }
+  .sidebar { width: 88vw; }
+  .sidebar-header { padding: 18px 14px; }
+  .logo-text { font-size: 16px; }
+  .logo-sub { font-size: 10px; }
+  .stat-value { font-size: 18px; }
+  .page-title { font-size: 17px; }
+  .card-header { padding: 10px 12px; }
+  .card-body { padding: 12px; }
+  .btn { padding: 9px 12px; font-size: 12px; }
+  .filter-btn { font-size: 10px; padding: 5px 8px; }
+  .nav-item { font-size: 13px; padding: 9px 12px; }
+  th, td { padding: 6px 8px !important; font-size: 11px; }
+  .modal-header { padding: 12px 14px; }
+  .modal-body { padding: 12px; }
+  .modal-footer { padding: 10px 14px; flex-direction: column; }
+  .modal-footer .btn { width: 100%; justify-content: center; }
+  .vehicle-img { height: 140px; }
+}
+
+/* Mode paysage sur petits écrans (téléphones) */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal { height: 100vh; max-height: 100vh; border-radius: 0; }
+  .sidebar-header { padding: 12px 16px; }
+  .nav-section-label { padding: 8px 12px 4px; }
+  .nav-item { padding: 7px 12px; }
+}
+
+/* Tableaux : conteneur scrollable horizontalement */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 768px) {
+  table { min-width: 520px; }
+}
+
+/* Inputs : empêcher le zoom auto sur iOS (< 16px déclenche le zoom) */
+@media (max-width: 768px) {
+  .form-input, .form-select, .form-textarea, .search-bar input, input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Cibles tactiles : minimum 44x44 px (recommandation Apple) */
+@media (hover: none) and (pointer: coarse) {
+  .action-btn { width: 36px; height: 36px; }
+  .btn { min-height: 40px; }
+  .nav-item { min-height: 42px; }
+  .modal-close { min-width: 36px; min-height: 36px; }
+}
+
+/* Empêcher le débordement horizontal global */
+html, body { max-width: 100vw; overflow-x: hidden; }
+.main-content { max-width: 100%; }
+img, video { max-width: 100%; height: auto; }
+
+/* Support des encoches (iPhone X+, etc.) */
+@supports (padding: env(safe-area-inset-top)) {
+  .mobile-menu-btn {
+    top: calc(12px + env(safe-area-inset-top));
+    left: calc(12px + env(safe-area-inset-left));
+  }
+  :root[dir="rtl"] .mobile-menu-btn {
+    right: calc(12px + env(safe-area-inset-right));
+  }
+  .sidebar {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

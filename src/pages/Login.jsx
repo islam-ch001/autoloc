@@ -398,7 +398,7 @@ export default function Login() {
 }
 
 const styles = {
-  shell: { height: '100vh', background: 'radial-gradient(circle at 18% 18%, var(--surface-2) 0%, var(--bg) 52%)', display: 'grid', placeItems: 'center', padding: 20, position: 'relative', overflowY: 'auto' },
+  shell: { minHeight: '100vh', background: 'radial-gradient(circle at 18% 18%, var(--surface-2) 0%, var(--bg) 52%)', display: 'grid', placeItems: 'center', padding: 'clamp(10px, 3vw, 20px)', position: 'relative', overflowY: 'auto' },
   themeButton: {
     position: 'fixed',
     top: 18,
@@ -420,10 +420,10 @@ const styles = {
     fontWeight: 700,
   },
   stage: { width: '100%', maxWidth: 1120, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22, alignItems: 'stretch' },
-  heroPanel: { minHeight: 560, borderRadius: 18, border: '1px solid var(--border)', background: 'linear-gradient(145deg, var(--surface) 0%, var(--bg-2) 58%, rgba(245,158,11,0.10) 100%)', boxShadow: 'var(--shadow-lg)', padding: 34, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' },
+  heroPanel: { minHeight: 'clamp(360px, 50vh, 560px)', borderRadius: 18, border: '1px solid var(--border)', background: 'linear-gradient(145deg, var(--surface) 0%, var(--bg-2) 58%, rgba(245,158,11,0.10) 100%)', boxShadow: 'var(--shadow-lg)', padding: 'clamp(18px, 4vw, 34px)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' },
   heroTopline: { display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--primary)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 18 },
   heroDot: { width: 9, height: 9, borderRadius: 999, background: 'var(--success)', boxShadow: '0 0 0 6px var(--success-soft)' },
-  heroTitle: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 42, lineHeight: 1.05, letterSpacing: 0, color: 'var(--text)', maxWidth: 560, margin: 0 },
+  heroTitle: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(24px, 5vw, 42px)', lineHeight: 1.1, letterSpacing: 0, color: 'var(--text)', maxWidth: 560, margin: 0 },
   heroText: { color: 'var(--text-2)', fontSize: 15, lineHeight: 1.7, maxWidth: 520, margin: '18px 0 0' },
   heroActions: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 26 },
   downloadButton: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 44, padding: '0 16px', borderRadius: 10, background: 'var(--primary)', color: '#0a0a0f', textDecoration: 'none', fontWeight: 800, fontSize: 13, boxShadow: '0 12px 28px var(--primary-glow)' },
@@ -434,7 +434,7 @@ const styles = {
   carLine: { position: 'absolute', left: 0, right: 0, bottom: 42, height: 2, background: 'linear-gradient(90deg, transparent, var(--primary), transparent)', opacity: 0.8 },
   carShape: { color: 'var(--primary)', filter: 'drop-shadow(0 18px 35px var(--primary-glow))' },
   plateText: { position: 'absolute', bottom: 14, padding: '5px 14px', borderRadius: 7, background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em' },
-  card: { width: '100%', maxWidth: 430, justifySelf: 'center', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, padding: 36, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: 'var(--shadow-lg)' },
+  card: { width: '100%', maxWidth: 430, justifySelf: 'center', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, padding: 'clamp(20px, 5vw, 36px)', display: 'flex', flexDirection: 'column', gap: 16, boxShadow: 'var(--shadow-lg)' },
   logo: { display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 4 },
   brand: { fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--primary)', letterSpacing: -0.5 },
   tabs: { display: 'flex', background: 'var(--bg)', padding: 4, borderRadius: 10, border: '1px solid var(--border)' },
