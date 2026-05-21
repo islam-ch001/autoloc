@@ -932,7 +932,7 @@ tbody tr:last-child td { border-bottom: none; }
   .hide-mobile { display: none !important; }
   th.hide-mobile, td.hide-mobile { display: none !important; }
 
-  /* Pages avec tableau Admin : pas de scroll horizontal, on cache des colonnes */
+  /* Tableau Admin sur mobile : 2 colonnes (Utilisateur + Statut), ligne entiere cliquable */
   .admin-table-wrap {
     overflow: visible !important;
     width: 100%;
@@ -942,34 +942,35 @@ tbody tr:last-child td { border-bottom: none; }
     width: 100%;
   }
   .admin-table-wrap th, .admin-table-wrap td {
-    padding: 10px 8px !important;
+    padding: 12px 10px !important;
     overflow: hidden;
   }
   .admin-table-wrap td:first-child {
     width: auto;     /* utilisateur prend l'espace restant */
   }
-  /* Colonne Statut : badge compact */
+  /* Colonne Statut : badge compact a droite */
   .admin-table-wrap th:nth-last-child(2),
   .admin-table-wrap td:nth-last-child(2) {
-    width: 60px;
-    text-align: center;
+    width: 80px;
+    text-align: right;
   }
-  /* Colonne Actions : juste l'icone (carré) */
-  .admin-table-wrap th:last-child,
-  .admin-table-wrap td:last-child {
-    width: 44px;
-    text-align: center;
-    padding: 8px 4px !important;
+  /* Indication visuelle : la ligne est cliquable */
+  .admin-row-clickable {
+    transition: background 0.15s;
   }
-  /* Bouton Gerer : icone seule, carré, centré */
-  .admin-manage-btn {
-    width: 36px;
-    height: 36px;
-    padding: 0 !important;
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    gap: 0 !important;
+  .admin-row-clickable:active {
+    background: var(--surface-2);
+  }
+  /* Petite fleche pour indiquer qu'on peut cliquer */
+  .admin-row-clickable td:last-child::after {
+    content: '›';
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 20px;
+    color: var(--text-3);
+    font-weight: 300;
+    line-height: 0;
+    vertical-align: middle;
   }
 
   /* Filtres Admin : empilés sur mobile (recherche + select pleine largeur) */

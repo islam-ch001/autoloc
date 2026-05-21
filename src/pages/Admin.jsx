@@ -133,7 +133,7 @@ export default function Admin() {
                   <th className="hide-mobile">Derniere connexion</th>
                   <th className="hide-mobile">Acces</th>
                   <th>Statut</th>
-                  <th>Actions</th>
+                  <th className="hide-mobile">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -147,7 +147,7 @@ export default function Admin() {
                 {filtered.map(u => {
                   const s = statusOf(u);
                   return (
-                    <tr key={u.id}>
+                    <tr key={u.id} className="admin-row-clickable" onClick={() => setEditing(u)} style={{ cursor: 'pointer' }}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--accent))', color: '#fff', fontWeight: 700, display: 'grid', placeItems: 'center', fontSize: 12, flexShrink: 0 }}>
@@ -171,10 +171,9 @@ export default function Admin() {
                         {!u.subscriptionEnd && <span style={{ color: 'var(--text-3)' }}>Aucun acces</span>}
                       </td>
                       <td><span className={`badge ${s.cls}`}>{s.label}</span></td>
-                      <td>
-                        <button className="btn btn-sm admin-manage-btn" onClick={() => setEditing(u)} title="Gerer l'acces">
-                          <Calendar size={14} />
-                          <span className="hide-mobile" style={{ marginLeft: 6 }}>Gerer l'acces</span>
+                      <td className="hide-mobile">
+                        <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); setEditing(u); }} title="Gerer l'acces">
+                          <Calendar size={14} style={{ marginRight: 6 }} /> Gerer l'acces
                         </button>
                       </td>
                     </tr>
