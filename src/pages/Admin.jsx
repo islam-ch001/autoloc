@@ -100,20 +100,27 @@ export default function Admin() {
             placeholder="Chercher un compte par email..."
           />
         </div>
-        <select
-          className="form-select admin-status-filter"
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-        >
-          <option value="all">Tous les comptes</option>
-          <option value="active">Actif</option>
-          <option value="trial">Essai</option>
-          <option value="expired">Expire</option>
-          <option value="none">Aucun acces</option>
-          <option value="blocked">Bloque</option>
-        </select>
+        <div className="filter-group admin-filter-group">
+          {[
+            { v: 'all',      label: 'Tous' },
+            { v: 'active',   label: 'Actif' },
+            { v: 'trial',    label: 'Essai' },
+            { v: 'expired',  label: 'Expire' },
+            { v: 'none',     label: 'Aucun acces' },
+            { v: 'blocked',  label: 'Bloque' },
+          ].map(opt => (
+            <button
+              key={opt.v}
+              type="button"
+              className={`filter-btn ${statusFilter === opt.v ? 'active' : ''}`}
+              onClick={() => setStatusFilter(opt.v)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
         {(search || statusFilter !== 'all') && (
-          <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-3)', width: '100%' }}>
             {filtered.length} / {managedUsers.length}
           </div>
         )}
