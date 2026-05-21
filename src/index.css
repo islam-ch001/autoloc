@@ -927,10 +927,17 @@ tbody tr:last-child td { border-bottom: none; }
     width: 100%;
   }
 
-  /* Le main-content garde le scroll vertical */
+  /* CRITIQUE : utiliser 100dvh pour s'adapter a la barre Safari et permettre le scroll */
+  .app-layout {
+    height: 100vh;
+    height: 100dvh !important;
+  }
   .main-content {
-    touch-action: pan-y;
-    overscroll-behavior-y: contain;
+    height: 100%;
+    max-height: 100dvh;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    /* PAS de touch-action: pan-y — ca bloque le scroll naturel sur iOS */
   }
 }
 
