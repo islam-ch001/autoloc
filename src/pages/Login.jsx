@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
-const WINDOWS_DOWNLOAD_URL = 'https://github.com/islam-ch001/autoloc/releases/download/autoloc-windows-online-2026-05-20/AutoLoc-Windows-Portable.zip';
+const WINDOWS_DOWNLOAD_URL = 'https://github.com/islam-ch001/autoloc/releases/download/autoloc-windows-installer-v1.0.0/AutoLoc-Setup.exe';
 
 export default function Login() {
   const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
@@ -130,7 +130,7 @@ export default function Login() {
               <Download size={17} />
               Telecharger l'app Windows
             </a>
-            <span style={styles.downloadMeta}>ZIP portable - connecte a la base en ligne</span>
+            <span style={styles.downloadMeta}>Installeur Windows - connecte a la base en ligne</span>
           </div>
           <div style={styles.featureGrid} className="login-features">
             <div style={styles.featureItem}><ShieldCheck size={18} /><span>Acces controle</span></div>
