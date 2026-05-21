@@ -28,3 +28,11 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Build outputs Electron desktop
+desktop/build-output/
+desktop/dist-installer/
+desktop/frontend/
+*.exe
+*.zip
+*.7z

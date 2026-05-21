@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, Car, CalendarDays, Users, FileText, RotateCcw, Settings, LogOut, Wrench, Sun, Moon, Languages, ShieldCheck, Menu, X, ChevronUp } from 'lucide-react';
+import { LayoutDashboard, Car, CalendarDays, Users, UserCheck, FileText, RotateCcw, Settings, LogOut, Wrench, Sun, Moon, Languages, ShieldCheck, Menu, X, ChevronUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -20,6 +20,7 @@ const navItemsConfig = [
   { to: '/vehicles', icon: Car, key: 'nav.vehicles' },
   { to: '/reservations', icon: FileText, key: 'nav.reservations' },
   { to: '/clients', icon: Users, key: 'nav.clients' },
+  { to: '/drivers', icon: UserCheck, key: 'nav.drivers' },
   { to: '/calendar', icon: CalendarDays, key: 'nav.calendar' },
   { to: '/returns', icon: RotateCcw, key: 'nav.returns' },
   { to: '/maintenance', icon: Wrench, key: 'nav.maintenance' },

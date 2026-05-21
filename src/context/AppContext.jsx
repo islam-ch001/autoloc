@@ -6,6 +6,7 @@ const AppContext = createContext();
 export function AppProvider({ children }) {
   const [vehicles,     setVehicles]     = useState([]);
   const [clients,      setClients]      = useState([]);
+  const [drivers,      setDrivers]      = useState([]);
   const [reservations, setReservations] = useState([]);
   const [returns,      setReturns]      = useState([]);
   const [maintenance,  setMaintenance]  = useState([]);
@@ -17,15 +18,17 @@ export function AppProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      const [v, c, r, ret, m] = await Promise.all([
+      const [v, c, d, r, ret, m] = await Promise.all([
         api.getVehicles(),
         api.getClients(),
+        api.getDrivers().catch(() => []),  // graceful fallback si table pas encore créée
         api.getReservations(),
         api.getReturns(),
         api.getMaintenance(),
       ]);
       setVehicles(v);
       setClients(c);
+      setDrivers(d);
       setReservations(r);
       setReturns(ret);
       setMaintenance(m);
@@ -67,6 +70,22 @@ export function AppProvider({ children }) {
     const c = await api.updateClient(id, data);
     setClients(prev => prev.map(x => x.id === id ? c : x));
     return c;
+  };
+
+  // ── Chauffeurs ─────────────────────────────────────────────
+  const addDriver = async (data) => {
+    const d = await api.createDriver(data);
+    setDrivers(prev => [...prev, d]);
+    return d;
+  };
+  const patchDriver = async (id, data) => {
+    const d = await api.updateDriver(id, data);
+    setDrivers(prev => prev.map(x => x.id === id ? d : x));
+    return d;
+  };
+  const removeDriver = async (id) => {
+    await api.deleteDriver(id);
+    setDrivers(prev => prev.filter(x => x.id !== id));
   };
 
   // ── Réservations ───────────────────────────────────────────
@@ -135,13 +154,15 @@ export function AppProvider({ children }) {
   };
 
   const value = {
-    vehicles, clients, reservations, returns, maintenance,
+    vehicles, clients, drivers, reservations, returns, maintenance,
     loading, error, reload: loadAll,
     addMaintenance, patchMaintenance, removeMaintenance,
     // Véhicules
     setVehicles, addVehicle, patchVehicle, removeVehicle,
     // Clients
     setClients, addClient, patchClient,
+    // Chauffeurs
+    setDrivers, addDriver, patchDriver, removeDriver,
     // Réservations
     setReservations, addReservation, updateReservation, removeReservation,
     // Retours

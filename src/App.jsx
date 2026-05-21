@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Vehicles from './pages/Vehicles';
 import Reservations from './pages/Reservations';
 import Clients from './pages/Clients';
+import Drivers from './pages/Drivers';
 import Calendar from './pages/Calendar';
 import Returns from './pages/Returns';
 import Maintenance from './pages/Maintenance';
@@ -106,6 +107,7 @@ function AppShell() {
           <Route path="/vehicles"     element={<Vehicles />} />
           <Route path="/reservations" element={<Reservations />} />
           <Route path="/clients"      element={<Clients />} />
+          <Route path="/drivers"      element={<Drivers />} />
           <Route path="/calendar"     element={<Calendar />} />
           <Route path="/returns"      element={<Returns />} />
           <Route path="/maintenance"  element={<Maintenance />} />

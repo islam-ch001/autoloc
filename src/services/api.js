@@ -78,6 +78,13 @@ export const createClient    = (data)       => request('POST', '/clients', data)
 export const updateClient    = (id, data)   => request('PATCH', `/clients/${id}`, data);
 export const deleteClient    = (id)         => request('DELETE', `/clients/${id}`);
 
+// ─── Chauffeurs (drivers) ────────────────────────────────────
+export const getDrivers      = (params)     => request('GET', `/drivers${buildQS(params)}`);
+export const getDriver       = (id)         => request('GET', `/drivers/${id}`);
+export const createDriver    = (data)       => request('POST', '/drivers', data);
+export const updateDriver    = (id, data)   => request('PATCH', `/drivers/${id}`, data);
+export const deleteDriver    = (id)         => request('DELETE', `/drivers/${id}`);
+
 // ─── Réservations ────────────────────────────────────────────
 export const getReservations  = (status)   => request('GET', `/reservations${status ? `?status=${status}` : ''}`);
 export const getReservation   = (id)       => request('GET', `/reservations/${id}`);

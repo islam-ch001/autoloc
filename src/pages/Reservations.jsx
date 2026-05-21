@@ -289,9 +289,9 @@ function EditReservationModal({ reservation: r, onClose, onSave }) {
 }
 
 function AddReservationModal({ onClose }) {
-  const { clients, vehicles, addReservation } = useApp();
+  const { clients, vehicles, drivers, addReservation } = useApp();
   const { t } = useT();
-  const [form, setForm] = useState({ clientId: '', vehicleId: '', startDate: '', endDate: '', paymentMethod: 'Espèces', deposit: '', paidAmount: '', kmLimit: 200, extraKmPrice: 50, notes: '' });
+  const [form, setForm] = useState({ clientId: '', vehicleId: '', driverId: '', startDate: '', endDate: '', paymentMethod: 'Espèces', deposit: '', paidAmount: '', kmLimit: 200, extraKmPrice: 50, notes: '' });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const vehicle = vehicles.find(v => v.id === +form.vehicleId);
@@ -302,6 +302,7 @@ function AddReservationModal({ onClose }) {
     if (!form.clientId || !form.vehicleId || !form.startDate || !form.endDate) return;
     addReservation({
       clientId: +form.clientId, vehicleId: +form.vehicleId,
+      driverId: form.driverId ? +form.driverId : null,
       startDate: form.startDate, endDate: form.endDate,
       status: 'upcoming', totalPrice: total,
       paidAmount: +form.paidAmount || 0,
@@ -333,6 +334,19 @@ function AddReservationModal({ onClose }) {
           ))}
         </select>
       </div>
+      {drivers && drivers.length > 0 && (
+        <div className="form-group">
+          <label className="form-label">Chauffeur (optionnel)</label>
+          <select className="form-select" value={form.driverId} onChange={e => set('driverId', e.target.value)}>
+            <option value="">— Sans chauffeur —</option>
+            {drivers.filter(d => d.status === 'active').map(d => (
+              <option key={d.id} value={d.id}>
+                {d.firstName} {d.lastName}{d.dailyRate > 0 ? ` — ${d.dailyRate.toLocaleString()} DA/j` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="form-row">
         <div className="form-group"><label className="form-label">{t('res.startDate') + ' *'}</label><input className="form-input" type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} /></div>
         <div className="form-group"><label className="form-label">{t('res.endDate') + ' *'}</label><input className="form-input" type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} /></div>
