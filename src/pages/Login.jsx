@@ -104,18 +104,19 @@ export default function Login() {
   const isSignup = mode === 'signup';
 
   return (
-    <div style={styles.shell}>
+    <div style={styles.shell} className="login-shell">
       <button
         type="button"
         onClick={toggle}
         title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
         style={styles.themeButton}
+        className="login-theme-btn"
       >
         {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
         <span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span>
       </button>
-      <div style={styles.stage}>
-        <section style={styles.heroPanel}>
+      <div style={styles.stage} className="login-stage">
+        <section style={styles.heroPanel} className="login-hero">
           <div style={styles.heroTopline}>
             <span style={styles.heroDot} />
             AutoLoc Cloud
@@ -131,12 +132,12 @@ export default function Login() {
             </a>
             <span style={styles.downloadMeta}>ZIP portable - connecte a la base en ligne</span>
           </div>
-          <div style={styles.featureGrid}>
+          <div style={styles.featureGrid} className="login-features">
             <div style={styles.featureItem}><ShieldCheck size={18} /><span>Acces controle</span></div>
             <div style={styles.featureItem}><Cloud size={18} /><span>Donnees en ligne</span></div>
             <div style={styles.featureItem}><Gauge size={18} /><span>Gestion rapide</span></div>
           </div>
-          <div style={styles.carPlate}>
+          <div style={styles.carPlate} className="login-car-plate">
             <div style={styles.carLine} />
             <div style={styles.carShape}>
               <Car size={64} />
@@ -145,7 +146,7 @@ export default function Login() {
           </div>
         </section>
 
-      <form onSubmit={handleSubmit} style={styles.card}>
+      <form onSubmit={handleSubmit} style={styles.card} className="login-card">
         <div style={styles.logo}>
           <Car size={32} style={{ color: 'var(--primary)' }} />
           <span style={styles.brand}>AutoLoc</span>
