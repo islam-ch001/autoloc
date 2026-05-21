@@ -950,65 +950,142 @@ img, video { max-width: 100%; height: auto; }
   }
 }
 
-/* Mobile : form en premier, hero condensé en dessous (ou caché) */
+/* ===== MOBILE LANDING PAGE (≤ 640px) ===== */
 @media (max-width: 640px) {
   .login-shell {
     min-height: 100vh;
     min-height: 100dvh;
-    padding: 12px !important;
-    padding-top: 60px !important;   /* place pour le bouton thème en haut */
-    align-items: start !important;
+    padding: 0 !important;
+    align-items: stretch !important;
+    place-items: stretch !important;
+    background: var(--bg) !important;
   }
+
   .login-stage {
-    gap: 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
     width: 100% !important;
-  }
-  /* Le formulaire passe en premier (UX : action principale en haut) */
-  .login-card {
-    order: -1 !important;
-    padding: 22px !important;
-    gap: 12px !important;
     max-width: 100% !important;
+    padding: 0 !important;
   }
+
+  /* ---- HERO en haut : style landing page ---- */
   .login-hero {
-    padding: 20px !important;
+    order: 1 !important;
+    border: none !important;
+    border-radius: 0 0 28px 28px !important;
     min-height: auto !important;
+    padding: 64px 22px 32px !important;
+    background: linear-gradient(160deg,
+      var(--surface) 0%,
+      var(--bg-2) 45%,
+      rgba(245,158,11,0.18) 100%) !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25) !important;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
   }
+  /* Cercle décoratif en arrière-plan */
+  .login-hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, var(--primary-soft) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .login-hero > * { position: relative; z-index: 1; }
+
+  .login-hero h1 {
+    font-size: clamp(26px, 7vw, 34px) !important;
+    line-height: 1.15 !important;
+    margin: 8px 0 0 !important;
+  }
+  .login-hero p {
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    margin-top: 14px !important;
+  }
+
+  /* Bouton téléchargement plus visible */
+  .login-hero a[href*="github"] {
+    width: 100%;
+    justify-content: center;
+    min-height: 50px !important;
+    font-size: 14px !important;
+    border-radius: 14px !important;
+    margin-top: 4px;
+  }
+
+  /* Grille features : 3 colonnes en mobile (chips compactes) */
   .login-features {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 8px !important;
+    margin-top: 18px !important;
   }
-  .login-theme-btn {
-    top: 10px !important;
-    right: 10px !important;
-    padding: 0 10px !important;
-    min-height: 36px !important;
-    font-size: 12px !important;
+  .login-features > div {
+    flex-direction: column !important;
+    text-align: center;
+    padding: 12px 6px !important;
+    min-height: 70px !important;
+    font-size: 10.5px !important;
+    line-height: 1.2;
   }
-}
 
-/* Très petits téléphones : cacher complètement le hero, focus 100% sur le form */
-@media (max-width: 480px) {
-  .login-hero {
-    display: none !important;
-  }
-  .login-shell {
-    place-items: center !important;
-    padding: 16px !important;
-    padding-top: 56px !important;
-  }
+  /* Cacher la décoration voiture (déjà décorative dans le hero) */
+  .login-car-plate { display: none !important; }
+
+  /* ---- FORMULAIRE en dessous : style carte landing ---- */
   .login-card {
-    padding: 20px !important;
+    order: 2 !important;
+    margin: -20px 16px 24px !important;    /* chevauche légèrement le hero */
+    padding: 24px 20px !important;
+    border-radius: 20px !important;
+    max-width: calc(100% - 32px) !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.35) !important;
+    position: relative;
+    z-index: 2;
+    gap: 14px !important;
   }
+
+  /* Bouton thème : icône seule, position flottante */
+  .login-theme-btn {
+    top: 14px !important;
+    right: 14px !important;
+    padding: 0 !important;
+    width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 50% !important;
+    background: rgba(0,0,0,0.25) !important;
+    backdrop-filter: blur(10px);
+    border-color: rgba(255,255,255,0.15) !important;
+    color: #fff !important;
+    z-index: 10;
+  }
+  .login-theme-btn span { display: none !important; }
 }
 
-/* Très très petits (≤ 360px : Galaxy Fold, iPhone SE 1G) */
-@media (max-width: 360px) {
-  .login-shell { padding: 10px !important; padding-top: 52px !important; }
-  .login-card { padding: 16px !important; gap: 10px !important; }
+/* Très petits téléphones (≤ 380px) */
+@media (max-width: 380px) {
+  .login-hero { padding: 56px 18px 28px !important; }
+  .login-hero h1 { font-size: 22px !important; }
+  .login-hero p { font-size: 13px !important; }
+  .login-features {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+  .login-features > div {
+    padding: 10px 4px !important;
+    font-size: 9.5px !important;
+    min-height: 64px !important;
+  }
+  .login-features > div svg { width: 16px !important; height: 16px !important; }
+  .login-card { padding: 20px 16px !important; }
 }
 
-/* Mode paysage sur téléphone : layout horizontal compact */
+/* Mode paysage : on remet le layout côte à côte compact */
 @media (max-height: 500px) and (orientation: landscape) {
   .login-shell {
     padding: 10px !important;
@@ -1020,6 +1097,7 @@ img, video { max-width: 100%; height: auto; }
     padding: 16px !important;
     gap: 10px !important;
     max-width: 480px !important;
+    margin: 0 auto !important;
   }
   .login-theme-btn {
     top: 8px !important;
