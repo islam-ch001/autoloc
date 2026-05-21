@@ -906,9 +906,23 @@ tbody tr:last-child td { border-bottom: none; }
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;     /* permet les deux axes */
 }
 @media (max-width: 768px) {
   table { min-width: 520px; }
+
+  /* CRITIQUE : conteneurs scrollables horizontalement doivent permettre le scroll vertical aussi */
+  .card > div[style*="overflow"],
+  .card div[style*="overflowX"] {
+    touch-action: pan-x pan-y !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Le main-content garde le scroll vertical en priorité */
+  .main-content {
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
+  }
 }
 
 /* Inputs : empêcher le zoom auto sur iOS (< 16px déclenche le zoom) */
