@@ -172,8 +172,9 @@ export default function Admin() {
                       </td>
                       <td><span className={`badge ${s.cls}`}>{s.label}</span></td>
                       <td>
-                        <button className="btn btn-sm" onClick={() => setEditing(u)}>
-                          <Calendar size={12} /> <span className="hide-mobile">Gerer l'acces</span><span className="show-mobile">Gerer</span>
+                        <button className="btn btn-sm admin-manage-btn" onClick={() => setEditing(u)} title="Gerer l'acces">
+                          <Calendar size={14} />
+                          <span className="hide-mobile" style={{ marginLeft: 6 }}>Gerer l'acces</span>
                         </button>
                       </td>
                     </tr>

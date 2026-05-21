@@ -937,6 +937,40 @@ tbody tr:last-child td { border-bottom: none; }
     overflow: visible !important;
     width: 100%;
   }
+  .admin-table-wrap table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .admin-table-wrap th, .admin-table-wrap td {
+    padding: 10px 8px !important;
+    overflow: hidden;
+  }
+  .admin-table-wrap td:first-child {
+    width: auto;     /* utilisateur prend l'espace restant */
+  }
+  /* Colonne Statut : badge compact */
+  .admin-table-wrap th:nth-last-child(2),
+  .admin-table-wrap td:nth-last-child(2) {
+    width: 60px;
+    text-align: center;
+  }
+  /* Colonne Actions : juste l'icone (carré) */
+  .admin-table-wrap th:last-child,
+  .admin-table-wrap td:last-child {
+    width: 44px;
+    text-align: center;
+    padding: 8px 4px !important;
+  }
+  /* Bouton Gerer : icone seule, carré, centré */
+  .admin-manage-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0 !important;
+  }
 
   /* Filtres Admin : empilés sur mobile (recherche + select pleine largeur) */
   .admin-filters {
