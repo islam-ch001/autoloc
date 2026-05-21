@@ -764,19 +764,21 @@ tbody tr:last-child td { border-bottom: none; }
     align-items: stretch !important;
     justify-content: stretch !important;
     padding: 0;
+    /* CRITIQUE : l'overlay s'arrête au-dessus de la barre Safari iOS */
+    height: 100vh;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    inset: 0 0 auto 0 !important;     /* pas de bottom:0 — on contrôle par height */
+    top: 0 !important;
   }
   .modal {
     width: 100% !important;
     max-width: 100% !important;
-    /* hauteur fixe basée sur le parent fixed inset:0 — fiable partout */
     height: 100% !important;
     max-height: 100% !important;
     border-radius: 0 !important;
     display: flex !important;
     flex-direction: column !important;
-    /* fallback dvh pour les navigateurs récents */
-    height: 100dvh !important;
-    max-height: 100dvh !important;
   }
   .modal-header {
     padding: 14px 16px !important;
@@ -792,15 +794,31 @@ tbody tr:last-child td { border-bottom: none; }
     -webkit-overflow-scrolling: touch;
   }
   .modal-footer {
-    padding: 12px 16px !important;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+    padding: 14px 16px !important;
+    /* iOS Safari : la barre flottante peut faire ~85px en bas. On laisse de la marge. */
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
     flex: 0 0 auto !important;     /* le footer ne se rétrécit JAMAIS */
     background: var(--surface) !important;
     border-top: 1px solid var(--border) !important;
     box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
-    /* pas de sticky — flex column le place naturellement en bas */
     display: flex !important;
     gap: 8px !important;
+  }
+  /* iOS Safari : forcer une marge supplémentaire pour passer au-dessus de la barre flottante */
+  @supports (-webkit-touch-callout: none) {
+    .modal-footer {
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+      margin-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .modal {
+      /* svh = small viewport height : la PLUS PETITE hauteur (barre Safari visible) */
+      height: 100svh !important;
+      max-height: 100svh !important;
+    }
+    .modal-overlay {
+      height: 100svh !important;
+      max-height: 100svh !important;
+    }
   }
   .modal-footer .btn,
   .modal-footer button {
