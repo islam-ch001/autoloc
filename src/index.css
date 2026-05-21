@@ -952,13 +952,22 @@ img, video { max-width: 100%; height: auto; }
 
 /* ===== MOBILE LANDING PAGE (≤ 640px) ===== */
 @media (max-width: 640px) {
+  /* IMPORTANT : permettre le scroll vertical sur la page de connexion */
+  html:has(.login-shell), body:has(.login-shell), #root:has(.login-shell) {
+    overflow: auto !important;
+    height: auto !important;
+    min-height: 100% !important;
+  }
   .login-shell {
+    height: auto !important;
     min-height: 100vh;
     min-height: 100dvh;
     padding: 0 !important;
-    align-items: stretch !important;
-    place-items: stretch !important;
+    align-items: start !important;
+    place-items: start stretch !important;
     background: var(--bg) !important;
+    overflow: visible !important;     /* le scroll se fait au niveau body */
+    display: block !important;        /* simplifier : block scrollable */
   }
 
   .login-stage {
