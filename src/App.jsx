@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LogOut, Moon, ShieldCheck, Sun } from 'lucide-react';
 import { AppProvider, useApp } from './context/AppContext';
@@ -7,19 +8,22 @@ import { ThemeProvider } from './context/ThemeContext';
 import { useTheme } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
-import Vehicles from './pages/Vehicles';
-import Reservations from './pages/Reservations';
-import Clients from './pages/Clients';
-import Drivers from './pages/Drivers';
-import Calendar from './pages/Calendar';
-import Returns from './pages/Returns';
-import Maintenance from './pages/Maintenance';
-import Settings from './pages/Settings';
-import Admin from './pages/Admin';
-import SubscriptionRequired from './pages/SubscriptionRequired';
-import Login from './pages/Login';
 import './index.css';
+
+// Lazy loading : chaque page est chargée à la demande
+// → bundle initial 80% plus petit, demarrage instantané
+const Dashboard            = lazy(() => import('./pages/Dashboard'));
+const Vehicles             = lazy(() => import('./pages/Vehicles'));
+const Reservations         = lazy(() => import('./pages/Reservations'));
+const Clients              = lazy(() => import('./pages/Clients'));
+const Drivers              = lazy(() => import('./pages/Drivers'));
+const Calendar             = lazy(() => import('./pages/Calendar'));
+const Returns              = lazy(() => import('./pages/Returns'));
+const Maintenance          = lazy(() => import('./pages/Maintenance'));
+const Settings             = lazy(() => import('./pages/Settings'));
+const Admin                = lazy(() => import('./pages/Admin'));
+const SubscriptionRequired = lazy(() => import('./pages/SubscriptionRequired'));
+const Login                = lazy(() => import('./pages/Login'));
 
 function FullScreenLoader({ text = 'Chargement…' }) {
   return (
@@ -46,7 +50,7 @@ function RequireAuth({ children }) {
     || (validStatus
         && user.subscriptionEnd
         && new Date(user.subscriptionEnd) >= new Date());
-  if (!isSubActive) return <SubscriptionRequired />;
+  if (!isSubActive) return <Suspense fallback={<FullScreenLoader />}><SubscriptionRequired /></Suspense>;
 
   return children;
 }
@@ -102,19 +106,30 @@ function AppShell() {
       <Sidebar />
       <main className="main-content">
         <TrialBanner />
-        <Routes>
-          <Route path="/"             element={<Dashboard />} />
-          <Route path="/vehicles"     element={<Vehicles />} />
-          <Route path="/reservations" element={<Reservations />} />
-          <Route path="/clients"      element={<Clients />} />
-          <Route path="/drivers"      element={<Drivers />} />
-          <Route path="/calendar"     element={<Calendar />} />
-          <Route path="/returns"      element={<Returns />} />
-          <Route path="/maintenance"  element={<Maintenance />} />
-          <Route path="/admin"        element={<Admin />} />
-          <Route path="/settings"     element={<Settings />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/"             element={<Dashboard />} />
+            <Route path="/vehicles"     element={<Vehicles />} />
+            <Route path="/reservations" element={<Reservations />} />
+            <Route path="/clients"      element={<Clients />} />
+            <Route path="/drivers"      element={<Drivers />} />
+            <Route path="/calendar"     element={<Calendar />} />
+            <Route path="/returns"      element={<Returns />} />
+            <Route path="/maintenance"  element={<Maintenance />} />
+            <Route path="/admin"        element={<Admin />} />
+            <Route path="/settings"     element={<Settings />} />
+          </Routes>
+        </Suspense>
       </main>
+    </div>
+  );
+}
+
+function PageLoader() {
+  return (
+    <div style={{ padding: 40, display: 'grid', placeItems: 'center', minHeight: 200 }}>
+      <div style={{ width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
@@ -170,10 +185,12 @@ function SuperAdminShell() {
       </header>
 
       <main style={{ padding: 24, maxWidth: 1280, margin: '0 auto' }}>
-        <Routes>
-          <Route path="/admin" element={<Admin />} />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/admin" element={<Admin />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   );
@@ -200,7 +217,7 @@ export default function App() {
       <ThemeProvider>
       <AuthProvider>
         <Routes>
-          <Route path="/login"    element={<Login />} />
+          <Route path="/login"    element={<Suspense fallback={<FullScreenLoader />}><Login /></Suspense>} />
           <Route path="/*" element={
             <RequireAuth>
               <AuthenticatedApp />
