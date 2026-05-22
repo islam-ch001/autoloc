@@ -17,7 +17,7 @@ const statusMap = {
 };
 
 export default function Reservations() {
-  const { reservations, vehicles, clients, addReservation, updateReservation, removeReservation } = useApp();
+  const { reservations, vehicles, clients, drivers, addReservation, updateReservation, removeReservation } = useApp();
   const { t } = useT();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Tous');
@@ -107,6 +107,7 @@ export default function Reservations() {
               {filtered.map(r => {
                 const client = clients.find(c => c.id === r.clientId);
                 const vehicle = vehicles.find(v => v.id === r.vehicleId);
+                const driver = r.driverId ? drivers.find(d => d.id === r.driverId) : null;
                 const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
                 const remaining = r.totalPrice - r.paidAmount;
                 return (
@@ -118,6 +119,11 @@ export default function Reservations() {
                           <span style={{ color: 'var(--text-3)', fontWeight: 700, marginRight: 6 }}>#{r.displayId || r.id}</span>
                           {client?.firstName} {client?.lastName}
                         </div>
+                        {driver && (
+                          <div style={{ fontSize: 11, color: 'var(--accent)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            🧑‍✈️ {driver.firstName} {driver.lastName}
+                          </div>
+                        )}
                         <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           🚗 {vehicle?.brand} {vehicle?.model} · {format(parseISO(r.startDate), 'dd/MM')}→{format(parseISO(r.endDate), 'dd/MM')}
                         </div>
@@ -222,7 +228,7 @@ export default function Reservations() {
 }
 
 function EditReservationModal({ reservation: r, onClose, onSave }) {
-  const { clients, vehicles } = useApp();
+  const { clients, vehicles, drivers } = useApp();
   const { t } = useT();
   const client  = clients.find(c => c.id === r.clientId);
   const vehicle = vehicles.find(v => v.id === r.vehicleId);
@@ -230,6 +236,7 @@ function EditReservationModal({ reservation: r, onClose, onSave }) {
   const [form, setForm] = useState({
     startDate: r.startDate ? r.startDate.split('T')[0] : '',
     endDate:   r.endDate ? r.endDate.split('T')[0] : '',
+    driverId:      r.driverId || '',
     paidAmount:    r.paidAmount || 0,
     deposit:       r.deposit || 0,
     paymentMethod: r.paymentMethod || 'Espèces',
@@ -252,6 +259,7 @@ function EditReservationModal({ reservation: r, onClose, onSave }) {
     await onSave({
       startDate: form.startDate,
       endDate: form.endDate,
+      driverId: form.driverId ? +form.driverId : null,
       paidAmount: +form.paidAmount || 0,
       deposit: +form.deposit || 0,
       paymentMethod: form.paymentMethod,
@@ -280,6 +288,20 @@ function EditReservationModal({ reservation: r, onClose, onSave }) {
         <div className="form-group"><label className="form-label">{t('res.startDate') + ' *'}</label><input className="form-input" type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} /></div>
         <div className="form-group"><label className="form-label">{t('res.endDate') + ' *'}</label><input className="form-input" type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} /></div>
       </div>
+
+      {drivers && drivers.length > 0 && (
+        <div className="form-group">
+          <label className="form-label">Chauffeur (optionnel)</label>
+          <select className="form-select" value={form.driverId} onChange={e => set('driverId', e.target.value)}>
+            <option value="">— Sans chauffeur —</option>
+            {drivers.filter(d => d.status === 'active' || d.id === r.driverId).map(d => (
+              <option key={d.id} value={d.id}>
+                {d.firstName} {d.lastName}{d.dailyRate > 0 ? ` — ${d.dailyRate.toLocaleString()} DA/j` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {days > 0 && (
         <div style={{ padding: '10px 14px', background: 'var(--primary-soft)', borderRadius: 8, marginBottom: 14, fontSize: 13 }}>
@@ -413,10 +435,11 @@ function AddReservationModal({ onClose }) {
 }
 
 function ReservationDetailModal({ reservation: r, onClose, onPrint, onContract, onEdit, onActivate, onDelete }) {
-  const { clients, vehicles } = useApp();
+  const { clients, vehicles, drivers } = useApp();
   const { t } = useT();
   const client = clients.find(c => c.id === r.clientId);
   const vehicle = vehicles.find(v => v.id === r.vehicleId);
+  const driver = r.driverId ? drivers.find(d => d.id === r.driverId) : null;
   const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
   const isUpcoming  = r.status === 'upcoming';
   const isCancelled = r.status === 'cancelled';
@@ -482,6 +505,13 @@ function ReservationDetailModal({ reservation: r, onClose, onPrint, onContract, 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         <InfoBox label={t('res.client')} value={`${client?.firstName} ${client?.lastName}`} sub={client?.phone} />
         <InfoBox label={t('res.vehicle')} value={`${vehicle?.brand} ${vehicle?.model}`} sub={vehicle?.plate} />
+        {driver && (
+          <InfoBox
+            label="Chauffeur"
+            value={`${driver.firstName} ${driver.lastName}`}
+            sub={`${driver.phone}${driver.dailyRate > 0 ? ` · ${driver.dailyRate.toLocaleString('fr-DZ')} DA/j` : ''}`}
+          />
+        )}
         <InfoBox label={t('res.startDate')} value={format(parseISO(r.startDate), 'dd MMMM yyyy', { locale: fr })} />
         <InfoBox label={t('res.endDate')} value={format(parseISO(r.endDate), 'dd MMMM yyyy', { locale: fr })} />
         <InfoBox label={t('res.duration')} value={`${days} jours`} />

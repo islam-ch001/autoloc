@@ -9,10 +9,15 @@ router.get('/', async (req, res) => {
     let query = `
       SELECT r.*,
              c.first_name, c.last_name, c.phone,
-             v.brand, v.model, v.plate, v.price_per_day
+             v.brand, v.model, v.plate, v.price_per_day,
+             d.first_name AS driver_first_name,
+             d.last_name  AS driver_last_name,
+             d.phone      AS driver_phone,
+             d.daily_rate AS driver_daily_rate
       FROM reservations r
       JOIN clients  c ON c.id = r.client_id
       JOIN vehicles v ON v.id = r.vehicle_id
+      LEFT JOIN drivers d ON d.id = r.driver_id
       WHERE r.user_id = $1
     `;
     if (status) { query += ' AND r.status = $2'; params.push(status); }
@@ -30,10 +35,18 @@ router.get('/:id', async (req, res) => {
     const { rows } = await pool.query(
       `SELECT r.*,
               c.first_name, c.last_name, c.phone, c.email,
-              v.brand, v.model, v.plate, v.price_per_day, v.mileage
+              v.brand, v.model, v.plate, v.price_per_day, v.mileage,
+              d.first_name AS driver_first_name,
+              d.last_name  AS driver_last_name,
+              d.phone      AS driver_phone,
+              d.email      AS driver_email,
+              d.daily_rate AS driver_daily_rate,
+              d.license    AS driver_license,
+              d.license_number AS driver_license_number
        FROM reservations r
        JOIN clients  c ON c.id = r.client_id
        JOIN vehicles v ON v.id = r.vehicle_id
+       LEFT JOIN drivers d ON d.id = r.driver_id
        WHERE r.id = $1 AND r.user_id = $2`,
       [req.params.id, req.user.id]
     );
