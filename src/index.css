@@ -1017,6 +1017,30 @@ tbody tr:last-child td { border-bottom: none; }
     vertical-align: middle;
   }
 
+  /* ===== Modales : forcer toutes les grilles 2-col / 3-col en 1-col sur mobile =====
+     Cible les inline styles {gridTemplateColumns: '1fr 1fr'} etc. dans les detail/edit modals. */
+  .modal-body [style*="1fr 1fr"],
+  .modal-body [style*="grid-template-columns: 1fr 1fr"],
+  .modal-body [style*="gridTemplateColumns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  /* Petites cartes d'info dans les modales (devises, stats) : padding reduit */
+  .modal-body [style*="padding: 12px 16px"] {
+    padding: 12px !important;
+  }
+  /* Boites avec icone + label sur 2 colonnes (DetailRow) : empilage */
+  .modal-body [style*="grid"][style*="gap"] > * {
+    min-width: 0;
+  }
+
+  /* Boutons rapides dans les modales (Essai 3j, 1 mois, etc.) : wrap propre */
+  .modal-body [style*="flex-wrap: wrap"] .btn-sm,
+  .modal-body [style*="flexWrap: 'wrap'"] .btn-sm {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
   /* Barre de filtres standard sur mobile : recherche en haut, select dropdown en dessous */
   .filters-row {
     flex-direction: column !important;
