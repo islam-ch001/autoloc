@@ -69,21 +69,21 @@ export default function Returns() {
         </div>
       </div>
 
-      <div className="card">
-        <div style={{ overflowX: 'auto' }}>
+      <div className="card admin-table-card">
+        <div className="admin-table-wrap">
           <table>
             <thead>
               <tr>
-                <th>#</th>
+                <th className="hide-mobile">#</th>
                 <th>{t('res.vehicle')}</th>
-                <th>{t('res.client')}</th>
-                <th>{t('ret.returnDate')}</th>
-                <th>{t('veh.mileage')}</th>
-                <th>{t('ret.fuelOut').split(' ')[0]}</th>
+                <th className="hide-mobile">{t('res.client')}</th>
+                <th className="hide-mobile">{t('ret.returnDate')}</th>
+                <th className="hide-mobile">{t('veh.mileage')}</th>
+                <th className="hide-mobile">{t('ret.fuelOut').split(' ')[0]}</th>
                 <th>{t('ret.condition').split(' ')[0]}</th>
-                <th>{t('ret.extraCharges').split(' (')[0]}</th>
-                <th>{t('ret.extraPaid').split(' (')[0]}</th>
-                <th>{t('maint.notes')}</th>
+                <th className="hide-mobile">{t('ret.extraCharges').split(' (')[0]}</th>
+                <th className="hide-mobile">{t('ret.extraPaid').split(' (')[0]}</th>
+                <th className="hide-mobile">{t('maint.notes')}</th>
               </tr>
             </thead>
             <tbody>
@@ -101,42 +101,50 @@ export default function Returns() {
                 const condLabel = condLabelMap[r.condition] || r.condition;
                 return (
                   <tr key={r.id}>
-                    <td style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.reservationId}</td>
+                    <td className="hide-mobile" style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.reservationId}</td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{r.vehicle?.brand} {r.vehicle?.model}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.vehicle?.plate}</div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span className="hide-mobile">{r.vehicle?.brand} {r.vehicle?.model}</span>
+                          <span className="show-mobile">#{r.reservationId} · {r.vehicle?.brand} {r.vehicle?.model}</span>
+                        </div>
+                        <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {r.client?.firstName} {r.client?.lastName} · {r.returnDate} · +{kmDiff.toLocaleString()} km
+                        </div>
+                        <div className="hide-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.vehicle?.plate}</div>
+                      </div>
                     </td>
-                    <td style={{ fontWeight: 500 }}>{r.client?.firstName} {r.client?.lastName}</td>
-                    <td style={{ fontSize: 12 }}>{r.returnDate}</td>
-                    <td>
+                    <td className="hide-mobile" style={{ fontWeight: 500 }}>{r.client?.firstName} {r.client?.lastName}</td>
+                    <td className="hide-mobile" style={{ fontSize: 12 }}>{r.returnDate}</td>
+                    <td className="hide-mobile">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
                         <Gauge size={12} style={{ color: 'var(--text-3)' }} />
                         {r.mileageIn.toLocaleString()} km
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-3)' }}>+{kmDiff.toLocaleString()} km</div>
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Départ: {r.fuelOut}</div>
                         <div style={{ fontSize: 11, color: r.fuelIn !== r.fuelOut ? 'var(--warning)' : 'var(--text-2)' }}>Retour: {r.fuelIn}</div>
                       </div>
                     </td>
                     <td>
-                      <span className={`badge ${cond.cls}`} style={{ display: 'flex', alignItems: 'center', gap: 4, width: 'fit-content' }}>
+                      <span className={`badge ${cond.cls}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                         {cond.icon} {condLabel}
                       </span>
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       {r.extraCharges > 0
                         ? <span style={{ fontWeight: 700, color: 'var(--danger)' }}>+{r.extraCharges.toLocaleString('fr-DZ')} DA</span>
                         : <span style={{ color: 'var(--text-3)' }}>—</span>}
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       {r.extraPaid > 0
                         ? <span style={{ fontWeight: 700, color: 'var(--success)' }}>+{r.extraPaid.toLocaleString('fr-DZ')} DA</span>
                         : <span style={{ color: 'var(--text-3)' }}>—</span>}
                     </td>
-                    <td style={{ fontSize: 12, color: 'var(--text-2)', maxWidth: 160 }}>
+                    <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-2)', maxWidth: 160 }}>
                       {r.damages && <div style={{ color: 'var(--warning)', marginBottom: 2 }}>⚠ {r.damages}</div>}
                       {r.notes || '—'}
                     </td>

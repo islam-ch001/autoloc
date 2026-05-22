@@ -86,7 +86,7 @@ export default function Vehicles() {
       </div>
 
       {/* Stats bar */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+      <div className="veh-stats-bar" style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { key: 'available', label: t('vehicle.available'), count: vehicles.filter(v => v.status === 'available').length, color: 'var(--success)' },
           { key: 'rented', label: t('vehicle.rented'), count: vehicles.filter(v => v.status === 'rented').length, color: 'var(--accent)' },

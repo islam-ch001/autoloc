@@ -154,39 +154,44 @@ export default function Maintenance() {
           </p>
         </div>
       ) : (
-        <div className="card">
-          <div style={{ overflowX: 'auto' }}>
+        <div className="card admin-table-card">
+          <div className="admin-table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>{t('maint.date')}</th>
+                  <th className="hide-mobile">{t('maint.date')}</th>
                   <th>{t('res.vehicle')}</th>
-                  <th>{t('maint.type')}</th>
-                  <th>{t('maint.description')}</th>
-                  <th>{t('maint.km')}</th>
+                  <th className="hide-mobile">{t('maint.type')}</th>
+                  <th className="hide-mobile">{t('maint.description')}</th>
+                  <th className="hide-mobile">{t('maint.km')}</th>
                   <th>{t('maint.cost')}</th>
-                  <th>{t('maint.nextDue')}</th>
-                  <th></th>
+                  <th className="hide-mobile">{t('maint.nextDue')}</th>
+                  <th className="hide-mobile"></th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(m => (
                   <tr key={m.id}>
-                    <td style={{ fontSize: 12 }}>{format(parseISO(m.date), 'dd MMM yyyy', { locale: fr })}</td>
+                    <td className="hide-mobile" style={{ fontSize: 12 }}>{format(parseISO(m.date), 'dd MMM yyyy', { locale: fr })}</td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{m.brand} {m.model}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{m.plate}</div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.brand} {m.model}</div>
+                        <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                          {format(parseISO(m.date), 'dd MMM yyyy', { locale: fr })} · {m.type}
+                        </div>
+                        <div className="hide-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>{m.plate}</div>
+                      </div>
                     </td>
-                    <td><span className="badge badge-warning">{m.type}</span></td>
-                    <td style={{ fontSize: 12, color: 'var(--text-2)', maxWidth: 240 }}>{m.description || '—'}</td>
-                    <td style={{ fontSize: 12 }}>{m.mileage ? `${fmt(m.mileage)} km` : '—'}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--primary)' }}>{fmt(m.cost)} DA</td>
-                    <td style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                    <td className="hide-mobile"><span className="badge badge-warning">{m.type}</span></td>
+                    <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-2)', maxWidth: 240 }}>{m.description || '—'}</td>
+                    <td className="hide-mobile" style={{ fontSize: 12 }}>{m.mileage ? `${fmt(m.mileage)} km` : '—'}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--primary)', whiteSpace: 'nowrap' }}>{fmt(m.cost)} DA</td>
+                    <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-3)' }}>
                       {m.nextDate && <div>📅 {format(parseISO(m.nextDate), 'dd/MM/yyyy')}</div>}
                       {m.nextMileage && <div>🛣️ {fmt(m.nextMileage)} km</div>}
                       {!m.nextDate && !m.nextMileage && '—'}
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       <button className="action-btn" title={t('action.delete')} onClick={async () => {
                         if (!confirm('Supprimer cette intervention ?')) return;
                         try { await removeMaintenance(m.id); }

@@ -114,15 +114,15 @@ export default function Calendar() {
       {/* Vehicle timeline */}
       <div style={{ marginTop: 24 }}>
         <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 16, marginBottom: 16 }}>Disponibilité des véhicules</h2>
-        <div className="card">
-          <div style={{ overflowX: 'auto' }}>
+        <div className="card admin-table-card">
+          <div className="admin-table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Véhicule</th>
                   <th>Statut</th>
-                  <th>Réservations en cours</th>
-                  <th>Prochaine dispo</th>
+                  <th className="hide-mobile">Réservations en cours</th>
+                  <th className="hide-mobile">Prochaine dispo</th>
                 </tr>
               </thead>
               <tbody>
@@ -134,16 +134,21 @@ export default function Calendar() {
                   return (
                     <tr key={v.id}>
                       <td>
-                        <div style={{ fontWeight: 600 }}>{v.brand} {v.model}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{v.plate}</div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.brand} {v.model}</div>
+                          <div className="hide-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>{v.plate}</div>
+                          <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                            {activeR ? `→ ${activeR.endDate}` : (upcomingR ? `${upcomingR.startDate} → ${upcomingR.endDate}` : v.plate)}
+                          </div>
+                        </div>
                       </td>
                       <td><span className={`badge ${s.cls}`}>{s.label}</span></td>
-                      <td style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                      <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-2)' }}>
                         {activeR ? (
                           <span>Jusqu'au {activeR.endDate} — {clients.find(c => c.id === activeR.clientId)?.lastName}</span>
                         ) : '—'}
                       </td>
-                      <td style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                      <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-2)' }}>
                         {upcomingR ? `${upcomingR.startDate} → ${upcomingR.endDate}` : (v.status === 'available' ? <span style={{ color: 'var(--success)' }}>Disponible maintenant</span> : '—')}
                       </td>
                     </tr>

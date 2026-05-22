@@ -87,20 +87,20 @@ export default function Reservations() {
         </div>
       </div>
 
-      <div className="card">
-        <div style={{ overflowX: 'auto' }}>
+      <div className="card admin-table-card">
+        <div className="admin-table-wrap">
           <table>
             <thead>
               <tr>
-                <th>#</th>
+                <th className="hide-mobile">#</th>
                 <th>{t('res.client')}</th>
-                <th>{t('res.vehicle')}</th>
-                <th>Période</th>
-                <th>{t('res.duration')}</th>
-                <th>{t('res.total')}</th>
-                <th>{t('res.paid')}</th>
+                <th className="hide-mobile">{t('res.vehicle')}</th>
+                <th className="hide-mobile">Période</th>
+                <th className="hide-mobile">{t('res.duration')}</th>
+                <th className="hide-mobile">{t('res.total')}</th>
+                <th className="hide-mobile">{t('res.paid')}</th>
                 <th>{t('veh.status')}</th>
-                <th>Actions</th>
+                <th className="hide-mobile">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -110,30 +110,37 @@ export default function Reservations() {
                 const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
                 const remaining = r.totalPrice - r.paidAmount;
                 return (
-                  <tr key={r.id}>
-                    <td style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.displayId || r.id}</td>
+                  <tr key={r.id} className="admin-row-clickable" onClick={() => setSelected(r)} style={{ cursor: 'pointer' }}>
+                    <td className="hide-mobile" style={{ fontWeight: 700, color: 'var(--text-3)' }}>#{r.displayId || r.id}</td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{client?.firstName} {client?.lastName}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{client?.phone}</div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ color: 'var(--text-3)', fontWeight: 700, marginRight: 6 }}>#{r.displayId || r.id}</span>
+                          {client?.firstName} {client?.lastName}
+                        </div>
+                        <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          🚗 {vehicle?.brand} {vehicle?.model} · {format(parseISO(r.startDate), 'dd/MM')}→{format(parseISO(r.endDate), 'dd/MM')}
+                        </div>
+                      </div>
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       <div style={{ fontWeight: 600 }}>{vehicle?.brand} {vehicle?.model}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{vehicle?.plate}</div>
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       <div style={{ fontSize: 12 }}>{format(parseISO(r.startDate), 'dd/MM/yyyy')}</div>
                       <div style={{ fontSize: 12, color: 'var(--text-3)' }}>→ {format(parseISO(r.endDate), 'dd/MM/yyyy')}</div>
                     </td>
-                    <td style={{ fontWeight: 600 }}>{days}j</td>
-                    <td style={{ fontWeight: 700 }}>{r.totalPrice.toLocaleString('fr-DZ')} DA</td>
-                    <td>
+                    <td className="hide-mobile" style={{ fontWeight: 600 }}>{days}j</td>
+                    <td className="hide-mobile" style={{ fontWeight: 700 }}>{r.totalPrice.toLocaleString('fr-DZ')} DA</td>
+                    <td className="hide-mobile">
                       <div style={{ fontWeight: 600, color: remaining > 0 ? 'var(--danger)' : 'var(--success)' }}>
                         {r.paidAmount.toLocaleString('fr-DZ')} DA
                       </div>
                       {remaining > 0 && <div style={{ fontSize: 11, color: 'var(--danger)' }}>-{remaining.toLocaleString('fr-DZ')} DA</div>}
                     </td>
                     <td><span className={`badge ${statusMap[r.status]?.cls}`}>{t(statusMap[r.status]?.label)}</span></td>
-                    <td>
+                    <td className="hide-mobile">
                       <div className="actions-cell" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                         <button className="action-btn" title={t('action.view')} onClick={() => setSelected(r)}><Eye size={14} /></button>
                         <button
