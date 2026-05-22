@@ -52,19 +52,19 @@ export default function Clients() {
         </select>
       </div>
 
-      <div className="card">
-        <div style={{ overflowX: 'auto' }}>
+      <div className="card admin-table-card">
+        <div className="admin-table-wrap">
           <table>
             <thead>
               <tr>
                 <th>{t('res.client')}</th>
-                <th>{t('cli.contact')}</th>
-                <th>{t('cli.address')}</th>
-                <th>{t('cli.license')}</th>
-                <th>{t('cli.rentals')}</th>
-                <th>{t('cli.memberSince')}</th>
+                <th className="hide-mobile">{t('cli.contact')}</th>
+                <th className="hide-mobile">{t('cli.address')}</th>
+                <th className="hide-mobile">{t('cli.license')}</th>
+                <th className="hide-mobile">{t('cli.rentals')}</th>
+                <th className="hide-mobile">{t('cli.memberSince')}</th>
                 <th>{t('veh.status')}</th>
-                <th>Actions</th>
+                <th className="hide-mobile">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -73,31 +73,32 @@ export default function Clients() {
                 const activeRes = clientRes.find(r => r.status === 'active');
                 const vehicle = activeRes ? vehicles.find(v => v.id === activeRes.vehicleId) : null;
                 return (
-                  <tr key={c.id}>
+                  <tr key={c.id} className="admin-row-clickable" onClick={() => setSelected(c)} style={{ cursor: 'pointer' }}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), var(--purple))', display: 'grid', placeItems: 'center', color: 'white', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
                           {c.firstName[0]}{c.lastName[0]}
                         </div>
-                        <div>
-                          <div style={{ fontWeight: 600 }}>{c.firstName} {c.lastName}</div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.firstName} {c.lastName}</div>
+                          <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.phone}</div>
                           {vehicle && <div style={{ fontSize: 11, color: 'var(--accent)' }}>🚗 {vehicle.brand} {vehicle.model}</div>}
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-2)' }}><Phone size={11} /> {c.phone}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}><Mail size={11} /> {c.email}</div>
                     </td>
-                    <td style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                    <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-2)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {c.address}</div>
                     </td>
-                    <td><span className="badge badge-neutral">{c.license}</span></td>
-                    <td>
+                    <td className="hide-mobile"><span className="badge badge-neutral">{c.license}</span></td>
+                    <td className="hide-mobile">
                       <div style={{ fontWeight: 700, fontSize: 16 }}>{c.totalRentals}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-3)' }}>location{c.totalRentals > 1 ? 's' : ''}</div>
                     </td>
-                    <td style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                    <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-2)' }}>
                       {format(parseISO(c.joinedDate), 'dd MMM yyyy', { locale: fr })}
                     </td>
                     <td>
@@ -105,10 +106,10 @@ export default function Clients() {
                         {c.status === 'active' ? t('client.active') : t('client.inactive')}
                       </span>
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="action-btn" title={t('action.view')} onClick={() => setSelected(c)}><Eye size={14} /></button>
-                        <button className="action-btn" title={t('action.edit')} onClick={() => setEditing(c)}>
+                        <button className="action-btn" title={t('action.view')} onClick={(e) => { e.stopPropagation(); setSelected(c); }}><Eye size={14} /></button>
+                        <button className="action-btn" title={t('action.edit')} onClick={(e) => { e.stopPropagation(); setEditing(c); }}>
                           <Pencil size={14} style={{ color: 'var(--primary)' }} />
                         </button>
                       </div>
