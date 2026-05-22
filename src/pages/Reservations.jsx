@@ -146,7 +146,7 @@ export default function Reservations() {
                       {remaining > 0 && <div style={{ fontSize: 11, color: 'var(--danger)' }}>-{remaining.toLocaleString('fr-DZ')} DA</div>}
                     </td>
                     <td><span className={`badge ${statusMap[r.status]?.cls}`}>{t(statusMap[r.status]?.label)}</span></td>
-                    <td className="hide-mobile">
+                    <td className="hide-mobile" onClick={(e) => e.stopPropagation()}>
                       <div className="actions-cell" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                         <button className="action-btn" title={t('action.view')} onClick={() => setSelected(r)}><Eye size={14} /></button>
                         <button
