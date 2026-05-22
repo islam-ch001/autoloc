@@ -745,11 +745,26 @@ tbody tr:last-child td { border-bottom: none; }
 
   .page-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch !important;
     gap: 12px;
+    width: 100%;
+    max-width: 100%;
   }
-  .page-header > * { width: 100%; }
-  .page-header button { width: 100%; justify-content: center; }
+  .page-header > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .page-header button {
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: center;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .page-title { font-size: 20px; }
   .page-subtitle { font-size: 12px; }
 

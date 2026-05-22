@@ -56,18 +56,18 @@ export default function Drivers() {
           <button className="btn btn-primary" onClick={() => setShowAdd(true)}><Plus size={16} /> Ajouter mon premier chauffeur</button>
         </div>
       ) : (
-        <div className="card">
-          <div style={{ overflowX: 'auto' }}>
+        <div className="card admin-table-card">
+          <div className="admin-table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Chauffeur</th>
-                  <th>Contact</th>
-                  <th>Permis</th>
-                  <th>Tarif / Salaire</th>
-                  <th>Réservations</th>
+                  <th className="hide-mobile">Contact</th>
+                  <th className="hide-mobile">Permis</th>
+                  <th className="hide-mobile">Tarif / Salaire</th>
+                  <th className="hide-mobile">Réservations</th>
                   <th>Statut</th>
-                  <th>Actions</th>
+                  <th className="hide-mobile">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -77,23 +77,24 @@ export default function Drivers() {
                   const vehicle = activeRes ? vehicles.find(v => v.id === activeRes.vehicleId) : null;
                   const licenseExpiringSoon = d.licenseExpiry && isBefore(parseISO(d.licenseExpiry), addMonths(new Date(), 2));
                   return (
-                    <tr key={d.id}>
+                    <tr key={d.id} className="admin-row-clickable" onClick={() => setSelected(d)} style={{ cursor: 'pointer' }}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--accent))', display: 'grid', placeItems: 'center', color: 'white', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
                             {d.firstName?.[0]}{d.lastName?.[0]}
                           </div>
-                          <div>
-                            <div style={{ fontWeight: 600 }}>{d.firstName} {d.lastName}</div>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.firstName} {d.lastName}</div>
+                            <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.phone}</div>
                             {vehicle && <div style={{ fontSize: 11, color: 'var(--accent)' }}>🚗 {vehicle.brand} {vehicle.model}</div>}
                           </div>
                         </div>
                       </td>
-                      <td>
+                      <td className="hide-mobile">
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-2)' }}><Phone size={11} /> {d.phone}</div>
                         {d.email && <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}><Mail size={11} /> {d.email}</div>}
                       </td>
-                      <td>
+                      <td className="hide-mobile">
                         <span className="badge badge-neutral">{d.license || 'B'}</span>
                         {d.licenseExpiry && (
                           <div style={{ fontSize: 10, color: licenseExpiringSoon ? 'var(--danger)' : 'var(--text-3)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 3 }}>
@@ -102,12 +103,12 @@ export default function Drivers() {
                           </div>
                         )}
                       </td>
-                      <td style={{ fontSize: 12 }}>
+                      <td className="hide-mobile" style={{ fontSize: 12 }}>
                         {d.dailyRate > 0 && <div style={{ color: 'var(--text-2)' }}>{d.dailyRate.toLocaleString('fr-DZ')} DA/jour</div>}
                         {d.salary > 0 && <div style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 2 }}>{d.salary.toLocaleString('fr-DZ')} DA/mois</div>}
                         {!d.dailyRate && !d.salary && <span style={{ color: 'var(--text-3)' }}>—</span>}
                       </td>
-                      <td>
+                      <td className="hide-mobile">
                         <div style={{ fontWeight: 700, fontSize: 16 }}>{driverRes.length}</div>
                         <div style={{ fontSize: 11, color: 'var(--text-3)' }}>course{driverRes.length > 1 ? 's' : ''}</div>
                       </td>
@@ -116,13 +117,14 @@ export default function Drivers() {
                           {d.status === 'active' ? 'Actif' : 'Inactif'}
                         </span>
                       </td>
-                      <td>
+                      <td className="hide-mobile">
                         <div style={{ display: 'flex', gap: 6 }}>
-                          <button className="action-btn" title="Voir" onClick={() => setSelected(d)}><Eye size={14} /></button>
-                          <button className="action-btn" title="Modifier" onClick={() => setEditing(d)}>
+                          <button className="action-btn" title="Voir" onClick={(e) => { e.stopPropagation(); setSelected(d); }}><Eye size={14} /></button>
+                          <button className="action-btn" title="Modifier" onClick={(e) => { e.stopPropagation(); setEditing(d); }}>
                             <Pencil size={14} style={{ color: 'var(--primary)' }} />
                           </button>
-                          <button className="action-btn" title="Supprimer" onClick={async () => {
+                          <button className="action-btn" title="Supprimer" onClick={async (e) => {
+                            e.stopPropagation();
                             if (confirm(`Supprimer le chauffeur ${d.firstName} ${d.lastName} ?`)) {
                               try { await removeDriver(d.id); } catch (err) { alert('Erreur : ' + err.message); }
                             }
