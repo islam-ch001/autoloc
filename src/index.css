@@ -920,6 +920,18 @@ tbody tr:last-child td { border-bottom: none; }
 .admin-search-bar { flex: 1; min-width: 260px; }
 .admin-status-filter { max-width: 220px; }
 
+/* ===== Barre de filtres standard (Vehicles, Clients, Drivers) ===== */
+.filters-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.filters-search { flex: 1; min-width: 240px; }
+.filters-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.filters-select { display: none; }   /* select caché sur desktop */
+
 /* Classes utilitaires : afficher/cacher selon la taille d'écran */
 .show-mobile { display: none; }
 .hide-mobile { display: revert; }
@@ -1003,6 +1015,24 @@ tbody tr:last-child td { border-bottom: none; }
     font-weight: 300;
     line-height: 0;
     vertical-align: middle;
+  }
+
+  /* Barre de filtres standard sur mobile : recherche en haut, select dropdown en dessous */
+  .filters-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+  .filters-search {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .filters-buttons { display: none !important; }   /* boutons cachés sur mobile */
+  .filters-select {
+    display: block !important;
+    width: 100% !important;
+    min-height: 44px;
   }
 
   /* Filtres Admin : empilés sur mobile (recherche + select pleine largeur) */

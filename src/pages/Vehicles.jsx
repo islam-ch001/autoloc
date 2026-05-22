@@ -62,18 +62,27 @@ export default function Vehicles() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-        <div className="search-bar" style={{ flex: 1, minWidth: 240 }}>
+      <div className="filters-row">
+        <div className="search-bar filters-search">
           <Search size={16} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('veh.searchPh')} />
         </div>
-        <div className="filter-group">
+        {/* Desktop : boutons */}
+        <div className="filter-group filters-buttons">
           {['Tous', 'available', 'rented', 'maintenance'].map(s => (
             <button key={s} className={`filter-btn ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>
               {s === 'Tous' ? t('action.all') : t(statusMap[s]?.tkey)}
             </button>
           ))}
         </div>
+        {/* Mobile : liste deroulante */}
+        <select className="form-select filters-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+          {['Tous', 'available', 'rented', 'maintenance'].map(s => (
+            <option key={s} value={s}>
+              {s === 'Tous' ? t('action.all') : t(statusMap[s]?.tkey)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Stats bar */}

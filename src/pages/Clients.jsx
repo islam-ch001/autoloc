@@ -35,16 +35,21 @@ export default function Clients() {
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div className="search-bar" style={{ flex: 1, minWidth: 260 }}>
+      <div className="filters-row">
+        <div className="search-bar filters-search">
           <Search size={16} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('cli.searchPh')} />
         </div>
-        <div className="filter-group">
+        <div className="filter-group filters-buttons">
           {['Tous', 'Actifs', 'Inactifs'].map(f => (
             <button key={f} className={`filter-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{filterLabels[f]}</button>
           ))}
         </div>
+        <select className="form-select filters-select" value={filter} onChange={e => setFilter(e.target.value)}>
+          {['Tous', 'Actifs', 'Inactifs'].map(f => (
+            <option key={f} value={f}>{filterLabels[f]}</option>
+          ))}
+        </select>
       </div>
 
       <div className="card">
