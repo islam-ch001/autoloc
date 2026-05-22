@@ -124,8 +124,8 @@ function SuperAdminShell() {
   const { theme, toggle } = useTheme();
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <header style={{
+    <div className="super-admin-shell" style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <header className="super-admin-header" style={{
         height: 68,
         display: 'flex',
         alignItems: 'center',
@@ -138,7 +138,7 @@ function SuperAdminShell() {
         top: 0,
         zIndex: 20,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+        <div className="super-admin-brand" style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
           <div style={{
             width: 42,
             height: 42,
@@ -151,20 +151,20 @@ function SuperAdminShell() {
           }}>
             <ShieldCheck size={22} />
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 800, color: 'var(--text)', fontFamily: 'Space Grotesk, sans-serif' }}>AutoLoc Admin</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontWeight: 800, color: 'var(--text)', fontFamily: 'Space Grotesk, sans-serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>AutoLoc Admin</div>
             <div style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button className="btn" onClick={toggle}>
+        <div className="super-admin-actions" style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <button className="btn super-admin-btn" onClick={toggle} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}>
             {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-            {theme === 'dark' ? 'Clair' : 'Sombre'}
+            <span className="super-admin-btn-label">{theme === 'dark' ? 'Clair' : 'Sombre'}</span>
           </button>
-          <button className="btn" onClick={logout} style={{ color: 'var(--danger)' }}>
+          <button className="btn super-admin-btn" onClick={logout} style={{ color: 'var(--danger)' }} title="Déconnexion">
             <LogOut size={15} />
-            Déconnexion
+            <span className="super-admin-btn-label">Déconnexion</span>
           </button>
         </div>
       </header>

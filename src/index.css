@@ -932,6 +932,38 @@ tbody tr:last-child td { border-bottom: none; }
   .hide-mobile { display: none !important; }
   th.hide-mobile, td.hide-mobile { display: none !important; }
 
+  /* Header super-admin : compact sur mobile */
+  .super-admin-header {
+    padding: 0 12px !important;
+    height: 60px !important;
+    gap: 8px !important;
+  }
+  .super-admin-brand > div:first-child {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+  }
+  .super-admin-brand > div:first-child svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .super-admin-actions {
+    gap: 6px !important;
+  }
+  /* Boutons en icones rondes : pas de texte sur mobile */
+  .super-admin-btn {
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    min-height: 38px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+  .super-admin-btn-label { display: none !important; }
+
   /* Tableau Admin sur mobile : 2 colonnes (Utilisateur + Statut), ligne entiere cliquable */
   .admin-table-wrap {
     overflow: visible !important;
