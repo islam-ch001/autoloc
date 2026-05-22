@@ -44,8 +44,8 @@ export default function Calendar() {
           <h1 className="page-title">{t('cal.title')}</h1>
           <p className="page-subtitle">{t('cal.subtitle')}</p>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <select className="form-select" style={{ width: 220 }} value={selectedVehicle} onChange={e => setSelectedVehicle(e.target.value)}>
+        <div className="cal-vehicle-select-wrap">
+          <select className="form-select" value={selectedVehicle} onChange={e => setSelectedVehicle(e.target.value)}>
             <option value="all">Tous les véhicules</option>
             {activeVehicles.map(id => {
               const v = vehicles.find(vv => vv.id === id);
@@ -56,15 +56,17 @@ export default function Calendar() {
       </div>
 
       {/* Month nav */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-        <button className="btn btn-sm" onClick={prev} title={t('cal.prev')}><ChevronLeft size={16} /></button>
-        <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, textTransform: 'capitalize', minWidth: 200, textAlign: 'center' }}>
-          {format(currentDate, 'MMMM yyyy', { locale: fr })}
-        </h2>
-        <button className="btn btn-sm" onClick={next} title={t('cal.next')}><ChevronRight size={16} /></button>
-        <button className="btn btn-sm" onClick={() => setCurrentDate(new Date())}>{t('cal.today')}</button>
+      <div className="cal-month-nav">
+        <div className="cal-month-nav-buttons">
+          <button className="btn btn-sm" onClick={prev} title={t('cal.prev')}><ChevronLeft size={16} /></button>
+          <h2 className="cal-month-title">
+            {format(currentDate, 'MMMM yyyy', { locale: fr })}
+          </h2>
+          <button className="btn btn-sm" onClick={next} title={t('cal.next')}><ChevronRight size={16} /></button>
+          <button className="btn btn-sm" onClick={() => setCurrentDate(new Date())}>{t('cal.today')}</button>
+        </div>
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, fontSize: 12 }}>
+        <div className="cal-legend">
           {Object.entries({ active: t('res.active'), upcoming: t('res.upcoming'), completed: t('res.completed') }).map(([k, label]) => (
             <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ width: 10, height: 10, borderRadius: 3, background: statusColor[k] }} />

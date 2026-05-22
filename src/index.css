@@ -630,6 +630,19 @@ tbody tr:last-child td { border-bottom: none; }
 
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
 
+/* Calendar : navigation mois (desktop : tout en ligne, mobile : empile) */
+.cal-vehicle-select-wrap { display: flex; gap: 12px; align-items: center; }
+.cal-vehicle-select-wrap select { width: 220px; }
+.cal-month-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.cal-month-nav-buttons { display: flex; align-items: center; gap: 12px; }
+.cal-month-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700; font-size: 20px;
+  text-transform: capitalize; min-width: 200px; text-align: center;
+  margin: 0;
+}
+.cal-legend { margin-left: auto; display: flex; gap: 16px; font-size: 12px; flex-wrap: wrap; }
+
 .calendar-header-cell {
   padding: 10px 4px; text-align: center; font-size: 11px; font-weight: 700;
   color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em;
@@ -875,6 +888,44 @@ tbody tr:last-child td { border-bottom: none; }
   .btn-sm { padding: 8px 12px; font-size: 12px; }
   .grid-3 { grid-template-columns: 1fr !important; }
   .calendar-cell { min-height: 56px; padding: 4px; }
+  /* Calendar navigation : tout empile sur mobile */
+  .cal-vehicle-select-wrap { width: 100%; }
+  .cal-vehicle-select-wrap select { width: 100% !important; min-height: 44px; }
+  .cal-month-nav {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .cal-month-nav-buttons {
+    width: 100%;
+    justify-content: space-between !important;
+    gap: 6px !important;
+  }
+  .cal-month-title {
+    flex: 1;
+    min-width: 0 !important;
+    font-size: 16px !important;
+  }
+  .cal-month-nav-buttons .btn-sm {
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 6px 10px !important;
+  }
+  .cal-legend {
+    margin-left: 0 !important;
+    justify-content: center;
+    width: 100%;
+    gap: 12px !important;
+  }
+  /* Cellules calendrier plus serrees */
+  .calendar-grid { gap: 1px !important; }
+  .calendar-cell { min-height: 50px !important; padding: 3px !important; }
+  .calendar-event {
+    font-size: 8px !important;
+    padding: 1px 3px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .calendar-day { font-size: 11px; }
   .calendar-event { font-size: 9px; padding: 1px 4px; }
   .calendar-header-cell { font-size: 10px; padding: 6px 2px; }
