@@ -195,7 +195,18 @@ export default function Reservations() {
       </div>
 
       {showAdd && <AddReservationModal onClose={() => setShowAdd(false)} />}
-      {selected && <ReservationDetailModal reservation={selected} onClose={() => setSelected(null)} onPrint={() => { setInvoice(selected); setSelected(null); }} />}
+      {selected && <ReservationDetailModal
+        reservation={selected}
+        onClose={() => setSelected(null)}
+        onPrint={() => { setInvoice(selected); setSelected(null); }}
+        onContract={() => { setContract(selected); setSelected(null); }}
+        onEdit={() => { setEditing(selected); setSelected(null); }}
+        onActivate={async () => {
+          try { await updateReservation(selected.id, { status: 'active' }); setSelected(null); }
+          catch (err) { alert('Erreur : ' + err.message); }
+        }}
+        onDelete={async () => { await handleDelete(selected); setSelected(null); }}
+      />}
       {invoice && <InvoiceModal reservation={invoice} onClose={() => setInvoice(null)} />}
       {contract && <ContractModal reservation={contract} onClose={() => setContract(null)} />}
       {editing && <EditReservationModal
@@ -401,12 +412,14 @@ function AddReservationModal({ onClose }) {
   );
 }
 
-function ReservationDetailModal({ reservation: r, onClose, onPrint }) {
+function ReservationDetailModal({ reservation: r, onClose, onPrint, onContract, onEdit, onActivate, onDelete }) {
   const { clients, vehicles } = useApp();
   const { t } = useT();
   const client = clients.find(c => c.id === r.clientId);
   const vehicle = vehicles.find(v => v.id === r.vehicleId);
   const days = differenceInDays(parseISO(r.endDate), parseISO(r.startDate));
+  const isUpcoming  = r.status === 'upcoming';
+  const isCancelled = r.status === 'cancelled';
 
   return (
     <Modal title={`Réservation #${r.displayId || r.id}`} onClose={onClose} footer={
@@ -417,9 +430,53 @@ function ReservationDetailModal({ reservation: r, onClose, onPrint }) {
         </button>
       </>
     }>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
         <span className={`badge ${statusMap[r.status]?.cls}`}>{t(statusMap[r.status]?.label)}</span>
         <span className="badge badge-neutral">{r.paymentMethod || 'Non défini'}</span>
+      </div>
+
+      {/* Boutons d'actions rapides (toutes plateformes — utile sur mobile) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 18 }}>
+        {isUpcoming && onActivate && (
+          <button onClick={onActivate}
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '10px 14px', borderRadius: 10, border: 'none', cursor: 'pointer',
+              background: 'var(--success)', color: '#fff', fontWeight: 700, fontSize: 13, minHeight: 42,
+            }}>
+            <Play size={14} /> Activer
+          </button>
+        )}
+        {onContract && (
+          <button onClick={onContract}
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(59,130,246,0.35)', cursor: 'pointer',
+              background: 'rgba(59,130,246,0.10)', color: 'var(--accent)', fontWeight: 700, fontSize: 13, minHeight: 42,
+            }}>
+            <FileSignature size={14} /> Contrat
+          </button>
+        )}
+        {isUpcoming && onEdit && (
+          <button onClick={onEdit}
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', cursor: 'pointer',
+              background: 'var(--surface)', color: 'var(--text)', fontWeight: 600, fontSize: 13, minHeight: 42,
+            }}>
+            <Pencil size={14} /> Modifier
+          </button>
+        )}
+        {(isUpcoming || isCancelled) && onDelete && (
+          <button onClick={onDelete}
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(239,68,68,0.35)', cursor: 'pointer',
+              background: 'var(--danger-soft)', color: 'var(--danger)', fontWeight: 700, fontSize: 13, minHeight: 42,
+            }}>
+            <Trash2 size={14} /> Supprimer
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
