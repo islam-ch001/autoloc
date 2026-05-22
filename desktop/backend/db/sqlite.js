@@ -139,6 +139,27 @@ CREATE TABLE IF NOT EXISTS maintenance (
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS drivers (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  first_name      TEXT NOT NULL,
+  last_name       TEXT NOT NULL,
+  phone           TEXT NOT NULL,
+  email           TEXT,
+  address         TEXT,
+  birth_date      TEXT,
+  license         TEXT NOT NULL DEFAULT 'B',
+  license_number  TEXT,
+  license_expiry  TEXT,
+  daily_rate      INTEGER NOT NULL DEFAULT 0,
+  salary          INTEGER NOT NULL DEFAULT 0,
+  notes           TEXT,
+  status          TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive')),
+  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_drivers_user        ON drivers(user_id);
+CREATE INDEX IF NOT EXISTS idx_drivers_status      ON drivers(status);
 CREATE INDEX IF NOT EXISTS idx_maintenance_user     ON maintenance(user_id);
 CREATE INDEX IF NOT EXISTS idx_maintenance_vehicle  ON maintenance(vehicle_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_user        ON invoices(user_id);
@@ -185,6 +206,12 @@ try {
       )
       UPDATE reservations SET display_id = (SELECT rn FROM numbered WHERE numbered.id = reservations.id)
     `);
+  }
+
+  // Migration : ajouter driver_id sur reservations (lien optionnel vers un chauffeur)
+  if (!resCols.includes('driver_id')) {
+    db.exec("ALTER TABLE reservations ADD COLUMN driver_id INTEGER REFERENCES drivers(id) ON DELETE SET NULL");
+    db.exec("CREATE INDEX IF NOT EXISTS idx_reservations_driver ON reservations(driver_id)");
   }
 } catch (err) { console.error('[DB] Migration error:', err); }
 

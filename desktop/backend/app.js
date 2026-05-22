@@ -5,6 +5,7 @@ const { requireAuth } = require('./middleware/auth');
 const authRouter         = require('./routes/auth');
 const vehiclesRouter     = require('./routes/vehicles');
 const clientsRouter      = require('./routes/clients');
+const driversRouter      = require('./routes/drivers');
 const reservationsRouter = require('./routes/reservations');
 const returnsRouter      = require('./routes/returns');
 const dashboardRouter    = require('./routes/dashboard');
@@ -23,6 +24,7 @@ function createApp() {
   app.use('/api/auth', authRouter);
   app.use('/api/vehicles',     requireAuth, vehiclesRouter);
   app.use('/api/clients',      requireAuth, clientsRouter);
+  app.use('/api/drivers',      requireAuth, driversRouter);
   app.use('/api/reservations', requireAuth, reservationsRouter);
   app.use('/api/returns',      requireAuth, returnsRouter);
   app.use('/api/dashboard',    requireAuth, dashboardRouter);

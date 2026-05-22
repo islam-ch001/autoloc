@@ -7,10 +7,15 @@ router.get('/', async (req, res) => {
     const params = [req.user.id];
     let query = `
       SELECT r.*, c.first_name, c.last_name, c.phone,
-             v.brand, v.model, v.plate, v.price_per_day
+             v.brand, v.model, v.plate, v.price_per_day,
+             d.first_name AS driver_first_name,
+             d.last_name  AS driver_last_name,
+             d.phone      AS driver_phone,
+             d.daily_rate AS driver_daily_rate
       FROM reservations r
       JOIN clients  c ON c.id = r.client_id
       JOIN vehicles v ON v.id = r.vehicle_id
+      LEFT JOIN drivers d ON d.id = r.driver_id
       WHERE r.user_id = $1
     `;
     if (status) { query += ' AND r.status = $2'; params.push(status); }
@@ -24,10 +29,18 @@ router.get('/:id', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT r.*, c.first_name, c.last_name, c.phone, c.email,
-              v.brand, v.model, v.plate, v.price_per_day, v.mileage
+              v.brand, v.model, v.plate, v.price_per_day, v.mileage,
+              d.first_name AS driver_first_name,
+              d.last_name  AS driver_last_name,
+              d.phone      AS driver_phone,
+              d.email      AS driver_email,
+              d.daily_rate AS driver_daily_rate,
+              d.license    AS driver_license,
+              d.license_number AS driver_license_number
        FROM reservations r
        JOIN clients c ON c.id = r.client_id
        JOIN vehicles v ON v.id = r.vehicle_id
+       LEFT JOIN drivers d ON d.id = r.driver_id
        WHERE r.id = $1 AND r.user_id = $2`,
       [req.params.id, req.user.id]
     );
@@ -40,7 +53,7 @@ router.post('/', async (req, res) => {
   const db = await pool.connect();
   try {
     await db.query('BEGIN');
-    const { client_id, vehicle_id, start_date, end_date, payment_method, deposit, paid_amount, km_limit, extra_km_price, notes } = req.body;
+    const { client_id, vehicle_id, driver_id, start_date, end_date, payment_method, deposit, paid_amount, km_limit, extra_km_price, notes } = req.body;
 
     const { rows: chk } = await db.query(
       `SELECT (SELECT 1 FROM clients WHERE id = $1 AND user_id = $3) AS c,
@@ -65,9 +78,9 @@ router.post('/', async (req, res) => {
     const display_id = (maxRows[0]?.m || 0) + 1;
 
     const { rows } = await db.query(
-      `INSERT INTO reservations (user_id, display_id, client_id, vehicle_id, start_date, end_date, total_price, paid_amount, deposit, payment_method, km_limit, extra_km_price, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
-      [req.user.id, display_id, client_id, vehicle_id, start_date, end_date, total_price, paid_amount ?? 0, deposit ?? 0, payment_method, km_limit ?? 200, extra_km_price ?? 50, notes]
+      `INSERT INTO reservations (user_id, display_id, client_id, vehicle_id, driver_id, start_date, end_date, total_price, paid_amount, deposit, payment_method, km_limit, extra_km_price, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+      [req.user.id, display_id, client_id, vehicle_id, driver_id || null, start_date, end_date, total_price, paid_amount ?? 0, deposit ?? 0, payment_method, km_limit ?? 200, extra_km_price ?? 50, notes]
     );
     await db.query('COMMIT');
     res.status(201).json(rows[0]);
@@ -84,7 +97,7 @@ router.patch('/:id', async (req, res) => {
     const fields = [];
     const values = [];
     let i = 1;
-    const allowed = ['status','paid_amount','deposit','payment_method','notes','km_limit','extra_km_price','start_date','end_date'];
+    const allowed = ['status','paid_amount','deposit','payment_method','notes','km_limit','extra_km_price','start_date','end_date','driver_id'];
     for (const key of allowed) {
       if (req.body[key] !== undefined) { fields.push(`${key} = $${i++}`); values.push(req.body[key]); }
     }
