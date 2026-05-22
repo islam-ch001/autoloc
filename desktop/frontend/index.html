@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Preconnect au backend Render pour gagner ~100-300ms sur la 1ere requete -->
+    <link rel="preconnect" href="https://autoloc-api.onrender.com" crossorigin />
+    <link rel="dns-prefetch" href="https://autoloc-api.onrender.com" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0" />
     <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
@@ -38,8 +41,12 @@
       #err-overlay.show { display: block; }
       #err-overlay h2 { color: #ef4444; margin-top: 0; }
     </style>
-    <script type="module" crossorigin src="/assets/index-CzOJ75_P.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DkRkqawD.css">
+    <script type="module" crossorigin src="/assets/index-ByFTv-D3.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-S-ySWqyJ.js">
+    <link rel="modulepreload" crossorigin href="/assets/lucide-DAYaJelW.js">
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-QfsM-l6M.js">
+    <link rel="modulepreload" crossorigin href="/assets/AuthContext-BGNGCrKa.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-DM61Fqc8.css">
   </head>
   <body>
     <div id="root"></div>

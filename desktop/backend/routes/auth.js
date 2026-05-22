@@ -3,6 +3,34 @@ const bcrypt = require('bcryptjs');
 const pool = require('../db/pool');
 const { requireAuth, signToken } = require('../middleware/auth');
 
+// AUTO-LOGIN desktop : single-user offline, pas de mot de passe requis
+// Cree un utilisateur local par defaut s'il n'existe pas, retourne un token
+router.post('/desktop-auto-login', async (_req, res) => {
+  try {
+    const LOCAL_EMAIL = 'local@autoloc.app';
+    const { rows: existing } = await pool.query('SELECT id, email, name, role, is_super_admin, subscription_status, subscription_end, subscription_plan, settings FROM users WHERE email = $1', [LOCAL_EMAIL]);
+
+    let user;
+    if (existing.length) {
+      user = existing[0];
+    } else {
+      // Creation au premier lancement : compte avec acces a vie
+      const hash = await bcrypt.hash('local-offline-' + Date.now(), 10);
+      const { rows } = await pool.query(
+        "INSERT INTO users (email, password_hash, name, role, is_super_admin, subscription_status, subscription_end, subscription_plan) VALUES ($1,$2,$3,'admin',0,'active',date('now','+50 years'),'Local Offline') RETURNING id, email, name, role, is_super_admin, subscription_status, subscription_end, subscription_plan, settings",
+        [LOCAL_EMAIL, hash, 'Utilisateur Local']
+      );
+      user = rows[0];
+    }
+    // Mise a jour last_login
+    await pool.query("UPDATE users SET last_login_at = datetime('now') WHERE id = $1", [user.id]);
+    const token = signToken({ id: user.id, email: user.email, role: user.role });
+    res.json({ token, user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post('/register', async (req, res) => {
   try {
     const { email, password, name } = req.body;

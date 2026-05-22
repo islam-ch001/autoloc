@@ -55,6 +55,19 @@ export function AuthProvider({ children }) {
     setUser(camelize(data.user));
   };
 
+  // Auto-login pour l'app desktop (single-user offline, pas de mot de passe)
+  const desktopAutoLogin = async () => {
+    const res = await fetch(`${BASE}/auth/desktop-auto-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur de demarrage');
+    setToken(data.token);
+    setUser(camelize(data.user));
+    return data.user;
+  };
+
   // Étape 1 : demander l'envoi du code par email
   const signupRequest = async (name, email, password) => {
     const res = await fetch(`${BASE}/auth/signup-request`, {
@@ -120,7 +133,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword, logout, refreshUser: fetchMe }}>
+    <AuthContext.Provider value={{ user, loading, login, desktopAutoLogin, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword, logout, refreshUser: fetchMe }}>
       {children}
     </AuthContext.Provider>
   );
