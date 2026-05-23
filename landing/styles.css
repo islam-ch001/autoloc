@@ -647,7 +647,7 @@ section { padding: 100px 0; }
 }
 .footer-cols {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 30px;
 }
 .footer-col h4 {
