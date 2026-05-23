@@ -39,8 +39,18 @@
     ],
     "extraResources": [],
     "win": {
-      "target": "nsis",
+      "target": ["nsis", "appx"],
       "icon": "icon.ico"
+    },
+    "appx": {
+      "applicationId": "AutoLoc",
+      "displayName": "AutoLoc",
+      "identityName": "REMPLACER_PAR_CELUI_DU_DASHBOARD",
+      "publisher": "CN=REMPLACER_PAR_CELUI_DU_DASHBOARD",
+      "publisherDisplayName": "REMPLACER_PAR_VOTRE_NOM_DEV",
+      "languages": ["fr-FR"],
+      "showNameOnTiles": true,
+      "addAutoLaunchExtension": false
     },
     "nsis": {
       "oneClick": false,
