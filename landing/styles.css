@@ -270,6 +270,24 @@ ul { list-style: none; }
   font-size: 13px;
 }
 
+/* Le hero s'anime au chargement (pas au scroll) */
+.hero-inner > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: hero-fade-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.hero-inner > *:nth-child(1) { animation-delay: 0.05s; }
+.hero-inner > *:nth-child(2) { animation-delay: 0.15s; }
+.hero-inner > *:nth-child(3) { animation-delay: 0.30s; }
+.hero-inner > *:nth-child(4) { animation-delay: 0.45s; }
+.hero-inner > *:nth-child(5) { animation-delay: 0.60s; }
+@keyframes hero-fade-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-inner > * { opacity: 1; transform: none; animation: none; }
+}
+
 /* ===== STATS ===== */
 .stats {
   padding: 40px 0;
@@ -831,6 +849,51 @@ section { padding: 100px 0; }
   font-weight: 600;
 }
 .pricing-note a:hover { color: var(--accent); }
+
+/* ============================================================
+   ANIMATIONS AU SCROLL
+   Element invisible au depart, apparait quand visible dans le viewport.
+   ============================================================ */
+[data-animate] {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+              transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform;
+}
+[data-animate].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Variantes d'animation */
+[data-animate="fade-left"] { transform: translateX(-40px); }
+[data-animate="fade-left"].is-visible { transform: translateX(0); }
+[data-animate="fade-right"] { transform: translateX(40px); }
+[data-animate="fade-right"].is-visible { transform: translateX(0); }
+[data-animate="scale"] { transform: scale(0.92); }
+[data-animate="scale"].is-visible { transform: scale(1); }
+
+/* Stagger : delais echelonnes pour les enfants d'une grille */
+.stagger > * { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.stagger.is-visible > *:nth-child(1) { transition-delay: 0.00s; opacity: 1; transform: translateY(0); }
+.stagger.is-visible > *:nth-child(2) { transition-delay: 0.08s; opacity: 1; transform: translateY(0); }
+.stagger.is-visible > *:nth-child(3) { transition-delay: 0.16s; opacity: 1; transform: translateY(0); }
+.stagger.is-visible > *:nth-child(4) { transition-delay: 0.24s; opacity: 1; transform: translateY(0); }
+.stagger.is-visible > *:nth-child(5) { transition-delay: 0.32s; opacity: 1; transform: translateY(0); }
+.stagger.is-visible > *:nth-child(6) { transition-delay: 0.40s; opacity: 1; transform: translateY(0); }
+.stagger.is-visible > *:nth-child(7) { transition-delay: 0.48s; opacity: 1; transform: translateY(0); }
+.stagger.is-visible > *:nth-child(8) { transition-delay: 0.56s; opacity: 1; transform: translateY(0); }
+
+/* Desactiver les animations pour les utilisateurs qui preferent le mouvement reduit */
+@media (prefers-reduced-motion: reduce) {
+  [data-animate], [data-animate].is-visible,
+  .stagger > *, .stagger.is-visible > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
 
 /* ===== AJUSTEMENTS MODE CLAIR ===== */
 :root[data-theme="light"] .hero-glow-1 { background: rgba(99, 102, 241, 0.18); }

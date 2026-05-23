@@ -308,10 +308,56 @@ function applyTheme(theme) {
     : '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';  // soleil
 }
 
+// ─── Animations au scroll ──────────────────────────────────
+function initScrollAnimations() {
+  // Auto-attribuer data-animate aux elements importants
+  const selectors = [
+    '.section-eyebrow',
+    '.section-title',
+    '.section-sub',
+    '.feature-card',
+    '.platform-card',
+    '.pricing-card',
+    '.screenshot-card',
+    '.faq-item',
+    '.download-box',
+    '.stat',
+    '.pricing-note',
+  ];
+  selectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      if (!el.hasAttribute('data-animate')) el.setAttribute('data-animate', '');
+    });
+  });
+
+  // Marquer les grilles a stagger
+  const grids = ['.features-grid', '.platforms-grid', '.pricing-grid', '.screenshots-grid', '.stats-grid'];
+  grids.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => el.classList.add('stagger'));
+  });
+
+  // Observer chaque element et lui ajouter is-visible quand il entre dans le viewport
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);  // animer une seule fois
+      }
+    });
+  }, {
+    threshold: 0.12,           // 12% visible suffit pour declencher
+    rootMargin: '0px 0px -50px 0px',  // declenche un peu avant l'apparition
+  });
+
+  // Observer tous les elements marques
+  document.querySelectorAll('[data-animate], .stagger').forEach(el => observer.observe(el));
+}
+
 // ─── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   applyLang(getLang());
   applyTheme(getTheme());
+  initScrollAnimations();
 
   document.getElementById('btn-lang').addEventListener('click', () => {
     const next = getLang() === 'fr' ? 'ar' : 'fr';
