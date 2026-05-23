@@ -372,7 +372,7 @@ function VehicleDetailModal({ vehicle: v, onClose }) {
 
 function AddVehicleModal({ onClose, onAdd }) {
   const { t } = useT();
-  const [form, setForm] = useState({ brand: '', model: '', year: new Date().getFullYear(), category: 'Berline', fuel: 'Essence', transmission: 'Manuelle', seats: 5, pricePerDay: '', plate: '', mileage: 0, image: '', color: '#000000' });
+  const [form, setForm] = useState({ brand: '', model: '', year: new Date().getFullYear(), category: 'Berline', fuel: 'Essence', transmission: 'Manuelle', seats: 5, pricePerDay: '', plate: '', mileage: '', image: '', color: '#000000' });
   const [photoErr, setPhotoErr] = useState(null);
   const [photoLoading, setPhotoLoading] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -394,7 +394,7 @@ function AddVehicleModal({ onClose, onAdd }) {
     <Modal title={t('veh.addNew')} onClose={onClose} footer={
       <>
         <button className="btn" onClick={onClose}>{t('action.cancel')}</button>
-        <button className="btn btn-primary" onClick={() => onAdd(form)}>{t('action.add')}</button>
+        <button className="btn btn-primary" onClick={() => onAdd({ ...form, pricePerDay: +form.pricePerDay || 0, mileage: +form.mileage || 0, year: +form.year || new Date().getFullYear(), seats: +form.seats || 5 })}>{t('action.add')}</button>
       </>
     }>
       <div className="form-group">
@@ -463,10 +463,10 @@ function AddVehicleModal({ onClose, onAdd }) {
         </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">{t('veh.pricePerDay')} *</label><input className="form-input" type="number" value={form.pricePerDay} onChange={e => set('pricePerDay', +e.target.value)} placeholder="4500" /></div>
+        <div className="form-group"><label className="form-label">{t('veh.pricePerDay')} *</label><input className="form-input" type="number" value={form.pricePerDay} onChange={e => set('pricePerDay', e.target.value)} placeholder="4500" /></div>
         <div className="form-group"><label className="form-label">{t('veh.plate')} *</label><input className="form-input" value={form.plate} onChange={e => set('plate', e.target.value)} placeholder="00125-116-16" /></div>
       </div>
-      <div className="form-group"><label className="form-label">{t('veh.mileage')}</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', +e.target.value)} /></div>
+      <div className="form-group"><label className="form-label">{t('veh.mileage')}</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', e.target.value)} placeholder="0" /></div>
     </Modal>
   );
 }
@@ -481,9 +481,9 @@ function EditVehicleModal({ vehicle, onClose, onSave }) {
     fuel: vehicle.fuel || 'Essence',
     transmission: vehicle.transmission || 'Manuelle',
     seats: vehicle.seats || 5,
-    pricePerDay: vehicle.pricePerDay || 0,
+    pricePerDay: vehicle.pricePerDay || '',
     plate: vehicle.plate || '',
-    mileage: vehicle.mileage || 0,
+    mileage: vehicle.mileage || '',
     image: vehicle.image || '',
     status: vehicle.status || 'available',
   });
@@ -510,7 +510,13 @@ function EditVehicleModal({ vehicle, onClose, onSave }) {
       return;
     }
     setSaving(true);
-    await onSave(form);
+    await onSave({
+      ...form,
+      pricePerDay: +form.pricePerDay || 0,
+      mileage: +form.mileage || 0,
+      year: +form.year || new Date().getFullYear(),
+      seats: +form.seats || 5,
+    });
     setSaving(false);
   };
 
@@ -587,11 +593,11 @@ function EditVehicleModal({ vehicle, onClose, onSave }) {
         </div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Prix / jour (DA) *</label><input className="form-input" type="number" value={form.pricePerDay} onChange={e => set('pricePerDay', +e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Prix / jour (DA) *</label><input className="form-input" type="number" value={form.pricePerDay} onChange={e => set('pricePerDay', e.target.value)} placeholder="4500" /></div>
         <div className="form-group"><label className="form-label">Immatriculation *</label><input className="form-input" value={form.plate} onChange={e => set('plate', e.target.value)} /></div>
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Kilométrage</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', +e.target.value)} /></div>
+        <div className="form-group"><label className="form-label">Kilométrage</label><input className="form-input" type="number" value={form.mileage} onChange={e => set('mileage', e.target.value)} placeholder="0" /></div>
         <div className="form-group"><label className="form-label">Statut</label>
           <select className="form-select" value={form.status} onChange={e => set('status', e.target.value)}>
             <option value="available">Disponible</option>

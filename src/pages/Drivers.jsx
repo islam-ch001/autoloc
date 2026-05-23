@@ -165,8 +165,8 @@ function DriverFormModal({ driver, onClose, onSave }) {
     license: driver?.license || 'B',
     licenseNumber: driver?.licenseNumber || '',
     licenseExpiry: driver?.licenseExpiry || '',
-    dailyRate: driver?.dailyRate || 0,
-    salary: driver?.salary || 0,
+    dailyRate: driver?.dailyRate || '',
+    salary: driver?.salary || '',
     notes: driver?.notes || '',
     status: driver?.status || 'active',
   });
@@ -179,7 +179,11 @@ function DriverFormModal({ driver, onClose, onSave }) {
       return;
     }
     setSaving(true);
-    await onSave(form);
+    await onSave({
+      ...form,
+      dailyRate: +form.dailyRate || 0,
+      salary: +form.salary || 0,
+    });
     setSaving(false);
   };
 
@@ -222,8 +226,8 @@ function DriverFormModal({ driver, onClose, onSave }) {
         Rémunération
       </div>
       <div className="form-row">
-        <div className="form-group"><label className="form-label">Tarif journalier (DA)</label><input className="form-input" type="number" min="0" value={form.dailyRate} onChange={e => set('dailyRate', parseInt(e.target.value) || 0)} /></div>
-        <div className="form-group"><label className="form-label">Salaire mensuel (DA)</label><input className="form-input" type="number" min="0" value={form.salary} onChange={e => set('salary', parseInt(e.target.value) || 0)} /></div>
+        <div className="form-group"><label className="form-label">Tarif journalier (DA)</label><input className="form-input" type="number" min="0" value={form.dailyRate} onChange={e => set('dailyRate', e.target.value)} placeholder="0" /></div>
+        <div className="form-group"><label className="form-label">Salaire mensuel (DA)</label><input className="form-input" type="number" min="0" value={form.salary} onChange={e => set('salary', e.target.value)} placeholder="0" /></div>
       </div>
 
       <div className="form-group"><label className="form-label">Notes</label><textarea className="form-textarea" value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Disponibilité, spécialités, langues parlées..." /></div>
