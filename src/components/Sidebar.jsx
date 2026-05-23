@@ -100,7 +100,7 @@ export default function Sidebar() {
         ))}
 
         <div className="nav-section-label">{t('nav.system')}</div>
-        {user?.isSuperAdmin && (
+        {!!user?.isSuperAdmin && (
           <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <ShieldCheck size={18} style={{ color: 'var(--primary)' }} />
             Administration

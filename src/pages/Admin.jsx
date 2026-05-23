@@ -312,7 +312,7 @@ function ManageAccessModal({ user: u, onClose, onSave }) {
         <Lock size={14} style={{ color: 'var(--danger)' }} />
         Bloquer ce compte
       </label>
-      {form.blocked && (
+      {!!form.blocked && (
         <input
           className="form-input"
           style={{ marginTop: 8 }}
