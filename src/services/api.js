@@ -71,6 +71,9 @@ export const createVehicle   = (data)       => request('POST', '/vehicles', data
 export const updateVehicle   = (id, data)   => request('PATCH', `/vehicles/${id}`, data);
 export const deleteVehicle   = (id)         => request('DELETE', `/vehicles/${id}`);
 
+// ─── Bootstrap (toutes les données en une seule requête) ────
+export const getBootstrap = () => request('GET', '/bootstrap');
+
 // ─── Clients ─────────────────────────────────────────────────
 export const getClients      = (params)     => request('GET', `/clients${buildQS(params)}`);
 export const getClient       = (id)         => request('GET', `/clients/${id}`);

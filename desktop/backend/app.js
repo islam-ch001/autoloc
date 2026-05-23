@@ -20,6 +20,41 @@ function createApp() {
   // Health
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', mode: 'offline' }));
 
+  // BOOTSTRAP : recupere toutes les donnees de base en UNE seule requete (perf)
+  const pool = require('./db/pool');
+  app.get('/api/bootstrap', requireAuth, async (req, res) => {
+    try {
+      const uid = req.user.id;
+      const [vehicles, clients, drivers, reservations, returns, maintenance] = await Promise.all([
+        pool.query('SELECT * FROM vehicles WHERE user_id = $1 ORDER BY brand, model', [uid]).then(r => r.rows),
+        pool.query('SELECT * FROM clients WHERE user_id = $1 ORDER BY last_name, first_name', [uid]).then(r => r.rows),
+        pool.query('SELECT * FROM drivers WHERE user_id = $1 ORDER BY last_name, first_name', [uid]).then(r => r.rows),
+        pool.query(`SELECT r.*, c.first_name, c.last_name, c.phone, v.brand, v.model, v.plate, v.price_per_day,
+                           d.first_name AS driver_first_name, d.last_name AS driver_last_name, d.phone AS driver_phone, d.daily_rate AS driver_daily_rate
+                    FROM reservations r
+                    JOIN clients c ON c.id = r.client_id
+                    JOIN vehicles v ON v.id = r.vehicle_id
+                    LEFT JOIN drivers d ON d.id = r.driver_id
+                    WHERE r.user_id = $1 ORDER BY r.start_date DESC`, [uid]).then(r => r.rows),
+        pool.query(`SELECT ret.*, r.start_date, r.end_date,
+                           c.first_name AS client_first_name, c.last_name AS client_last_name,
+                           v.brand, v.model, v.plate
+                    FROM returns ret
+                    JOIN reservations r ON r.id = ret.reservation_id
+                    JOIN clients c ON c.id = r.client_id
+                    JOIN vehicles v ON v.id = r.vehicle_id
+                    WHERE ret.user_id = $1 ORDER BY ret.return_date DESC`, [uid]).then(r => r.rows),
+        pool.query(`SELECT m.*, v.brand, v.model, v.plate
+                    FROM maintenance m
+                    JOIN vehicles v ON v.id = m.vehicle_id
+                    WHERE m.user_id = $1 ORDER BY m.date DESC`, [uid]).then(r => r.rows),
+      ]);
+      res.json({ vehicles, clients, drivers, reservations, returns, maintenance });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // API
   app.use('/api/auth', authRouter);
   app.use('/api/vehicles',     requireAuth, vehiclesRouter);
@@ -50,16 +85,29 @@ function createApp() {
   return app;
 }
 
+// Port FIXE : essentiel pour persister localStorage (et donc le JWT) entre les lancements.
+// Sans cela, chaque lancement repart de zéro (origine HTTP différente).
+const FIXED_PORT = 51847;
+
 function startServer() {
   return new Promise((resolve, reject) => {
     try {
       const app = createApp();
-      // Port 0 = port libre attribué par le système
-      const server = app.listen(0, '127.0.0.1', () => {
-        const port = server.address().port;
-        resolve({ port, server });
-      });
-      server.on('error', reject);
+      const tryPort = (port, isLast = false) => {
+        const server = app.listen(port, '127.0.0.1', () => {
+          resolve({ port: server.address().port, server });
+        });
+        server.on('error', (err) => {
+          if (err.code === 'EADDRINUSE' && !isLast) {
+            // Port pris (autre instance ?) → fallback sur port aléatoire
+            console.warn(`[Express] Port ${port} occupé, fallback sur port aléatoire`);
+            tryPort(0, true);
+          } else {
+            reject(err);
+          }
+        });
+      };
+      tryPort(FIXED_PORT);
     } catch (err) { reject(err); }
   });
 }

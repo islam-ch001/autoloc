@@ -15,7 +15,7 @@ export default function Welcome() {
 
     // Phase 2 : auto-login EN PARALLELE avec l'animation
     const startTime = Date.now();
-    const MIN_DISPLAY_MS = 1200;  // duree minimum d'affichage du splash (pour que l'anim soit visible)
+    const MIN_DISPLAY_MS = 600;  // duree minimum d'affichage du splash
 
     // Pre-fetch des chunks de la 1ere page (Dashboard) pour eviter un 2eme loader apres login
     import('./Dashboard').catch(() => {});

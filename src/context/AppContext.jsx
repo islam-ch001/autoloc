@@ -18,10 +18,24 @@ export function AppProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
+      // Essai 1 : endpoint /bootstrap (1 seule requête, 5-10x plus rapide)
+      try {
+        const all = await api.getBootstrap();
+        setVehicles(all.vehicles || []);
+        setClients(all.clients || []);
+        setDrivers(all.drivers || []);
+        setReservations(all.reservations || []);
+        setReturns(all.returns || []);
+        setMaintenance(all.maintenance || []);
+        return;
+      } catch (e) {
+        // Fallback : 6 requêtes parallèles (compat avec ancien backend)
+        if (!String(e.message).match(/404|introuvable/i)) throw e;
+      }
       const [v, c, d, r, ret, m] = await Promise.all([
         api.getVehicles(),
         api.getClients(),
-        api.getDrivers().catch(() => []),  // graceful fallback si table pas encore créée
+        api.getDrivers().catch(() => []),
         api.getReservations(),
         api.getReturns(),
         api.getMaintenance(),
