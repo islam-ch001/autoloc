@@ -17,30 +17,49 @@ function camelize(obj) {
   return obj;
 }
 
-// Token persisté dans localStorage
+// Token + user cache persistés dans localStorage (optimistic auth)
 const TOKEN_KEY = 'autoloc_token';
+const USER_KEY = 'autoloc_user';
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (t) => t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY);
+const getCachedUser = () => {
+  try { const s = localStorage.getItem(USER_KEY); return s ? JSON.parse(s) : null; }
+  catch { return null; }
+};
+const setCachedUser = (u) => {
+  if (u) localStorage.setItem(USER_KEY, JSON.stringify(u));
+  else   localStorage.removeItem(USER_KEY);
+};
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);
-  const [loading, setLoading] = useState(true);
+  // OPTIMISTIC AUTH : si un user est en cache, on l'utilise IMMEDIATEMENT
+  // → pas de "Vérification de la session…" sur les visites suivantes
+  const initialToken = getToken();
+  const initialUser  = initialToken ? getCachedUser() : null;
+  const [user, setUser]       = useState(initialUser);
+  // loading = true seulement si on n'a PAS de cache (1ere visite ou logout)
+  const [loading, setLoading] = useState(!initialUser);
 
   const fetchMe = useCallback(async () => {
     const token = getToken();
-    if (!token) { setUser(null); setLoading(false); return; }
+    if (!token) { setUser(null); setCachedUser(null); setLoading(false); return; }
     try {
       const res = await fetch(`${BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error();
-      setUser(camelize(await res.json()));
+      const freshUser = camelize(await res.json());
+      setUser(freshUser);
+      setCachedUser(freshUser);  // met le cache a jour avec les dernieres donnees
     } catch {
+      // Token invalide → on nettoie et on force re-login
       setToken(null);
+      setCachedUser(null);
       setUser(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Au mount : on revalide en arriere-plan (l'app est deja accessible si user en cache)
   useEffect(() => { fetchMe(); }, [fetchMe]);
 
   const login = async (email, password) => {
@@ -52,7 +71,9 @@ export function AuthProvider({ children }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erreur de connexion');
     setToken(data.token);
-    setUser(camelize(data.user));
+    const u = camelize(data.user);
+    setUser(u);
+    setCachedUser(u);
   };
 
   // Auto-login pour l'app desktop (single-user offline, pas de mot de passe)
@@ -64,7 +85,9 @@ export function AuthProvider({ children }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erreur de demarrage');
     setToken(data.token);
-    setUser(camelize(data.user));
+    const u = camelize(data.user);
+    setUser(u);
+    setCachedUser(u);
     return data.user;
   };
 
@@ -90,7 +113,9 @@ export function AuthProvider({ children }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Code invalide');
     setToken(data.token);
-    setUser(camelize(data.user));
+    const u = camelize(data.user);
+    setUser(u);
+    setCachedUser(u);
   };
 
   const signupResend = async (email) => {
@@ -129,6 +154,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setToken(null);
+    setCachedUser(null);
     setUser(null);
   };
 
