@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#09090B" />
-  <title>AutoLoc — Gestion de location de voitures pour l'Algérie</title>
-  <meta name="description" content="Logiciel professionnel pour agences de location de voitures. Gérez véhicules, clients, chauffeurs, réservations et contrats. Web + Application Windows hors-ligne." />
+  <title data-i18n="title">AutoLoc — Gestion de location de voitures pour l'Algérie</title>
+  <meta name="description" content="Logiciel professionnel pour agences de location de voitures." />
   <meta property="og:title" content="AutoLoc — Gestion de location de voitures" />
   <meta property="og:description" content="L'outil tout-en-un pour les agences de location de voitures." />
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -21,19 +21,29 @@
     <div class="container nav-inner">
       <a href="#" class="brand">
         <span class="brand-logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>
-            <circle cx="6.5" cy="16.5" r="2.5"/>
-            <circle cx="16.5" cy="16.5" r="2.5"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
         </span>
         <span class="brand-name">Auto<span class="primary">Loc</span></span>
       </a>
       <nav class="nav-links">
-        <a href="#features">Fonctionnalités</a>
-        <a href="#screenshots">Aperçu</a>
-        <a href="#download">Télécharger</a>
-        <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" class="btn-ghost">Accéder à l'app web →</a>
+        <a href="#features" data-i18n="nav.features">Fonctionnalités</a>
+        <a href="#screenshots" data-i18n="nav.screenshots">Aperçu</a>
+        <a href="#download" data-i18n="nav.download">Télécharger</a>
+
+        <button id="btn-theme" class="nav-toggle" title="Theme">
+          <svg id="btn-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <span id="btn-theme-label">Mode clair</span>
+        </button>
+        <button id="btn-lang" class="nav-toggle" title="Language">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>
+          </svg>
+          <span id="btn-lang-label">العربية</span>
+        </button>
+
+        <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" class="btn-ghost" data-i18n="nav.webapp">Accéder à l'app web →</a>
       </nav>
     </div>
   </header>
@@ -44,31 +54,28 @@
     <div class="hero-glow hero-glow-2"></div>
     <div class="container hero-inner">
       <span class="badge-eyebrow">
-        <span class="badge-dot"></span> Conçu pour les agences algériennes
+        <span class="badge-dot"></span> <span data-i18n="hero.badge">Conçu pour les agences algériennes</span>
       </span>
       <h1 class="hero-title">
-        Le système <span class="gradient-text">tout-en-un</span><br />
-        pour votre agence de location de voitures
+        <span data-i18n="hero.title1">Le système</span> <span class="gradient-text" data-i18n="hero.title2">tout-en-un</span><br />
+        <span data-i18n="hero.title3">pour votre agence de location de voitures</span>
       </h1>
-      <p class="hero-sub">
-        Gérez vos véhicules, clients, chauffeurs, réservations, retours et contrats —
-        depuis le web ou votre PC, en ligne ou hors-ligne. Sans complication.
+      <p class="hero-sub" data-i18n="hero.sub">
+        Gérez vos véhicules, clients, chauffeurs, réservations, retours et contrats — depuis le web ou votre PC, en ligne ou hors-ligne. Sans complication.
       </p>
       <div class="hero-actions">
         <a href="#download" class="btn-primary btn-lg">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
           </svg>
-          Télécharger pour Windows
+          <span data-i18n="hero.cta.download">Télécharger pour Windows</span>
         </a>
-        <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" class="btn-secondary btn-lg">
-          Essayer la version web →
-        </a>
+        <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" class="btn-secondary btn-lg" data-i18n="hero.cta.web">Essayer la version web →</a>
       </div>
       <div class="hero-meta">
-        <span>✓ Installeur Windows 81 MB</span>
-        <span>✓ Pas d'abonnement requis</span>
-        <span>✓ Données 100% privées</span>
+        <span data-i18n="hero.meta.1">✓ Installeur Windows 81 MB</span>
+        <span data-i18n="hero.meta.2">✓ Pas d'abonnement requis</span>
+        <span data-i18n="hero.meta.3">✓ Données 100% privées</span>
       </div>
     </div>
   </section>
@@ -78,19 +85,19 @@
     <div class="container stats-grid">
       <div class="stat">
         <div class="stat-num">7+</div>
-        <div class="stat-label">Modules intégrés</div>
+        <div class="stat-label" data-i18n="stats.1.label">Modules intégrés</div>
       </div>
       <div class="stat">
         <div class="stat-num">2</div>
-        <div class="stat-label">Langues (FR / AR)</div>
+        <div class="stat-label" data-i18n="stats.2.label">Langues (FR / AR)</div>
       </div>
       <div class="stat">
         <div class="stat-num">100%</div>
-        <div class="stat-label">Hors-ligne (desktop)</div>
+        <div class="stat-label" data-i18n="stats.3.label">Hors-ligne (desktop)</div>
       </div>
       <div class="stat">
         <div class="stat-num">∞</div>
-        <div class="stat-label">Véhicules / clients</div>
+        <div class="stat-label" data-i18n="stats.4.label">Véhicules / clients</div>
       </div>
     </div>
   </section>
@@ -98,73 +105,66 @@
   <!-- ===== FEATURES ===== -->
   <section id="features" class="features">
     <div class="container">
-      <span class="section-eyebrow">Fonctionnalités</span>
-      <h2 class="section-title">Tout ce qu'il faut pour gérer une agence</h2>
-      <p class="section-sub">7 modules connectés entre eux, pensés pour les agences de location de voitures en Algérie.</p>
+      <span class="section-eyebrow" data-i18n="features.eyebrow">Fonctionnalités</span>
+      <h2 class="section-title" data-i18n="features.title">Tout ce qu'il faut pour gérer une agence</h2>
+      <p class="section-sub" data-i18n="features.sub">7 modules connectés entre eux, pensés pour les agences de location de voitures en Algérie.</p>
 
       <div class="features-grid">
         <article class="feature-card">
           <div class="feature-icon icon-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
           </div>
-          <h3>Gestion de flotte</h3>
-          <p>Suivez chaque véhicule : marque, modèle, immatriculation, kilométrage, statut (disponible / loué / maintenance), photo, prix journalier.</p>
+          <h3 data-i18n="f1.title">Gestion de flotte</h3>
+          <p data-i18n="f1.desc">Suivez chaque véhicule : marque, modèle, immatriculation, kilométrage, statut, photo, prix journalier.</p>
         </article>
-
         <article class="feature-card">
           <div class="feature-icon icon-accent">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <h3>Fichier clients</h3>
-          <p>Coordonnées, permis, historique de locations, total dépensé. Recherche instantanée. Statut actif / inactif.</p>
+          <h3 data-i18n="f2.title">Fichier clients</h3>
+          <p data-i18n="f2.desc">Coordonnées, permis, historique de locations, total dépensé. Recherche instantanée.</p>
         </article>
-
         <article class="feature-card">
           <div class="feature-icon icon-success">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <h3>Chauffeurs</h3>
-          <p>Vos employés chauffeurs avec permis, expiration, tarif journalier, salaire mensuel. Assignables aux réservations.</p>
+          <h3 data-i18n="f3.title">Chauffeurs</h3>
+          <p data-i18n="f3.desc">Vos employés chauffeurs avec permis, expiration, tarif journalier, salaire mensuel.</p>
         </article>
-
         <article class="feature-card">
           <div class="feature-icon icon-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           </div>
-          <h3>Réservations</h3>
-          <p>Création en quelques clics : client + véhicule + chauffeur + dates → prix calculé. Statuts à venir / actif / terminé. Disponibilité vérifiée.</p>
+          <h3 data-i18n="f4.title">Réservations</h3>
+          <p data-i18n="f4.desc">Création en quelques clics. Statuts à venir / actif / terminé. Disponibilité vérifiée.</p>
         </article>
-
         <article class="feature-card">
           <div class="feature-icon icon-accent">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
           </div>
-          <h3>Retours & dépassements</h3>
-          <p>Saisissez kilométrage retour, carburant, état, dommages. Le système calcule automatiquement les frais kilométriques excédentaires.</p>
+          <h3 data-i18n="f5.title">Retours & dépassements</h3>
+          <p data-i18n="f5.desc">Saisissez kilométrage retour, carburant, état. Calcul automatique des frais excédentaires.</p>
         </article>
-
         <article class="feature-card">
           <div class="feature-icon icon-success">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
           </div>
-          <h3>Maintenance</h3>
-          <p>Historique des interventions par véhicule. Rappels automatiques pour les prochaines maintenances (date ou kilométrage).</p>
+          <h3 data-i18n="f6.title">Maintenance</h3>
+          <p data-i18n="f6.desc">Historique des interventions. Rappels automatiques pour les prochaines maintenances.</p>
         </article>
-
         <article class="feature-card">
           <div class="feature-icon icon-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
           </div>
-          <h3>Contrats & Factures PDF</h3>
-          <p>Génération automatique de contrats de location (8 articles légaux) et factures imprimables, au format A4.</p>
+          <h3 data-i18n="f7.title">Contrats & Factures PDF</h3>
+          <p data-i18n="f7.desc">Génération automatique de contrats de location et factures imprimables, format A4.</p>
         </article>
-
         <article class="feature-card">
           <div class="feature-icon icon-accent">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
           </div>
-          <h3>Mode sombre & clair</h3>
-          <p>Interface adaptable : mode sombre élégant ou mode clair épuré. Bilingue Français/Arabe avec RTL automatique.</p>
+          <h3 data-i18n="f8.title">Mode sombre & clair</h3>
+          <p data-i18n="f8.desc">Interface adaptable. Bilingue Français/Arabe avec RTL automatique.</p>
         </article>
       </div>
     </div>
@@ -173,45 +173,41 @@
   <!-- ===== TWO PLATFORMS ===== -->
   <section class="platforms">
     <div class="container">
-      <span class="section-eyebrow">Deux plateformes, une expérience</span>
-      <h2 class="section-title">Web ou Desktop — vous choisissez</h2>
+      <span class="section-eyebrow" data-i18n="platforms.eyebrow">Deux plateformes, une expérience</span>
+      <h2 class="section-title" data-i18n="platforms.title">Web ou Desktop — vous choisissez</h2>
 
       <div class="platforms-grid">
         <div class="platform-card platform-web">
           <div class="platform-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           </div>
-          <h3>Version Web</h3>
-          <p class="platform-desc">Accessible partout via votre navigateur. Synchronisée en temps réel sur tous vos appareils.</p>
+          <h3 data-i18n="pf.web.title">Version Web</h3>
+          <p class="platform-desc" data-i18n="pf.web.desc">Accessible partout via votre navigateur.</p>
           <ul class="platform-features">
-            <li>✓ Aucune installation requise</li>
-            <li>✓ Accessible depuis n'importe où</li>
-            <li>✓ Synchro multi-utilisateurs</li>
-            <li>✓ Optimisé mobile + tablette</li>
-            <li>✓ Mises à jour automatiques</li>
+            <li data-i18n="pf.web.f1">✓ Aucune installation requise</li>
+            <li data-i18n="pf.web.f2">✓ Accessible depuis n'importe où</li>
+            <li data-i18n="pf.web.f3">✓ Synchro multi-utilisateurs</li>
+            <li data-i18n="pf.web.f4">✓ Optimisé mobile + tablette</li>
+            <li data-i18n="pf.web.f5">✓ Mises à jour automatiques</li>
           </ul>
-          <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" class="btn-secondary">
-            Ouvrir l'app web →
-          </a>
+          <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" class="btn-secondary" data-i18n="pf.web.cta">Ouvrir l'app web →</a>
         </div>
 
         <div class="platform-card platform-desktop">
           <div class="platform-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
-          <span class="platform-tag">Recommandé pour usage local</span>
-          <h3>Application Windows</h3>
-          <p class="platform-desc">Application native qui fonctionne entièrement hors-ligne. Vos données restent sur votre ordinateur.</p>
+          <span class="platform-tag" data-i18n="pf.desktop.tag">Recommandé pour usage local</span>
+          <h3 data-i18n="pf.desktop.title">Application Windows</h3>
+          <p class="platform-desc" data-i18n="pf.desktop.desc">Application native qui fonctionne entièrement hors-ligne.</p>
           <ul class="platform-features">
-            <li>✓ 100% hors-ligne</li>
-            <li>✓ Données locales privées (SQLite)</li>
-            <li>✓ Pas d'abonnement</li>
-            <li>✓ Démarrage instantané (~2s)</li>
-            <li>✓ Tout AutoLoc dans un seul .exe</li>
+            <li data-i18n="pf.desktop.f1">✓ 100% hors-ligne</li>
+            <li data-i18n="pf.desktop.f2">✓ Données locales privées (SQLite)</li>
+            <li data-i18n="pf.desktop.f3">✓ Pas d'abonnement</li>
+            <li data-i18n="pf.desktop.f4">✓ Démarrage instantané (~2s)</li>
+            <li data-i18n="pf.desktop.f5">✓ Tout AutoLoc dans un seul .exe</li>
           </ul>
-          <a href="#download" class="btn-primary">
-            Télécharger pour Windows
-          </a>
+          <a href="#download" class="btn-primary" data-i18n="pf.desktop.cta">Télécharger pour Windows</a>
         </div>
       </div>
     </div>
@@ -220,16 +216,14 @@
   <!-- ===== SCREENSHOTS ===== -->
   <section id="screenshots" class="screenshots">
     <div class="container">
-      <span class="section-eyebrow">Aperçu</span>
-      <h2 class="section-title">Une interface claire, conçue pour aller vite</h2>
-      <p class="section-sub">Vue tableau de bord, gestion des véhicules, calendrier des réservations.</p>
+      <span class="section-eyebrow" data-i18n="ss.eyebrow">Aperçu</span>
+      <h2 class="section-title" data-i18n="ss.title">Une interface claire, conçue pour aller vite</h2>
+      <p class="section-sub" data-i18n="ss.sub">Vue tableau de bord, gestion des véhicules, calendrier des réservations.</p>
 
       <div class="screenshots-grid">
         <div class="screenshot-card">
           <div class="screenshot-window">
-            <div class="screenshot-bar">
-              <span></span><span></span><span></span>
-            </div>
+            <div class="screenshot-bar"><span></span><span></span><span></span></div>
             <div class="screenshot-body screenshot-dashboard">
               <div class="ss-sidebar"></div>
               <div class="ss-content">
@@ -242,13 +236,12 @@
               </div>
             </div>
           </div>
-          <div class="screenshot-caption">📊 Tableau de bord avec KPIs</div>
+          <div class="screenshot-caption" data-i18n="ss.cap1">📊 Tableau de bord avec KPIs</div>
         </div>
-
         <div class="screenshot-card">
           <div class="screenshot-window">
             <div class="screenshot-bar"><span></span><span></span><span></span></div>
-            <div class="screenshot-body screenshot-vehicles">
+            <div class="screenshot-body">
               <div class="ss-sidebar"></div>
               <div class="ss-content">
                 <div class="ss-grid-cards">
@@ -260,13 +253,12 @@
               </div>
             </div>
           </div>
-          <div class="screenshot-caption">🚗 Gestion de flotte avec photos</div>
+          <div class="screenshot-caption" data-i18n="ss.cap2">🚗 Gestion de flotte avec photos</div>
         </div>
-
         <div class="screenshot-card">
           <div class="screenshot-window">
             <div class="screenshot-bar"><span></span><span></span><span></span></div>
-            <div class="screenshot-body screenshot-calendar">
+            <div class="screenshot-body">
               <div class="ss-sidebar"></div>
               <div class="ss-content">
                 <div class="ss-cal-grid">
@@ -278,7 +270,7 @@
               </div>
             </div>
           </div>
-          <div class="screenshot-caption">📅 Calendrier des réservations</div>
+          <div class="screenshot-caption" data-i18n="ss.cap3">📅 Calendrier des réservations</div>
         </div>
       </div>
     </div>
@@ -291,20 +283,18 @@
         <div class="download-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </div>
-        <h2>Téléchargez AutoLoc pour Windows</h2>
-        <p>Application 100% hors-ligne. Toutes vos données restent privées sur votre ordinateur.</p>
+        <h2 data-i18n="dl.title">Téléchargez AutoLoc pour Windows</h2>
+        <p data-i18n="dl.sub">Application 100% hors-ligne. Toutes vos données restent privées sur votre ordinateur.</p>
         <a href="https://github.com/islam-ch001/autoloc/releases/download/autoloc-windows-installer-v1.0.0/AutoLoc-Setup.exe" class="btn-primary btn-xl">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-          </svg>
-          Télécharger AutoLoc-Setup.exe
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span data-i18n="dl.cta">Télécharger AutoLoc-Setup.exe</span>
         </a>
         <div class="download-info">
           <span>📦 81 MB</span>
           <span>•</span>
           <span>🖥️ Windows 10/11 64-bit</span>
           <span>•</span>
-          <span>🆓 Gratuit</span>
+          <span data-i18n="dl.free">🆓 Gratuit</span>
         </div>
       </div>
     </div>
@@ -313,33 +303,33 @@
   <!-- ===== FAQ ===== -->
   <section class="faq">
     <div class="container">
-      <span class="section-eyebrow">Questions fréquentes</span>
-      <h2 class="section-title">FAQ</h2>
+      <span class="section-eyebrow" data-i18n="faq.eyebrow">Questions fréquentes</span>
+      <h2 class="section-title" data-i18n="faq.title">FAQ</h2>
 
       <div class="faq-list">
         <details class="faq-item">
-          <summary>L'application est-elle vraiment gratuite ?</summary>
-          <p>Oui, AutoLoc est gratuit. L'application Windows est entièrement gratuite avec toutes les fonctionnalités. La version web propose un essai gratuit et un abonnement mensuel pour l'accès cloud.</p>
+          <summary data-i18n="faq.q1">L'application est-elle vraiment gratuite ?</summary>
+          <p data-i18n="faq.a1">Oui, AutoLoc est gratuit.</p>
         </details>
         <details class="faq-item">
-          <summary>Mes données sont-elles en sécurité ?</summary>
-          <p>Avec l'application Windows : 100% de vos données restent sur votre ordinateur (base SQLite locale). Personne d'autre n'y a accès. Avec la version web : les données sont chiffrées et stockées sur des serveurs sécurisés européens.</p>
+          <summary data-i18n="faq.q2">Mes données sont-elles en sécurité ?</summary>
+          <p data-i18n="faq.a2">Oui, avec l'application Windows vos données restent sur votre ordinateur.</p>
         </details>
         <details class="faq-item">
-          <summary>Faut-il une connexion Internet ?</summary>
-          <p>Non pour l'application Windows : elle fonctionne entièrement hors-ligne. Oui pour la version web (forcément). Vous pouvez utiliser les deux à la fois.</p>
+          <summary data-i18n="faq.q3">Faut-il une connexion Internet ?</summary>
+          <p data-i18n="faq.a3">Non pour l'application Windows : elle fonctionne entièrement hors-ligne.</p>
         </details>
         <details class="faq-item">
-          <summary>Combien d'utilisateurs / véhicules / clients je peux gérer ?</summary>
-          <p>Aucune limite. Vous pouvez ajouter autant de véhicules, clients, chauffeurs, réservations que vous voulez.</p>
+          <summary data-i18n="faq.q4">Combien d'utilisateurs / véhicules / clients je peux gérer ?</summary>
+          <p data-i18n="faq.a4">Aucune limite.</p>
         </details>
         <details class="faq-item">
-          <summary>L'application est-elle en arabe ?</summary>
-          <p>Oui ! AutoLoc est bilingue Français / Arabe avec support RTL (droite-à-gauche) complet. Vous pouvez basculer entre les deux langues à tout moment.</p>
+          <summary data-i18n="faq.q5">L'application est-elle en arabe ?</summary>
+          <p data-i18n="faq.a5">Oui, AutoLoc est bilingue Français / Arabe.</p>
         </details>
         <details class="faq-item">
-          <summary>Comment imprimer un contrat de location ?</summary>
-          <p>Depuis la page Réservations, cliquez sur « Contrat » à côté d'une réservation. Un contrat de location au format A4 (avec 8 articles légaux) s'ouvre et peut être imprimé ou enregistré en PDF.</p>
+          <summary data-i18n="faq.q6">Comment imprimer un contrat de location ?</summary>
+          <p data-i18n="faq.a6">Depuis la page Réservations, cliquez sur « Contrat ».</p>
         </details>
       </div>
     </div>
@@ -348,11 +338,11 @@
   <!-- ===== FINAL CTA ===== -->
   <section class="final-cta">
     <div class="container">
-      <h2>Prêt à digitaliser votre agence ?</h2>
-      <p>Commencez aujourd'hui — gratuit et sans inscription pour la version desktop.</p>
+      <h2 data-i18n="cta.title">Prêt à digitaliser votre agence ?</h2>
+      <p data-i18n="cta.sub">Commencez aujourd'hui — gratuit et sans inscription pour la version desktop.</p>
       <div class="hero-actions">
-        <a href="#download" class="btn-primary btn-lg">⬇️ Télécharger Windows</a>
-        <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" class="btn-secondary btn-lg">🌐 Essayer la version web</a>
+        <a href="#download" class="btn-primary btn-lg" data-i18n="cta.btn1">⬇️ Télécharger Windows</a>
+        <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" class="btn-secondary btn-lg" data-i18n="cta.btn2">🌐 Essayer la version web</a>
       </div>
     </div>
   </section>
@@ -367,26 +357,26 @@
           </span>
           <span class="brand-name">Auto<span class="primary">Loc</span></span>
         </span>
-        <p>Le système tout-en-un pour les agences de location de voitures.</p>
+        <p data-i18n="footer.tagline">Le système tout-en-un pour les agences de location de voitures.</p>
       </div>
       <div class="footer-cols">
         <div class="footer-col">
-          <h4>Produit</h4>
-          <a href="#features">Fonctionnalités</a>
-          <a href="#download">Télécharger</a>
-          <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener">App web</a>
+          <h4 data-i18n="footer.h1">Produit</h4>
+          <a href="#features" data-i18n="footer.l1">Fonctionnalités</a>
+          <a href="#download" data-i18n="footer.l2">Télécharger</a>
+          <a href="https://autoloc-app.vercel.app" target="_blank" rel="noopener" data-i18n="footer.l3">App web</a>
         </div>
         <div class="footer-col">
-          <h4>Contact</h4>
+          <h4 data-i18n="footer.h3">Contact</h4>
           <a href="https://wa.me/213554214999">WhatsApp</a>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <div class="container">
-        © 2026 AutoLoc · Tous droits réservés
-      </div>
+      <div class="container" data-i18n="footer.copy">© 2026 AutoLoc · Tous droits réservés</div>
     </div>
   </footer>
+
+  <script src="app.js"></script>
 </body>
 </html>
