@@ -15,9 +15,9 @@ async function api(path, options = {}) {
   return data;
 }
 
-export default function Activation() {
+export default function Activation({ onActivated }) {
   const navigate = useNavigate();
-  const [status, setStatus] = useState('checking'); // 'checking' | 'needs-activation' | 'activating' | 'success'
+  const [status, setStatus] = useState('needs-activation');
   const [key, setKey] = useState('');
   const [error, setError] = useState(null);
   const [machineId, setMachineId] = useState(null);
@@ -26,21 +26,17 @@ export default function Activation() {
   useEffect(() => {
     api('/license/status')
       .then(res => {
+        setMachineId(res.machineId);
         if (res.activated) {
-          navigate('/welcome', { replace: true });
-        } else {
-          setMachineId(res.machineId);
-          setStatus('needs-activation');
-          if (res.error === 'machine_mismatch') {
-            setError(res.message || 'Cette licence est liée à un autre ordinateur.');
-          }
+          // Si on est appele depuis LicenseGate, on lui dit "active"
+          if (onActivated) onActivated();
+          else navigate('/welcome', { replace: true });
+        } else if (res.error === 'machine_mismatch') {
+          setError(res.message || 'Cette licence est liée à un autre ordinateur.');
         }
       })
-      .catch(err => {
-        setError(err.message);
-        setStatus('needs-activation');
-      });
-  }, [navigate]);
+      .catch(err => setError(err.message));
+  }, [navigate, onActivated]);
 
   const formatInput = (raw) => {
     const clean = raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20);
@@ -57,7 +53,10 @@ export default function Activation() {
         body: JSON.stringify({ key: key.trim() }),
       });
       setStatus('success');
-      setTimeout(() => navigate('/welcome', { replace: true }), 1500);
+      setTimeout(() => {
+        if (onActivated) onActivated();
+        else navigate('/welcome', { replace: true });
+      }, 1200);
     } catch (err) {
       setError(err.message);
       setStatus('needs-activation');
@@ -71,15 +70,6 @@ export default function Activation() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
-  if (status === 'checking') {
-    return (
-      <div style={S.shell}>
-        <Loader2 size={40} className="spin" style={{ color: 'var(--primary)' }} />
-        <p style={{ marginTop: 16, color: 'var(--text-2)' }}>Vérification de la licence…</p>
-      </div>
-    );
-  }
 
   if (status === 'success') {
     return (

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LogOut, Moon, ShieldCheck, Sun } from 'lucide-react';
 import { AppProvider, useApp } from './context/AppContext';
@@ -41,6 +41,38 @@ function FullScreenLoader({ text = 'Chargement…' }) {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
+}
+
+// ============================================================
+// LicenseGate : verifie la licence DESKTOP avant tout (auth, etc.)
+// Sur desktop si pas active → ecran d'activation. Sinon → enfants.
+// ============================================================
+function LicenseGate({ children }) {
+  const [state, setState] = useState({ loading: true, activated: false });
+
+  const checkLicense = async () => {
+    setState({ loading: true, activated: false });
+    try {
+      const envUrl = import.meta.env.VITE_API_URL;
+      const base = (envUrl !== undefined ? envUrl : '') + '/api';
+      const res = await fetch(base + '/license/status');
+      const data = await res.json();
+      setState({ loading: false, activated: !!data.activated });
+    } catch (err) {
+      setState({ loading: false, activated: false, error: err.message });
+    }
+  };
+
+  useEffect(() => { checkLicense(); }, []);
+
+  // Sur le web : pas de licence requise, passe direct
+  if (!IS_DESKTOP) return children;
+
+  if (state.loading) return <FullScreenLoader text="Vérification de la licence…" />;
+  if (!state.activated) {
+    return <Suspense fallback={<FullScreenLoader />}><Activation onActivated={checkLicense} /></Suspense>;
+  }
+  return children;
 }
 
 function RequireAuth({ children }) {
@@ -232,6 +264,7 @@ export default function App() {
     <BrowserRouter>
       <LanguageProvider>
       <ThemeProvider>
+      <LicenseGate>
       <AuthProvider>
         <Routes>
           <Route path="/login"    element={<Suspense fallback={<FullScreenLoader />}>{IS_DESKTOP ? <Activation /> : <Login />}</Suspense>} />
@@ -244,6 +277,7 @@ export default function App() {
           } />
         </Routes>
       </AuthProvider>
+      </LicenseGate>
       </ThemeProvider>
       </LanguageProvider>
     </BrowserRouter>
