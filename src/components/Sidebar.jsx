@@ -1,6 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, Car, CalendarDays, Users, UserCheck, FileText, RotateCcw, Settings, LogOut, Wrench, Sun, Moon, Languages, ShieldCheck, Menu, X, ChevronUp } from 'lucide-react';
+import { LayoutDashboard, Car, CalendarDays, Users, UserCheck, FileText, RotateCcw, Settings, LogOut, Wrench, Sun, Moon, Languages, ShieldCheck, Menu, X, ChevronUp, SlidersHorizontal } from 'lucide-react';
+
+// Detection du mode desktop (Electron)
+const IS_DESKTOP = typeof window !== 'undefined' && !!window.autoloc?.isDesktop;
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -130,29 +133,55 @@ export default function Sidebar() {
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               <span style={{ flex: 1, textAlign: 'left' }}>{theme === 'dark' ? 'Mode clair' : 'Mode sombre'}</span>
             </button>
-            <div style={{ height: 1, background: 'var(--border)' }} />
-            <button onClick={() => { setMenuOpen(false); logout(); }} style={{ ...menuItemStyle, color: 'var(--danger)' }}>
-              <LogOut size={16} />
-              <span style={{ flex: 1, textAlign: 'left' }}>Se déconnecter</span>
-            </button>
+            {/* Pas de bouton "Se deconnecter" sur l'app desktop (auto-login offline) */}
+            {!IS_DESKTOP && (
+              <>
+                <div style={{ height: 1, background: 'var(--border)' }} />
+                <button onClick={() => { setMenuOpen(false); logout(); }} style={{ ...menuItemStyle, color: 'var(--danger)' }}>
+                  <LogOut size={16} />
+                  <span style={{ flex: 1, textAlign: 'left' }}>Se déconnecter</span>
+                </button>
+              </>
+            )}
           </div>
         )}
-        <button
-          onClick={() => setMenuOpen(o => !o)}
-          className="sidebar-user"
-          style={{
-            background: menuOpen ? 'var(--surface-2)' : 'transparent',
-            border: 'none', cursor: 'pointer', width: '100%',
-            textAlign: 'left', transition: 'background 0.15s',
-          }}
-        >
-          <div className="user-avatar">{initials}</div>
-          <div className="user-info" style={{ flex: 1, minWidth: 0 }}>
-            <div className="user-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Utilisateur'}</div>
-            <div className="user-role" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
-          </div>
-          <ChevronUp size={16} style={{ color: 'var(--text-3)', transition: 'transform 0.2s', transform: menuOpen ? 'rotate(0deg)' : 'rotate(180deg)', flexShrink: 0 }} />
-        </button>
+        {IS_DESKTOP ? (
+          /* Desktop : bouton compact "Preferences" sans nom/email utilisateur */
+          <button
+            onClick={() => setMenuOpen(o => !o)}
+            className="sidebar-prefs-btn"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              background: menuOpen ? 'var(--surface-2)' : 'transparent',
+              border: 'none', cursor: 'pointer', width: '100%',
+              padding: '12px 14px',
+              textAlign: 'left', transition: 'background 0.15s',
+              color: 'var(--text-2)', fontSize: 13, fontWeight: 600,
+            }}
+          >
+            <SlidersHorizontal size={16} />
+            <span style={{ flex: 1 }}>Préférences</span>
+            <ChevronUp size={14} style={{ color: 'var(--text-3)', transition: 'transform 0.2s', transform: menuOpen ? 'rotate(0deg)' : 'rotate(180deg)' }} />
+          </button>
+        ) : (
+          /* Web : bouton avec avatar + nom + email */
+          <button
+            onClick={() => setMenuOpen(o => !o)}
+            className="sidebar-user"
+            style={{
+              background: menuOpen ? 'var(--surface-2)' : 'transparent',
+              border: 'none', cursor: 'pointer', width: '100%',
+              textAlign: 'left', transition: 'background 0.15s',
+            }}
+          >
+            <div className="user-avatar">{initials}</div>
+            <div className="user-info" style={{ flex: 1, minWidth: 0 }}>
+              <div className="user-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Utilisateur'}</div>
+              <div className="user-role" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
+            </div>
+            <ChevronUp size={16} style={{ color: 'var(--text-3)', transition: 'transform 0.2s', transform: menuOpen ? 'rotate(0deg)' : 'rotate(180deg)', flexShrink: 0 }} />
+          </button>
+        )}
       </div>
     </aside>
     </>
