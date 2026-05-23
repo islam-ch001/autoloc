@@ -89,18 +89,23 @@ function TrialBanner() {
 function AppShell() {
   const { loading, error, reload } = useApp();
 
-  if (loading) return <FullScreenLoader text="Chargement des données…" />;
-
+  // CRITIQUE : on rend TOUJOURS la sidebar immediatement (meme pendant loading).
+  // Le mini-loader se met dans le contenu principal, l'utilisateur peut naviguer.
   if (error) {
     return (
-      <div style={{ height: '100vh', display: 'grid', placeItems: 'center', background: 'var(--bg)' }}>
-        <div style={{ textAlign: 'center', maxWidth: 420, padding: '0 20px' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, marginBottom: 8, color: 'var(--text)' }}>Impossible de joindre l'API</h2>
-          <p style={{ color: 'var(--text-2)', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>Le serveur backend est peut-être en démarrage. Attendez 30 secondes et réessayez.</p>
-          <p style={{ color: 'var(--danger)', fontSize: 12, marginBottom: 20, background: 'var(--danger-soft)', padding: '8px 12px', borderRadius: 8 }}>{error}</p>
-          <button onClick={reload} style={{ background: 'var(--primary)', color: '#ffffff', border: 'none', padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>Réessayer</button>
-        </div>
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content">
+          <div style={{ display: 'grid', placeItems: 'center', minHeight: 'calc(100vh - 100px)' }}>
+            <div style={{ textAlign: 'center', maxWidth: 420, padding: '0 20px' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, marginBottom: 8, color: 'var(--text)' }}>Impossible de joindre l'API</h2>
+              <p style={{ color: 'var(--text-2)', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>Le serveur backend est peut-être en démarrage. Attendez 30 secondes et réessayez.</p>
+              <p style={{ color: 'var(--danger)', fontSize: 12, marginBottom: 20, background: 'var(--danger-soft)', padding: '8px 12px', borderRadius: 8 }}>{error}</p>
+              <button onClick={reload} style={{ background: 'var(--primary)', color: '#ffffff', border: 'none', padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>Réessayer</button>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -110,6 +115,13 @@ function AppShell() {
       <Sidebar />
       <main className="main-content">
         <TrialBanner />
+        {loading && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--primary-soft)', borderRadius: 8, marginBottom: 16, fontSize: 12, color: 'var(--text-2)' }}>
+            <div style={{ width: 14, height: 14, border: '2px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+            Chargement des données…
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/"             element={<Dashboard />} />
