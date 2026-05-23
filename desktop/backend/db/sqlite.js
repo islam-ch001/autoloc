@@ -139,6 +139,13 @@ CREATE TABLE IF NOT EXISTS maintenance (
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS license (
+  id          INTEGER PRIMARY KEY CHECK (id = 1),
+  key         TEXT NOT NULL,
+  machine_id  TEXT NOT NULL,
+  activated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS drivers (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

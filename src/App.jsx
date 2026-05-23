@@ -25,6 +25,7 @@ const Admin                = lazy(() => import('./pages/Admin'));
 const SubscriptionRequired = lazy(() => import('./pages/SubscriptionRequired'));
 const Login                = lazy(() => import('./pages/Login'));
 const Welcome              = lazy(() => import('./pages/Welcome'));
+const Activation           = lazy(() => import('./pages/Activation'));
 
 // Detection du mode desktop (Electron)
 const IS_DESKTOP = typeof window !== 'undefined' && !!window.autoloc?.isDesktop;
@@ -46,7 +47,7 @@ function RequireAuth({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) return <FullScreenLoader text="Vérification de la session…" />;
-  if (!user) return <Navigate to={IS_DESKTOP ? '/welcome' : '/login'} replace state={{ from: location }} />;
+  if (!user) return <Navigate to={IS_DESKTOP ? '/activation' : '/login'} replace state={{ from: location }} />;
 
   // Vérifier l'abonnement (super-admin bypassé) — 'active' ou 'trial' valides
   const validStatus = user.subscriptionStatus === 'active' || user.subscriptionStatus === 'trial';
@@ -233,8 +234,9 @@ export default function App() {
       <ThemeProvider>
       <AuthProvider>
         <Routes>
-          <Route path="/login"    element={<Suspense fallback={<FullScreenLoader />}>{IS_DESKTOP ? <Welcome /> : <Login />}</Suspense>} />
+          <Route path="/login"    element={<Suspense fallback={<FullScreenLoader />}>{IS_DESKTOP ? <Activation /> : <Login />}</Suspense>} />
           <Route path="/welcome"  element={<Suspense fallback={<FullScreenLoader />}><Welcome /></Suspense>} />
+          <Route path="/activation" element={<Suspense fallback={<FullScreenLoader />}><Activation /></Suspense>} />
           <Route path="/*" element={
             <RequireAuth>
               <AuthenticatedApp />

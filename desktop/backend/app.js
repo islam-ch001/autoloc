@@ -12,6 +12,7 @@ const dashboardRouter    = require('./routes/dashboard');
 const invoicesRouter     = require('./routes/invoices');
 const maintenanceRouter  = require('./routes/maintenance');
 const adminRouter        = require('./routes/admin');
+const licenseRouter      = require('./routes/license');
 
 function createApp() {
   const app = express();
@@ -19,6 +20,9 @@ function createApp() {
 
   // Health
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', mode: 'offline' }));
+
+  // License (NON protégée par requireAuth — c'est l'écran d'activation)
+  app.use('/api/license', licenseRouter);
 
   // BOOTSTRAP : recupere toutes les donnees de base en UNE seule requete (perf)
   const pool = require('./db/pool');
