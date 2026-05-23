@@ -10,15 +10,22 @@ export default function Welcome() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Phase 1 : animation 1.8s
-    const t1 = setTimeout(() => setPhase('connecting'), 1800);
+    // Phase 1 : montre "connecting" presque immediatement
+    const t1 = setTimeout(() => setPhase('connecting'), 400);
 
-    // Phase 2 : auto-login (en parallele avec animation)
+    // Phase 2 : auto-login EN PARALLELE avec l'animation
+    const startTime = Date.now();
+    const MIN_DISPLAY_MS = 1200;  // duree minimum d'affichage du splash (pour que l'anim soit visible)
+
+    // Pre-fetch des chunks de la 1ere page (Dashboard) pour eviter un 2eme loader apres login
+    import('./Dashboard').catch(() => {});
+
     const autoLogin = async () => {
       try {
         await desktopAutoLogin();
-        // Attendre que l'animation soit finie avant de naviguer
-        setTimeout(() => navigate('/', { replace: true }), 2200);
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, MIN_DISPLAY_MS - elapsed);
+        setTimeout(() => navigate('/', { replace: true }), remaining);
       } catch (err) {
         setError(err.message || 'Erreur de demarrage');
         setPhase('error');
@@ -58,17 +65,17 @@ export default function Welcome() {
         {/* Brand */}
         <h1 style={styles.brand}>
           {[
-            { c: 'A', d: '0.2s', primary: false },
-            { c: 'u', d: '0.3s', primary: false },
-            { c: 't', d: '0.4s', primary: false },
-            { c: 'o', d: '0.5s', primary: false },
-            { c: 'L', d: '0.6s', primary: true },
-            { c: 'o', d: '0.7s', primary: true },
-            { c: 'c', d: '0.8s', primary: true },
+            { c: 'A', d: '0.05s', primary: false },
+            { c: 'u', d: '0.10s', primary: false },
+            { c: 't', d: '0.15s', primary: false },
+            { c: 'o', d: '0.20s', primary: false },
+            { c: 'L', d: '0.25s', primary: true },
+            { c: 'o', d: '0.30s', primary: true },
+            { c: 'c', d: '0.35s', primary: true },
           ].map((l, i) => (
             <span key={i} style={{
               display: 'inline-block',
-              animation: `letter-pop 0.5s ${l.d} both`,
+              animation: `letter-pop 0.35s ${l.d} both`,
               color: l.primary ? 'var(--primary)' : 'var(--text)',
             }}>{l.c}</span>
           ))}
@@ -180,7 +187,7 @@ const styles = {
     background: 'linear-gradient(135deg, var(--primary), var(--accent))',
     display: 'grid', placeItems: 'center',
     boxShadow: '0 12px 40px rgba(99,102,241,0.5), inset 0 2px 8px rgba(255,255,255,0.2)',
-    animation: 'bounce-in 1s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+    animation: 'bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both',
   },
   brand: {
     fontFamily: 'Space Grotesk, sans-serif',
@@ -195,12 +202,12 @@ const styles = {
     fontSize: 14,
     color: 'var(--text-3)',
     margin: 0,
-    animation: 'fade-in 0.8s 1s both',
+    animation: 'fade-in 0.4s 0.35s both',
   },
   status: {
     marginTop: 24, minHeight: 40,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    animation: 'fade-in 0.6s 1.4s both',
+    animation: 'fade-in 0.3s 0.5s both',
   },
   dot: { color: 'var(--text-3)', fontSize: 13 },
   statusConnecting: {
@@ -229,7 +236,7 @@ const styles = {
   footer: {
     position: 'absolute', bottom: 24, left: 0, right: 0,
     textAlign: 'center', fontSize: 11, color: 'var(--text-3)',
-    animation: 'fade-in 1s 1.6s both',
+    animation: 'fade-in 0.4s 0.7s both',
   },
 };
 
