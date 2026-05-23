@@ -172,7 +172,7 @@ function ReturnModal({ onClose, onAdd }) {
   const { reservations, vehicles, clients } = useApp();
   const { t } = useT();
   const active = reservations.filter(r => r.status === 'active');
-  const [form, setForm] = useState({ reservationId: '', returnDate: new Date().toISOString().split('T')[0], mileageOut: '', mileageIn: '', fuelOut: 'Plein', fuelIn: 'Plein', condition: 'Bon état', damages: '', manualCharges: 0, extraPaid: 0, notes: '' });
+  const [form, setForm] = useState({ reservationId: '', returnDate: new Date().toISOString().split('T')[0], mileageOut: '', mileageIn: '', fuelOut: 'Plein', fuelIn: 'Plein', condition: 'Bon état', damages: '', manualCharges: '', extraPaid: '', notes: '' });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const selectedRes = reservations.find(r => r.id === +form.reservationId);
