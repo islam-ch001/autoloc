@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { KeyRound, Lock, Loader2, ShieldCheck, ExternalLink, Copy, Check } from 'lucide-react';
+import { KeyRound, Lock, Loader2, ShieldCheck, ExternalLink, Copy, Check, Smartphone } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 // Helper : appel direct au backend local (sans token, route publique)
 async function api(path, options = {}) {
@@ -135,17 +136,48 @@ export default function Activation({ onActivated }) {
           <p style={{ margin: 0, color: 'var(--text-2)', fontSize: 13 }}>
             <strong style={{ color: 'var(--text)' }}>Vous n'avez pas de clé ?</strong>
           </p>
-          <p style={{ margin: '6px 0 12px', color: 'var(--text-3)', fontSize: 12 }}>
-            Achetez votre licence (6 900 DA, paiement unique, à vie) sur WhatsApp :
+          <p style={{ margin: '6px 0 14px', color: 'var(--text-3)', fontSize: 12 }}>
+            Achetez votre licence (<strong style={{ color: 'var(--primary)' }}>6 900 DA</strong>, paiement unique, à vie).
           </p>
-          <a
-            href={`https://wa.me/213554214999?text=${encodeURIComponent(`Bonjour, je souhaite acheter une licence AutoLoc Windows.\nID de mon PC : ${machineId || 'inconnu'}`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={S.whatsappBtn}
-          >
-            💬 Acheter sur WhatsApp <ExternalLink size={12} />
-          </a>
+
+          {/* QR code + bouton WhatsApp côte à côte */}
+          <div style={S.contactRow}>
+            {/* QR Code */}
+            <div style={S.qrBox}>
+              <div style={S.qrWrap}>
+                <QRCodeSVG
+                  value={`https://wa.me/213554214999?text=${encodeURIComponent(`Bonjour, je souhaite acheter une licence AutoLoc Windows.\nID de mon PC : ${machineId || 'inconnu'}`)}`}
+                  size={120}
+                  bgColor="#ffffff"
+                  fgColor="#000000"
+                  level="M"
+                  includeMargin={false}
+                />
+              </div>
+              <div style={S.qrLabel}>
+                <Smartphone size={11} /> Scanner avec le téléphone
+              </div>
+            </div>
+
+            {/* OU + Bouton WhatsApp */}
+            <div style={S.orDivider}>
+              <span style={S.orLine}></span>
+              <span style={S.orText}>OU</span>
+              <span style={S.orLine}></span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <a
+                href={`https://wa.me/213554214999?text=${encodeURIComponent(`Bonjour, je souhaite acheter une licence AutoLoc Windows.\nID de mon PC : ${machineId || 'inconnu'}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={S.whatsappBtn}
+              >
+                💬 Cliquer ici <ExternalLink size={12} />
+              </a>
+              <span style={{ fontSize: 10, color: 'var(--text-3)' }}>+213 554 21 49 99</span>
+            </div>
+          </div>
         </div>
 
         {/* ID PC affiché */}
@@ -274,23 +306,70 @@ const S = {
   },
   helpBox: {
     marginTop: 28,
-    padding: 18,
+    padding: 20,
     background: 'var(--surface)',
     border: '1px solid var(--border)',
-    borderRadius: 10,
+    borderRadius: 12,
     textAlign: 'left',
+  },
+  contactRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 14,
+    flexWrap: 'wrap',
+  },
+  qrBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 6,
+  },
+  qrWrap: {
+    padding: 8,
+    background: '#ffffff',
+    borderRadius: 10,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    lineHeight: 0,
+  },
+  qrLabel: {
+    fontSize: 10,
+    color: 'var(--text-3)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    fontWeight: 600,
+  },
+  orDivider: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 4,
+    color: 'var(--text-3)',
+  },
+  orLine: {
+    width: 1,
+    height: 24,
+    background: 'var(--border)',
+  },
+  orText: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: 'var(--text-3)',
+    letterSpacing: '0.05em',
   },
   whatsappBtn: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 6,
-    padding: '8px 16px',
+    padding: '10px 18px',
     background: '#25D366',
     color: '#fff',
     borderRadius: 8,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 700,
     textDecoration: 'none',
+    boxShadow: '0 4px 12px rgba(37,211,102,0.3)',
   },
   machineBox: {
     marginTop: 14,
