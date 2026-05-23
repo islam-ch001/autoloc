@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun, Download, ShieldCheck, Cloud, Gauge, Languages } from 'lucide-react';
+import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon, Sun, Languages } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
-
-const WINDOWS_DOWNLOAD_URL = 'https://github.com/islam-ch001/autoloc/releases/download/autoloc-windows-installer-v1.0.0/AutoLoc-Setup.exe';
 
 export default function Login() {
   const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
@@ -128,38 +126,6 @@ export default function Login() {
         </button>
       </div>
       <div style={styles.stage} className="login-stage">
-        <section style={styles.heroPanel} className="login-hero">
-          <div style={styles.heroTopline}>
-            <span style={styles.heroDot} />
-            AutoLoc Cloud
-          </div>
-          <h1 style={styles.heroTitle}>Pilotez votre agence de location depuis le web ou votre PC.</h1>
-          <p style={styles.heroText}>
-            Reservations, clients, vehicules, contrats et acces utilisateurs restent synchronises avec la base en ligne.
-          </p>
-          {!window.autoloc?.isDesktop && (
-            <div style={styles.heroActions}>
-              <a href={WINDOWS_DOWNLOAD_URL} style={styles.downloadButton}>
-                <Download size={17} />
-                Telecharger l'app Windows
-              </a>
-              <span style={styles.downloadMeta}>Installeur Windows - connecte a la base en ligne</span>
-            </div>
-          )}
-          <div style={styles.featureGrid} className="login-features">
-            <div style={styles.featureItem}><ShieldCheck size={18} /><span>Acces controle</span></div>
-            <div style={styles.featureItem}><Cloud size={18} /><span>Donnees securisees</span></div>
-            <div style={styles.featureItem}><Gauge size={18} /><span>Gestion rapide</span></div>
-          </div>
-          <div style={styles.carPlate} className="login-car-plate">
-            <div style={styles.carLine} />
-            <div style={styles.carShape}>
-              <Car size={64} />
-            </div>
-            <div style={styles.plateText}>AUTOLOC DZ</div>
-          </div>
-        </section>
-
       <form onSubmit={handleSubmit} style={styles.card} className="login-card">
         <div style={styles.logo}>
           <Car size={32} style={{ color: 'var(--primary)' }} />
@@ -451,7 +417,7 @@ const styles = {
     fontSize: 13,
     fontWeight: 700,
   },
-  stage: { width: '100%', maxWidth: 1120, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22, alignItems: 'stretch' },
+  stage: { width: '100%', maxWidth: 460, display: 'grid', gap: 22, alignItems: 'stretch' },
   heroPanel: { minHeight: 'clamp(360px, 50vh, 560px)', borderRadius: 18, border: '1px solid var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-lg)', padding: 'clamp(18px, 4vw, 34px)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' },
   heroTopline: { display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--primary)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 18 },
   heroDot: { width: 9, height: 9, borderRadius: 999, background: 'var(--success)', boxShadow: '0 0 0 6px var(--success-soft)' },
