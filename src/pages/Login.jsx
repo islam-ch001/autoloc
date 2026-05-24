@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import OTPInput from '../components/OTPInput';
+import ValidatedInput from '../components/ValidatedInput';
 
 export default function Login() {
   const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
@@ -291,69 +292,80 @@ export default function Login() {
           </>
         ) : (
           <>
-            {isSignup && (
-              <div style={styles.field}>
-                <label style={styles.label}>{t('auth.name')}</label>
-                <div style={styles.inputWrap}>
-                  <User size={16} style={styles.icon} />
-                  <input type="text" required value={name} onChange={e => setName(e.target.value)}
-                    placeholder="Votre nom" style={styles.input} />
-                </div>
-              </div>
-            )}
+            {/* Helpers de validation temps réel */}
+            {(() => {
+              const nameValid = !name ? null : (name.trim().length >= 2 ? 'success' : 'error');
+              const emailValid = !email ? null : (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email) ? 'success' : 'error');
+              const pwdValid = !password ? null : (isSignup ? (password.length >= 6 ? 'success' : 'error') : null);
+              const confirmValid = !confirmPassword ? null : (confirmPassword === password ? 'success' : 'error');
+              return (
+                <>
+                  {isSignup && (
+                    <ValidatedInput
+                      label={t('auth.name')}
+                      required
+                      icon={<User size={16} />}
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="Votre nom"
+                      validation={nameValid}
+                      helperText={nameValid === 'error' ? 'Nom trop court (min. 2 caractères)' : ''}
+                    />
+                  )}
 
-            <div style={styles.field}>
-              <label style={styles.label}>{t('auth.email')}</label>
-              <div style={styles.inputWrap}>
-                <Mail size={16} style={styles.icon} />
-                <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="vous@exemple.com" style={styles.input} autoComplete="email" />
-              </div>
-            </div>
+                  <ValidatedInput
+                    label={t('auth.email')}
+                    required
+                    type="email"
+                    icon={<Mail size={16} />}
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="vous@exemple.com"
+                    autoComplete="email"
+                    validation={emailValid}
+                    helperText={emailValid === 'error' ? 'Format d\'email invalide' : ''}
+                  />
 
-            <div style={styles.field}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <label style={styles.label}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}</label>
-                {!isSignup && (
-                  <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); setPassword(''); }}
-                    style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: 0 }}>
-                    Mot de passe oublié ?
-                  </button>
-                )}
-              </div>
-              <div style={styles.inputWrap}>
-                <Lock size={16} style={styles.icon} />
-                <input type={showPassword ? 'text' : 'password'} required minLength={isSignup ? 6 : undefined} value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" style={{ ...styles.input, paddingRight: 40 }} autoComplete={isSignup ? 'new-password' : 'current-password'} />
-                <button type="button" onClick={() => setShowPassword(s => !s)}
-                  title={showPassword ? 'Masquer' : 'Afficher'}
-                  style={styles.eyeBtn}>
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
+                  <div className="vinput-group" style={{ marginBottom: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <label className="vinput-label" style={{ marginBottom: 0 }}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}{<span className="vinput-required">*</span>}</label>
+                      {!isSignup && (
+                        <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); setPassword(''); }}
+                          style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: 0 }}>
+                          Mot de passe oublié ?
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <ValidatedInput
+                    icon={<Lock size={16} />}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    showPasswordToggle
+                    autoComplete={isSignup ? 'new-password' : 'current-password'}
+                    validation={pwdValid}
+                    helperText={pwdValid === 'error' ? 'Le mot de passe doit faire au moins 6 caractères' : (pwdValid === 'success' ? 'Mot de passe valide' : '')}
+                    style={{ minLength: isSignup ? 6 : undefined }}
+                  />
 
-            {isSignup && (
-              <div style={styles.field}>
-                <label style={styles.label}>Confirmer le mot de passe</label>
-                <div style={styles.inputWrap}>
-                  <Lock size={16} style={styles.icon} />
-                  <input type={showPassword ? 'text' : 'password'} required minLength={6} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••" style={{
-                      ...styles.input, paddingRight: 40,
-                      borderColor: confirmPassword && confirmPassword !== password ? 'rgba(239,68,68,0.5)' : (confirmPassword && confirmPassword === password ? 'rgba(16,185,129,0.5)' : undefined),
-                    }} autoComplete="new-password" />
-                  <button type="button" onClick={() => setShowPassword(s => !s)}
-                    title={showPassword ? 'Masquer' : 'Afficher'}
-                    style={styles.eyeBtn}>
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                {confirmPassword && confirmPassword !== password && (
-                  <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>Les mots de passe ne correspondent pas</div>
-                )}
-              </div>
-            )}
+                  {isSignup && (
+                    <ValidatedInput
+                      label="Confirmer le mot de passe"
+                      required
+                      icon={<Lock size={16} />}
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      showPasswordToggle
+                      autoComplete="new-password"
+                      validation={confirmValid}
+                      helperText={confirmValid === 'error' ? 'Les mots de passe ne correspondent pas' : (confirmValid === 'success' ? 'Les mots de passe correspondent' : '')}
+                    />
+                  )}
+                </>
+              );
+            })()}
 
             {error && <div style={styles.error}>{error}</div>}
 
