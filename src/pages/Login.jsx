@@ -11,7 +11,7 @@ export default function Login() {
   const { t, lang, toggle: toggleLang } = useT();
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
-  const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'verify' | 'forgot' | 'reset'
+  const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'verify' | 'forgot' | 'reset' | 'reset-password'
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
@@ -49,10 +49,10 @@ export default function Login() {
       if (password !== confirmPassword) { setError('Les deux mots de passe ne correspondent pas'); return; }
       if (!name.trim() || name.trim().length < 2) { setError('Nom invalide (minimum 2 caractères)'); return; }
     }
-    if (mode === 'verify' || mode === 'reset') {
+    if (mode === 'verify' || mode === 'reset-password') {
       if (!/^\d{6}$/.test(code.trim())) { setError('Le code doit contenir 6 chiffres'); return; }
     }
-    if (mode === 'reset') {
+    if (mode === 'reset-password') {
       if (password.length < 6) { setError('Le nouveau mot de passe doit faire au moins 6 caractères'); return; }
       if (password !== confirmPassword) { setError('Les deux mots de passe ne correspondent pas'); return; }
     }
@@ -71,7 +71,7 @@ export default function Login() {
         setCode('');
         setPassword('');
         setConfirmPassword('');
-      } else if (mode === 'reset') {
+      } else if (mode === 'reset-password') {
         await resetPassword(email, code, password);
         setSuccess('Mot de passe modifié avec succès. Vous pouvez maintenant vous connecter.');
         setMode('login');
@@ -152,8 +152,10 @@ export default function Login() {
             : mode === 'forgot'
               ? <>🔐 Saisissez votre email — nous vous enverrons un code de réinitialisation.</>
               : mode === 'reset'
-                ? <>🔑 Saisissez le code reçu par email et votre <strong style={{ color: 'var(--text)' }}>nouveau mot de passe</strong>.</>
-                : (isSignup ? t('auth.createSpace') : t('auth.welcomeBack'))}
+                ? <>📧 Saisissez le code reçu par email à <strong style={{ color: 'var(--text)' }}>{email}</strong></>
+                : mode === 'reset-password'
+                  ? <>🔑 Choisissez votre <strong style={{ color: 'var(--text)' }}>nouveau mot de passe</strong>.</>
+                  : (isSignup ? t('auth.createSpace') : t('auth.welcomeBack'))}
         </p>
 
         {success && <div style={{ ...styles.error, background: 'var(--success-soft)', borderColor: 'rgba(16,185,129,0.3)', color: 'var(--success)' }}>{success}</div>}
@@ -178,6 +180,7 @@ export default function Login() {
             </button>
           </>
         ) : mode === 'reset' ? (
+          /* ÉTAPE 1 : Email + code OTP uniquement */
           <>
             <div style={styles.field}>
               <label style={styles.label}>Email du compte</label>
@@ -191,12 +194,38 @@ export default function Login() {
               <label style={styles.label}>Code reçu par email</label>
               <OTPInput value={code} onChange={setCode} autoFocus={!!email} />
             </div>
+            {error && <div style={styles.error}>{error}</div>}
+            <button
+              type="button"
+              disabled={code.length !== 6 || !email}
+              onClick={() => { setError(null); setMode('reset-password'); }}
+              style={{ ...styles.button, opacity: (code.length !== 6 || !email) ? 0.6 : 1 }}>
+              Continuer →
+            </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
+              <button type="button" onClick={() => { setMode('login'); setError(null); setSuccess(null); setCode(''); setPassword(''); }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <ArrowLeft size={12} /> Retour
+              </button>
+              <button type="button" onClick={async () => {
+                try { await forgotPassword(email); setSuccess('Nouveau code envoyé !'); } catch (e) { setError(e.message); }
+              }} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>
+                Renvoyer le code
+              </button>
+            </div>
+          </>
+        ) : mode === 'reset-password' ? (
+          /* ÉTAPE 2 : Nouveau mot de passe */
+          <>
+            <div style={{ padding: '10px 14px', background: 'var(--success-soft)', borderRadius: 8, marginBottom: 16, fontSize: 12, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              ✓ Code valide. Choisissez maintenant votre nouveau mot de passe.
+            </div>
             <div style={styles.field}>
               <label style={styles.label}>Nouveau mot de passe (min. 6 caractères)</label>
               <div style={styles.inputWrap}>
                 <Lock size={16} style={styles.icon} />
                 <input type={showPassword ? 'text' : 'password'} required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" style={{ ...styles.input, paddingRight: 40 }} autoComplete="new-password" />
+                  placeholder="••••••••" style={{ ...styles.input, paddingRight: 40 }} autoComplete="new-password" autoFocus />
                 <button type="button" onClick={() => setShowPassword(s => !s)}
                   title={showPassword ? 'Masquer' : 'Afficher'}
                   style={styles.eyeBtn}>
@@ -224,21 +253,14 @@ export default function Login() {
               )}
             </div>
             {error && <div style={styles.error}>{error}</div>}
-            <button type="submit" disabled={loading || code.length !== 6 || password.length < 6 || password !== confirmPassword}
-              style={{ ...styles.button, opacity: (loading || code.length !== 6 || password.length < 6 || password !== confirmPassword) ? 0.6 : 1 }}>
+            <button type="submit" disabled={loading || password.length < 6 || password !== confirmPassword}
+              style={{ ...styles.button, opacity: (loading || password.length < 6 || password !== confirmPassword) ? 0.6 : 1 }}>
               {loading ? <><Loader2 size={16} className="spin" /> Réinitialisation…</> : 'Changer mon mot de passe'}
             </button>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
-              <button type="button" onClick={() => { setMode('login'); setError(null); setSuccess(null); setCode(''); setPassword(''); }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <ArrowLeft size={12} /> Retour
-              </button>
-              <button type="button" onClick={async () => {
-                try { await forgotPassword(email); setSuccess('Nouveau code envoyé !'); } catch (e) { setError(e.message); }
-              }} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>
-                Renvoyer le code
-              </button>
-            </div>
+            <button type="button" onClick={() => { setMode('reset'); setError(null); }}
+              style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 12 }}>
+              <ArrowLeft size={12} /> Revenir au code
+            </button>
           </>
         ) : mode === 'verify' ? (
           <>
