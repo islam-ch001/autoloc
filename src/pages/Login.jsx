@@ -231,7 +231,7 @@ export default function Login() {
               ✓ Code valide. Choisissez maintenant votre nouveau mot de passe.
             </div>
             <div style={styles.field}>
-              <label style={styles.label}>Nouveau mot de passe (min. 8 caractères + 1 majuscule)</label>
+              <label style={styles.label}>Nouveau mot de passe (min. 8 caractères, dont 1 majuscule.)</label>
               <div style={styles.inputWrap}>
                 <Lock size={16} style={styles.icon} />
                 <input type={showPassword ? 'text' : 'password'} required minLength={8} value={password} onChange={e => setPassword(e.target.value)}
@@ -338,7 +338,7 @@ export default function Login() {
 
                   <div className="vinput-group" style={{ marginBottom: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <label className="vinput-label" style={{ marginBottom: 0 }}>{t('auth.password')}{isSignup && ' (min. 8 caractères + 1 majuscule)'}{<span className="vinput-required">*</span>}</label>
+                      <label className="vinput-label" style={{ marginBottom: 0 }}>{t('auth.password')}{isSignup && ' (min. 8 caractères, dont 1 majuscule.)'}{<span className="vinput-required">*</span>}</label>
                       {!isSignup && (
                         <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); setPassword(''); }}
                           style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: 0 }}>
@@ -356,7 +356,7 @@ export default function Login() {
                     autoComplete={isSignup ? 'new-password' : 'current-password'}
                     validation={pwdValid}
                     helperText={pwdValid === 'error' ? pwdErrMsg : (pwdValid === 'success' ? '✓ Mot de passe valide' : '')}
-                    description={isSignup && !password ? 'Min. 8 caractères avec au moins une majuscule' : ''}
+                    description={isSignup && !password ? 'Min. 8 caractères, dont 1 majuscule.' : ''}
                   />
 
                   {isSignup && (
