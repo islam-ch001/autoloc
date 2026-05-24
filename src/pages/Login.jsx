@@ -39,6 +39,13 @@ export default function Login() {
     return null;
   };
 
+  // Règle : min 8 caractères + au moins 1 majuscule
+  const validatePassword = (pwd) => {
+    if (!pwd || pwd.length < 8) return 'Le mot de passe doit contenir au moins 8 caractères';
+    if (!/[A-Z]/.test(pwd)) return 'Le mot de passe doit contenir au moins une lettre majuscule';
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -46,7 +53,8 @@ export default function Login() {
     if (mode === 'signup') {
       const emailErr = validateEmail(email);
       if (emailErr) { setError(emailErr); return; }
-      if (password.length < 6) { setError('Le mot de passe doit faire au moins 6 caractères'); return; }
+      const pwdErr = validatePassword(password);
+      if (pwdErr) { setError(pwdErr); return; }
       if (password !== confirmPassword) { setError('Les deux mots de passe ne correspondent pas'); return; }
       if (!name.trim() || name.trim().length < 2) { setError('Nom invalide (minimum 2 caractères)'); return; }
     }
@@ -54,7 +62,8 @@ export default function Login() {
       if (!/^\d{6}$/.test(code.trim())) { setError('Le code doit contenir 6 chiffres'); return; }
     }
     if (mode === 'reset-password') {
-      if (password.length < 6) { setError('Le nouveau mot de passe doit faire au moins 6 caractères'); return; }
+      const pwdErr = validatePassword(password);
+      if (pwdErr) { setError(pwdErr); return; }
       if (password !== confirmPassword) { setError('Les deux mots de passe ne correspondent pas'); return; }
     }
     setLoading(true);
@@ -222,10 +231,10 @@ export default function Login() {
               ✓ Code valide. Choisissez maintenant votre nouveau mot de passe.
             </div>
             <div style={styles.field}>
-              <label style={styles.label}>Nouveau mot de passe (min. 6 caractères)</label>
+              <label style={styles.label}>Nouveau mot de passe (min. 8 caractères + 1 majuscule)</label>
               <div style={styles.inputWrap}>
                 <Lock size={16} style={styles.icon} />
-                <input type={showPassword ? 'text' : 'password'} required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
+                <input type={showPassword ? 'text' : 'password'} required minLength={8} value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••" style={{ ...styles.input, paddingRight: 40 }} autoComplete="new-password" autoFocus />
                 <button type="button" onClick={() => setShowPassword(s => !s)}
                   title={showPassword ? 'Masquer' : 'Afficher'}
@@ -238,7 +247,7 @@ export default function Login() {
               <label style={styles.label}>Confirmer le mot de passe</label>
               <div style={styles.inputWrap}>
                 <Lock size={16} style={styles.icon} />
-                <input type={showPassword ? 'text' : 'password'} required minLength={6} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                <input type={showPassword ? 'text' : 'password'} required minLength={8} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
                   placeholder="••••••••" style={{
                     ...styles.input, paddingRight: 40,
                     borderColor: confirmPassword && confirmPassword !== password ? 'rgba(239,68,68,0.5)' : (confirmPassword && confirmPassword === password ? 'rgba(16,185,129,0.5)' : undefined),
@@ -296,7 +305,8 @@ export default function Login() {
             {(() => {
               const nameValid = !name ? null : (name.trim().length >= 2 ? 'success' : 'error');
               const emailValid = !email ? null : (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email) ? 'success' : 'error');
-              const pwdValid = !password ? null : (isSignup ? (password.length >= 6 ? 'success' : 'error') : null);
+              const pwdErrMsg = isSignup && password ? validatePassword(password) : null;
+              const pwdValid = !password ? null : (isSignup ? (pwdErrMsg ? 'error' : 'success') : null);
               const confirmValid = !confirmPassword ? null : (confirmPassword === password ? 'success' : 'error');
               return (
                 <>
@@ -328,7 +338,7 @@ export default function Login() {
 
                   <div className="vinput-group" style={{ marginBottom: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <label className="vinput-label" style={{ marginBottom: 0 }}>{t('auth.password')}{isSignup && ' (min. 6 caractères)'}{<span className="vinput-required">*</span>}</label>
+                      <label className="vinput-label" style={{ marginBottom: 0 }}>{t('auth.password')}{isSignup && ' (min. 8 caractères + 1 majuscule)'}{<span className="vinput-required">*</span>}</label>
                       {!isSignup && (
                         <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); setPassword(''); }}
                           style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: 0 }}>
@@ -345,8 +355,8 @@ export default function Login() {
                     showPasswordToggle
                     autoComplete={isSignup ? 'new-password' : 'current-password'}
                     validation={pwdValid}
-                    helperText={pwdValid === 'error' ? 'Le mot de passe doit faire au moins 6 caractères' : (pwdValid === 'success' ? 'Mot de passe valide' : '')}
-                    style={{ minLength: isSignup ? 6 : undefined }}
+                    helperText={pwdValid === 'error' ? pwdErrMsg : (pwdValid === 'success' ? '✓ Mot de passe valide' : '')}
+                    description={isSignup && !password ? 'Min. 8 caractères avec au moins une majuscule' : ''}
                   />
 
                   {isSignup && (

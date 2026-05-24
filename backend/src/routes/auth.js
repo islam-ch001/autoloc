@@ -45,12 +45,20 @@ function validateEmail(email) {
   return { ok: true, email: clean };
 }
 
+// Règle commune mot de passe : min 8 caractères + au moins 1 majuscule
+function checkPasswordStrength(pwd) {
+  if (!pwd || pwd.length < 8) return 'Le mot de passe doit contenir au moins 8 caractères';
+  if (!/[A-Z]/.test(pwd)) return 'Le mot de passe doit contenir au moins une lettre majuscule';
+  return null;
+}
+
 // POST /api/auth/signup-request — Étape 1 : valider, envoyer code de vérification par email
 router.post('/signup-request', async (req, res) => {
   try {
     const { email, password, name } = req.body;
     if (!email || !password || !name) return res.status(400).json({ error: 'Email, mot de passe et nom requis' });
-    if (password.length < 6) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    const pwdErr = checkPasswordStrength(password);
+    if (pwdErr) return res.status(400).json({ error: pwdErr });
     if (!name.trim() || name.trim().length < 2) return res.status(400).json({ error: 'Nom invalide (minimum 2 caractères)' });
 
     const check = validateEmail(email);
@@ -273,7 +281,8 @@ router.post('/reset-password', async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
     if (!email || !code || !newPassword) return res.status(400).json({ error: 'Email, code et nouveau mot de passe requis' });
-    if (newPassword.length < 6) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    const pwdErr = checkPasswordStrength(newPassword);
+    if (pwdErr) return res.status(400).json({ error: pwdErr });
     const cleanEmail = String(email).trim().toLowerCase();
     const cleanCode = String(code).trim();
 

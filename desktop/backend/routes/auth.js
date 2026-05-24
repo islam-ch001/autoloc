@@ -35,7 +35,8 @@ router.post('/register', async (req, res) => {
   try {
     const { email, password, name } = req.body;
     if (!email || !password || !name) return res.status(400).json({ error: 'Email, mot de passe et nom requis' });
-    if (password.length < 6) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    if (!password || password.length < 8) return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 8 caractères' });
+    if (!/[A-Z]/.test(password)) return res.status(400).json({ error: 'Le mot de passe doit contenir au moins une lettre majuscule' });
     const cleanEmail = String(email).trim().toLowerCase();
 
     const { rows: existing } = await pool.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
