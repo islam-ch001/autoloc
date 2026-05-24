@@ -1185,6 +1185,80 @@ html, body { max-width: 100vw; overflow-x: hidden; }
 img, video { max-width: 100%; height: auto; }
 
 /* ============================================================
+   OTP Input — style HeroUI : 6 cases séparées
+   ============================================================ */
+.otp-input-wrap {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0;
+}
+.otp-input-cell {
+  width: 48px;
+  height: 56px;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: all 0.18s ease;
+  font-family: 'Inter', system-ui, sans-serif;
+  caret-color: var(--primary);
+  padding: 0;
+  -moz-appearance: textfield;
+}
+.otp-input-cell::-webkit-outer-spin-button,
+.otp-input-cell::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.otp-input-cell:hover:not(:disabled) {
+  border-color: var(--border-2);
+}
+.otp-input-cell:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+  transform: scale(1.04);
+}
+.otp-input-cell.filled {
+  background: var(--primary-soft);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: var(--primary);
+}
+.otp-input-cell.filled:focus {
+  background: var(--surface);
+  border-color: var(--primary);
+  color: var(--text);
+}
+.otp-input-cell:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile : cases un peu plus petites */
+@media (max-width: 480px) {
+  .otp-input-wrap { gap: 6px; }
+  .otp-input-cell {
+    width: 40px;
+    height: 50px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+}
+@media (max-width: 360px) {
+  .otp-input-cell {
+    width: 36px;
+    height: 46px;
+    font-size: 18px;
+  }
+}
+
+/* ============================================================
    Page de connexion (Login / Signup) - responsive
    ============================================================ */
 

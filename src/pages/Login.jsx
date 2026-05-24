@@ -4,6 +4,7 @@ import { Car, Mail, Lock, User, Loader2, KeyRound, ArrowLeft, Eye, EyeOff, Moon,
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import OTPInput from '../components/OTPInput';
 
 export default function Login() {
   const { login, signupRequest, signupVerify, signupResend, forgotPassword, resetPassword } = useAuth();
@@ -188,17 +189,7 @@ export default function Login() {
             </div>
             <div style={styles.field}>
               <label style={styles.label}>Code reçu par email</label>
-              <div style={styles.inputWrap}>
-                <KeyRound size={16} style={styles.icon} />
-                <input
-                  type="text" required maxLength={6} inputMode="numeric" pattern="\d{6}"
-                  value={code}
-                  onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="123456"
-                  style={{ ...styles.input, letterSpacing: 8, fontSize: 20, fontWeight: 700, textAlign: 'center', fontFamily: 'Courier New, monospace' }}
-                  autoFocus={!!email}
-                />
-              </div>
+              <OTPInput value={code} onChange={setCode} autoFocus={!!email} />
             </div>
             <div style={styles.field}>
               <label style={styles.label}>Nouveau mot de passe (min. 6 caractères)</label>
@@ -253,21 +244,7 @@ export default function Login() {
           <>
             <div style={styles.field}>
               <label style={styles.label}>Code de vérification</label>
-              <div style={styles.inputWrap}>
-                <KeyRound size={16} style={styles.icon} />
-                <input
-                  type="text"
-                  required
-                  maxLength={6}
-                  inputMode="numeric"
-                  pattern="\d{6}"
-                  value={code}
-                  onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="123456"
-                  style={{ ...styles.input, letterSpacing: 8, fontSize: 20, fontWeight: 700, textAlign: 'center', fontFamily: 'Courier New, monospace' }}
-                  autoFocus
-                />
-              </div>
+              <OTPInput value={code} onChange={setCode} autoFocus />
             </div>
 
             {error && <div style={styles.error}>{error}</div>}
