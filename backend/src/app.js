@@ -16,7 +16,7 @@ const { requireAuth } = require('./middleware/auth');
 
 const app = express();
 
-// CORS: web production, dev local, and Electron desktop served from a dynamic local port.
+// CORS: web production, dev local, Electron desktop, et apps Capacitor (Android/iOS).
 const allowedOrigins = [
   'http://localhost:5173',
   process.env.FRONTEND_URL,
@@ -25,7 +25,14 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    // Electron desktop : 127.0.0.1 ou localhost sur port arbitraire
     if (/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin)) return cb(null, true);
+    // Capacitor Android : http://localhost ou https://localhost (sans port)
+    if (origin === 'http://localhost' || origin === 'https://localhost') return cb(null, true);
+    // Capacitor iOS : capacitor://localhost
+    if (/^(capacitor|ionic):\/\/localhost$/.test(origin)) return cb(null, true);
+    // Apps installees via APK (toujours autorisé)
+    if (origin === 'null') return cb(null, true);
     cb(new Error(`CORS bloque pour : ${origin}`));
   },
 }));
