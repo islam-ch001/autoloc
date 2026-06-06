@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import * as api from '../services/api';
+import { syncMaintenanceNotifications } from '../services/maintenanceNotifications';
 
 const AppContext = createContext();
 
@@ -54,6 +55,15 @@ export function AppProvider({ children }) {
   }, []);
 
   useEffect(() => { loadAll(); }, [loadAll]);
+
+  // Re-programme les notifications de maintenance quand les donnees changent
+  useEffect(() => {
+    if (!loading && maintenance.length >= 0 && vehicles.length >= 0) {
+      syncMaintenanceNotifications({ maintenance, vehicles }).catch(e =>
+        console.warn('[Notifs] sync failed:', e)
+      );
+    }
+  }, [loading, maintenance, vehicles]);
 
   // ── Véhicules ──────────────────────────────────────────────
   const addVehicle = async (data) => {
