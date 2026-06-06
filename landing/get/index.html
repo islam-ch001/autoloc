@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090B" />
+  <title>Télécharger AutoLoc — Windows & Android</title>
+  <meta name="description" content="Téléchargez l'application AutoLoc gratuitement sur Windows ou Android." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root, :root[data-theme="dark"] {
+      --bg: #09090B;
+      --bg-2: #111114;
+      --surface: #18181B;
+      --surface-2: #27272A;
+      --border: #27272A;
+      --border-2: #3F3F46;
+      --text: #FAFAFA;
+      --text-2: #A1A1AA;
+      --text-3: #71717A;
+      --primary: #6366F1;
+      --primary-dark: #4F46E5;
+      --accent: #7C3AED;
+      --success: #10B981;
+      --primary-soft: rgba(99, 102, 241, 0.12);
+      --accent-soft: rgba(124, 58, 237, 0.12);
+    }
+    :root[data-theme="light"] {
+      --bg: #F8FAFC;
+      --bg-2: #FFFFFF;
+      --surface: #FFFFFF;
+      --surface-2: #F1F5F9;
+      --border: #E2E8F0;
+      --border-2: #CBD5E1;
+      --text: #0F172A;
+      --text-2: #475569;
+      --text-3: #94A3B8;
+      --primary-soft: rgba(99, 102, 241, 0.08);
+      --accent-soft: rgba(124, 58, 237, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Halos de fond */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      top: -150px;
+      left: -150px;
+      width: 500px;
+      height: 500px;
+      background: rgba(99, 102, 241, 0.30);
+    }
+    body::after {
+      bottom: -150px;
+      right: -150px;
+      width: 600px;
+      height: 600px;
+      background: rgba(124, 58, 237, 0.25);
+    }
+
+    /* Switches en haut a droite */
+    .top-controls {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .top-controls button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .top-controls button:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Hero brand */
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+      animation: fade-down 0.5s ease both;
+    }
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45);
+    }
+    .brand-logo svg { width: 28px; height: 28px; }
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      letter-spacing: -1px;
+    }
+    .brand-name .accent { color: var(--primary); }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      text-align: center;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+      animation: fade-down 0.6s 0.1s ease both;
+    }
+    .sub {
+      font-size: clamp(14px, 1.5vw, 17px);
+      color: var(--text-2);
+      text-align: center;
+      max-width: 520px;
+      margin: 0 auto 48px;
+      position: relative;
+      z-index: 1;
+      animation: fade-down 0.6s 0.2s ease both;
+    }
+
+    /* Grid plateformes */
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 760px;
+      width: 100%;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .platform-card {
+      padding: 32px 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      text-align: center;
+      transition: all 0.25s;
+      animation: fade-up 0.7s 0.3s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+    .platform-card:nth-child(2) { animation-delay: 0.4s; }
+    .platform-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--primary);
+      box-shadow: 0 20px 60px rgba(99, 102, 241, 0.25);
+    }
+    .platform-card::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .platform-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: grid;
+      place-items: center;
+      margin: 0 auto 18px;
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+    .platform-icon svg { width: 32px; height: 32px; }
+    .platform-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+    .platform-card .meta {
+      color: var(--text-3);
+      font-size: 13px;
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 1;
+    }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+      position: relative;
+      z-index: 1;
+    }
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+    }
+    .download-btn svg { width: 16px; height: 16px; }
+
+    /* Contact button */
+    .contact-section {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      animation: fade-up 0.7s 0.5s ease both;
+    }
+    .contact-sub {
+      color: var(--text-3);
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+    .contact-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: #25D366;
+      color: #fff;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35);
+    }
+    .contact-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
+    }
+    .contact-btn svg { width: 20px; height: 20px; }
+
+    /* Footer */
+    .foot {
+      margin-top: 40px;
+      color: var(--text-3);
+      font-size: 12px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .foot a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Animations */
+    @keyframes fade-down {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      .platforms { grid-template-columns: 1fr; max-width: 420px; }
+      .platform-card { padding: 28px 20px; }
+      .brand-name { font-size: 26px; }
+    }
+
+    /* RTL */
+    html[dir="rtl"] { font-family: 'Cairo', 'Inter', sans-serif; }
+    html[dir="rtl"] h1 { font-family: 'Cairo', sans-serif; }
+  </style>
+</head>
+<body>
+  <!-- Controles theme/langue -->
+  <div class="top-controls">
+    <button id="btn-theme" title="Theme" aria-label="Toggle theme">
+      <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+    </button>
+    <button id="btn-lang" title="Language" aria-label="Toggle language">
+      <span id="lang-label" style="font-size: 12px; font-weight: 700;">AR</span>
+    </button>
+  </div>
+
+  <!-- Logo -->
+  <div class="brand">
+    <span class="brand-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>
+        <circle cx="6.5" cy="16.5" r="2.5"/>
+        <circle cx="16.5" cy="16.5" r="2.5"/>
+      </svg>
+    </span>
+    <span class="brand-name">Auto<span class="accent">Loc</span></span>
+  </div>
+
+  <h1 data-i18n="title">Téléchargez AutoLoc</h1>
+  <p class="sub" data-i18n="sub">Choisissez votre plateforme et installez l'application gratuitement.</p>
+
+  <div class="platforms">
+    <!-- Windows -->
+    <article class="platform-card">
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      <h2 data-i18n="win.title">Windows</h2>
+      <p class="meta" data-i18n="win.meta">PC · 81 MB · Windows 10/11</p>
+      <a href="https://github.com/islam-ch001/autoloc/releases/download/autoloc-windows-installer-v1.0.0/AutoLoc-Setup.exe" class="download-btn" data-i18n="win.cta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        <span>Télécharger pour PC</span>
+      </a>
+    </article>
+
+    <!-- Android -->
+    <article class="platform-card">
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <line x1="12" y1="18" x2="12.01" y2="18"/>
+        </svg>
+      </div>
+      <h2 data-i18n="and.title">Android</h2>
+      <p class="meta" data-i18n="and.meta">Téléphone · 4 MB · Android 7+</p>
+      <a href="https://github.com/islam-ch001/autoloc/releases/download/autoloc-windows-installer-v1.0.0/AutoLoc.apk" class="download-btn" data-i18n="and.cta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        <span>Télécharger pour téléphone</span>
+      </a>
+    </article>
+  </div>
+
+  <!-- Contact -->
+  <div class="contact-section">
+    <p class="contact-sub" data-i18n="contact.sub">Une question ou besoin d'aide ?</p>
+    <a href="https://wa.me/213554214999?text=Bonjour%2C%20j'ai%20une%20question%20sur%20AutoLoc" target="_blank" rel="noopener" class="contact-btn" data-i18n="contact.cta">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+      </svg>
+      <span>Contactez-nous sur WhatsApp</span>
+    </a>
+  </div>
+
+  <p class="foot" data-i18n="foot">
+    © 2026 AutoLoc · <a href="/" data-i18n="foot.link">Retour au site</a>
+  </p>
+
+  <script>
+    const TRANSLATIONS = {
+      fr: {
+        'title': 'Téléchargez AutoLoc',
+        'sub': "Choisissez votre plateforme et installez l'application gratuitement.",
+        'win.title': 'Windows',
+        'win.meta': 'PC · 81 MB · Windows 10/11',
+        'win.cta': 'Télécharger pour PC',
+        'and.title': 'Android',
+        'and.meta': 'Téléphone · 4 MB · Android 7+',
+        'and.cta': 'Télécharger pour téléphone',
+        'contact.sub': "Une question ou besoin d'aide ?",
+        'contact.cta': 'Contactez-nous sur WhatsApp',
+        'foot': '© 2026 AutoLoc · ',
+        'foot.link': 'Retour au site',
+      },
+      ar: {
+        'title': 'حمّل أوتولوك',
+        'sub': 'اختر منصتك وثبّت التطبيق مجاناً.',
+        'win.title': 'ويندوز',
+        'win.meta': 'حاسوب · 81 ميغابايت · ويندوز 10/11',
+        'win.cta': 'تحميل للحاسوب',
+        'and.title': 'أندرويد',
+        'and.meta': 'هاتف · 4 ميغابايت · أندرويد 7+',
+        'and.cta': 'تحميل للهاتف',
+        'contact.sub': 'هل لديك سؤال أو تحتاج مساعدة؟',
+        'contact.cta': 'تواصل معنا على واتساب',
+        'foot': '© 2026 أوتولوك · ',
+        'foot.link': 'العودة للموقع',
+      },
+    };
+
+    const LS_LANG = 'autoloc_get_lang';
+    const LS_THEME = 'autoloc_get_theme';
+
+    function getLang() {
+      const stored = localStorage.getItem(LS_LANG);
+      if (stored === 'ar' || stored === 'fr') return stored;
+      return navigator.language?.startsWith('ar') ? 'ar' : 'fr';
+    }
+    function getTheme() {
+      const stored = localStorage.getItem(LS_THEME);
+      if (stored === 'light' || stored === 'dark') return stored;
+      return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+
+    function applyLang(lang) {
+      const t = TRANSLATIONS[lang];
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (t[key] !== undefined) {
+          if (el.tagName === 'P' && el.querySelector('a')) {
+            const link = el.querySelector('a');
+            el.firstChild.textContent = t[key];
+            if (t[key + '.link']) link.textContent = t[key + '.link'];
+          } else if (el.querySelector('span') && (el.classList.contains('download-btn') || el.classList.contains('contact-btn'))) {
+            el.querySelector('span').textContent = t[key];
+          } else {
+            el.textContent = t[key];
+          }
+        }
+      });
+      document.getElementById('lang-label').textContent = lang === 'fr' ? 'AR' : 'FR';
+      localStorage.setItem(LS_LANG, lang);
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem(LS_THEME, theme);
+      const icon = document.getElementById('theme-icon');
+      icon.innerHTML = theme === 'light'
+        ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+        : '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      applyLang(getLang());
+      applyTheme(getTheme());
+
+      document.getElementById('btn-lang').addEventListener('click', () => {
+        applyLang(getLang() === 'fr' ? 'ar' : 'fr');
+      });
+      document.getElementById('btn-theme').addEventListener('click', () => {
+        applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+      });
+    });
+  </script>
+</body>
+</html>
