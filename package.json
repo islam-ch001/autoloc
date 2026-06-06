@@ -7,10 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "build:desktop": "vite build --mode desktop",
+    "build:android": "vite build --mode android && npx cap sync android",
+    "open:android": "npx cap open android",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^1.16.0",
     "qrcode.react": "^4.2.0",

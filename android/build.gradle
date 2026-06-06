@@ -1,0 +1,58 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.6.1'
+        classpath 'com.google.gms:google-services:4.4.2'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+apply from: "variables.gradle"
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    // Force une SEULE version de Kotlin partout + supprime les modules redondants jdk7/jdk8
+    // (depuis Kotlin 1.8, ces modules sont integres dans kotlin-stdlib)
+    configurations.all {
+        resolutionStrategy {
+            force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.25'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-common:1.9.25'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.25'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.25'
+        }
+    }
+}
+
+// Force tous les sous-modules a utiliser Java 17 (compatible avec Android Studio actuel)
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+        tasks.withType(JavaCompile).configureEach {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

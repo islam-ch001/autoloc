@@ -1508,6 +1508,48 @@ img, video { max-width: 100%; height: auto; }
   min-height: 46px;
 }
 
+/* ============================================================
+   Safe area pour Capacitor (Android/iOS)
+   Évite que le contenu chevauche la barre de statut système.
+   ============================================================ */
+.super-admin-header {
+  padding-top: env(safe-area-inset-top) !important;
+  height: calc(68px + env(safe-area-inset-top)) !important;
+}
+@media (max-width: 768px) {
+  .super-admin-header {
+    height: calc(60px + env(safe-area-inset-top)) !important;
+  }
+}
+
+/* L'app web normale : le bouton hamburger doit etre sous la barre Android */
+.mobile-menu-btn {
+  top: calc(12px + env(safe-area-inset-top)) !important;
+}
+/* La sidebar mobile ouverte : son header sous la barre Android */
+.sidebar {
+  padding-top: env(safe-area-inset-top);
+}
+/* Le contenu principal : laisse de la place pour la barre Android */
+.main-content {
+  padding-top: calc(var(--mc-pt, 24px) + env(safe-area-inset-top));
+}
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: calc(56px + env(safe-area-inset-top)) !important;
+  }
+}
+
+/* Page de connexion : decale les boutons theme/langue sous la barre */
+.login-top-buttons {
+  top: calc(18px + env(safe-area-inset-top)) !important;
+}
+
+/* Page d'activation desktop / welcome : safe area aussi */
+.activation-shell, .welcome-shell {
+  padding-top: env(safe-area-inset-top);
+}
+
 /* Support des encoches (iPhone X+, etc.) */
 @supports (padding: env(safe-area-inset-top)) {
   .mobile-menu-btn {
