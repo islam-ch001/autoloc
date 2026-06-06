@@ -44,24 +44,6 @@ export default function Returns() {
         </button>
       </div>
 
-      {/* Active rentals alert */}
-      {activeRentals.length > 0 && (
-        <div style={{ padding: '14px 18px', background: 'var(--accent-soft)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 12, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <AlertTriangle size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-          <span style={{ fontSize: 13, color: 'var(--text-2)' }}>
-            <strong style={{ color: 'var(--text)' }}>{activeRentals.length} véhicule(s)</strong> actuellement en location — en attente de retour
-          </span>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            {activeRentals.slice(0, 3).map(r => {
-              const v = vehicles.find(vv => vv.id === r.vehicleId);
-              return (
-                <span key={r.id} className="badge badge-accent">{v?.brand} {v?.model}</span>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         <div className="search-bar" style={{ flex: 1 }}>
           <Search size={16} />
