@@ -751,6 +751,21 @@ tbody tr:last-child td { border-bottom: none; }
   .sidebar-overlay.show { display: block; }
   .mobile-menu-btn { display: flex; }
 
+  /* Quand la sidebar est ouverte : le bouton X passe a DROITE
+     (pour ne pas chevaucher le logo AutoLoc a gauche dans la sidebar). */
+  .mobile-menu-btn.is-open {
+    left: auto !important;
+    right: 12px !important;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(10px);
+    border-color: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+  :root[dir="rtl"] .mobile-menu-btn.is-open {
+    right: auto !important;
+    left: 12px !important;
+  }
+
   .main-content {
     padding: 56px 12px 12px;
     grid-column: 1 !important;

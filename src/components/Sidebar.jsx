@@ -57,7 +57,7 @@ export default function Sidebar() {
 
   return (
     <>
-    <button className="mobile-menu-btn" onClick={() => setOpen(o => !o)} aria-label="Menu">
+    <button className={`mobile-menu-btn ${open ? 'is-open' : ''}`} onClick={() => setOpen(o => !o)} aria-label="Menu">
       {open ? <X size={20} /> : <Menu size={20} />}
     </button>
     <div className={`sidebar-overlay ${open ? 'show' : ''}`} onClick={() => setOpen(false)} />
