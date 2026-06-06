@@ -244,13 +244,24 @@
 
         <!-- Web -->
         <div class="pricing-card pricing-web">
-          <div class="pricing-tag pricing-tag-soon" data-i18n="pricing.web.tag">Bientôt disponible</div>
+          <div class="pricing-tag pricing-tag-cloud" data-i18n="pricing.web.tag">Abonnement Cloud</div>
           <h3 data-i18n="pricing.web.title">AutoLoc Cloud</h3>
           <p class="pricing-desc" data-i18n="pricing.web.desc">Application web accessible partout, synchronisée en temps réel sur tous vos appareils.</p>
-          <div class="pricing-price">
-            <span class="price-amount price-coming" data-i18n="pricing.web.price">Sur devis</span>
+
+          <!-- Selecteur de plan -->
+          <div class="plan-switcher" role="tablist">
+            <button type="button" class="plan-tab active" data-plan="monthly" data-i18n="pricing.web.plan.monthly">Mensuel</button>
+            <button type="button" class="plan-tab" data-plan="semester" data-i18n="pricing.web.plan.semester">6 mois</button>
+            <button type="button" class="plan-tab" data-plan="yearly" data-i18n="pricing.web.plan.yearly">Annuel</button>
           </div>
-          <div class="pricing-once" data-i18n="pricing.web.subtitle">Abonnement mensuel · Tarifs à venir</div>
+
+          <div class="pricing-price">
+            <span class="price-amount" id="cloud-price">1 000</span>
+            <span class="price-currency">DA</span>
+          </div>
+          <div class="pricing-once" id="cloud-period" data-i18n="pricing.web.period.monthly">par mois · sans engagement</div>
+          <div class="pricing-saving" id="cloud-saving" style="display:none;"></div>
+
           <ul class="pricing-features">
             <li data-i18n="pricing.web.f1">✓ Accessible depuis le web</li>
             <li data-i18n="pricing.web.f2">✓ Synchro multi-utilisateurs</li>
@@ -259,7 +270,7 @@
             <li data-i18n="pricing.web.f5">✓ Sans installation</li>
             <li data-i18n="pricing.web.f6">✓ Mises à jour automatiques</li>
           </ul>
-          <a href="https://wa.me/213554214999?text=Bonjour%2C%20je%20suis%20interesse%20par%20AutoLoc%20Cloud" target="_blank" rel="noopener" class="btn-secondary pricing-cta" data-i18n="pricing.web.cta">Contactez-nous →</a>
+          <a href="https://wa.me/213554214999?text=Bonjour%2C%20je%20suis%20interesse%20par%20AutoLoc%20Cloud" target="_blank" rel="noopener" class="btn-secondary pricing-cta" id="cloud-cta" data-i18n="pricing.web.cta">S'abonner →</a>
         </div>
       </div>
 

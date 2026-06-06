@@ -25,18 +25,24 @@ const TRANSLATIONS = {
     'pricing.win.f5': '✓ Données privées (SQLite)',
     'pricing.win.f6': '✓ Support technique inclus',
     'pricing.win.cta': 'Acheter & télécharger',
-    'pricing.web.tag': 'Bientôt disponible',
+    'pricing.web.tag': 'Abonnement Cloud',
     'pricing.web.title': 'AutoLoc Cloud',
     'pricing.web.desc': 'Application web accessible partout, synchronisée en temps réel sur tous vos appareils.',
-    'pricing.web.price': 'Sur devis',
-    'pricing.web.subtitle': 'Abonnement mensuel · Tarifs à venir',
+    'pricing.web.plan.monthly': 'Mensuel',
+    'pricing.web.plan.semester': '6 mois',
+    'pricing.web.plan.yearly': 'Annuel',
+    'pricing.web.period.monthly': 'par mois · sans engagement',
+    'pricing.web.period.semester': 'pour 6 mois · ~833 DA/mois',
+    'pricing.web.period.yearly': 'pour 12 mois · ~708 DA/mois',
+    'pricing.web.saving.semester': '💰 Économisez 1 000 DA vs mensuel',
+    'pricing.web.saving.yearly': '🎉 Économisez 3 500 DA vs mensuel',
     'pricing.web.f1': '✓ Accessible depuis le web',
     'pricing.web.f2': '✓ Synchro multi-utilisateurs',
     'pricing.web.f3': '✓ Sauvegardes automatiques',
     'pricing.web.f4': '✓ Optimisé mobile',
     'pricing.web.f5': '✓ Sans installation',
     'pricing.web.f6': '✓ Mises à jour automatiques',
-    'pricing.web.cta': 'Contactez-nous →',
+    'pricing.web.cta': 'S\'abonner →',
     'pricing.note': '💬 Une question sur les tarifs ? <a href="https://wa.me/213554214999" target="_blank" rel="noopener">Contactez-nous sur WhatsApp</a>',
     'hero.badge': 'Conçu pour les agences algériennes',
     'hero.title1': 'Le système',
@@ -150,18 +156,24 @@ const TRANSLATIONS = {
     'pricing.win.f5': '✓ بيانات خاصة (SQLite)',
     'pricing.win.f6': '✓ الدعم الفني مشمول',
     'pricing.win.cta': 'اشتر وحمّل',
-    'pricing.web.tag': 'قريباً',
+    'pricing.web.tag': 'اشتراك سحابي',
     'pricing.web.title': 'أوتولوك السحابي',
     'pricing.web.desc': 'تطبيق ويب يمكن الوصول إليه من أي مكان، متزامن في الوقت الفعلي على جميع أجهزتك.',
-    'pricing.web.price': 'حسب الطلب',
-    'pricing.web.subtitle': 'اشتراك شهري · الأسعار قريباً',
+    'pricing.web.plan.monthly': 'شهري',
+    'pricing.web.plan.semester': '6 أشهر',
+    'pricing.web.plan.yearly': 'سنوي',
+    'pricing.web.period.monthly': 'شهرياً · بدون التزام',
+    'pricing.web.period.semester': 'لمدة 6 أشهر · ~833 دج/شهر',
+    'pricing.web.period.yearly': 'لمدة 12 شهر · ~708 دج/شهر',
+    'pricing.web.saving.semester': '💰 وفّر 1 000 دج مقارنة بالشهري',
+    'pricing.web.saving.yearly': '🎉 وفّر 3 500 دج مقارنة بالشهري',
     'pricing.web.f1': '✓ متاح عبر الويب',
     'pricing.web.f2': '✓ مزامنة متعددة المستخدمين',
     'pricing.web.f3': '✓ نسخ احتياطية تلقائية',
     'pricing.web.f4': '✓ محسّن للهاتف',
     'pricing.web.f5': '✓ بدون تثبيت',
     'pricing.web.f6': '✓ تحديثات تلقائية',
-    'pricing.web.cta': '← تواصل معنا',
+    'pricing.web.cta': '← اشترك الآن',
     'pricing.note': '💬 سؤال عن الأسعار؟ <a href="https://wa.me/213554214999" target="_blank" rel="noopener">تواصل معنا على واتساب</a>',
     'hero.badge': 'مصمم لوكالات التأجير الجزائرية',
     'hero.title1': 'النظام',
@@ -353,19 +365,64 @@ function initScrollAnimations() {
   document.querySelectorAll('[data-animate], .stagger').forEach(el => observer.observe(el));
 }
 
+// ─── Selecteur de plan AutoLoc Cloud (Mensuel / Semestriel / Annuel) ───
+const CLOUD_PLANS = {
+  monthly:  { price: '1 000',  priceAr: '1 000',  periodKey: 'pricing.web.period.monthly',  savingKey: null },
+  semester: { price: '5 000',  priceAr: '5 000',  periodKey: 'pricing.web.period.semester', savingKey: 'pricing.web.saving.semester' },
+  yearly:   { price: '8 500',  priceAr: '8 500',  periodKey: 'pricing.web.period.yearly',   savingKey: 'pricing.web.saving.yearly' },
+};
+
+function applyCloudPlan(planKey) {
+  const plan = CLOUD_PLANS[planKey];
+  if (!plan) return;
+  const lang = getLang();
+  const t = TRANSLATIONS[lang];
+
+  // Prix
+  document.getElementById('cloud-price').textContent = lang === 'ar' ? plan.priceAr : plan.price;
+  // Periode
+  document.getElementById('cloud-period').textContent = t[plan.periodKey] || '';
+  // Economies (cachees pour mensuel)
+  const savingEl = document.getElementById('cloud-saving');
+  if (plan.savingKey && t[plan.savingKey]) {
+    savingEl.textContent = t[plan.savingKey];
+    savingEl.style.display = 'inline-block';
+  } else {
+    savingEl.style.display = 'none';
+  }
+  // CTA WhatsApp avec plan pre-rempli
+  const cta = document.getElementById('cloud-cta');
+  if (cta) {
+    const labels = { monthly: 'Mensuel (1 000 DA)', semester: 'Semestriel (5 000 DA)', yearly: 'Annuel (8 500 DA)' };
+    const msg = encodeURIComponent(`Bonjour, je souhaite m'abonner à AutoLoc Cloud — plan ${labels[planKey]}.`);
+    cta.href = `https://wa.me/213554214999?text=${msg}`;
+  }
+  // Tabs UI
+  document.querySelectorAll('.plan-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.plan === planKey);
+  });
+}
+
 // ─── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   applyLang(getLang());
   applyTheme(getTheme());
   initScrollAnimations();
+  applyCloudPlan('monthly');
 
   document.getElementById('btn-lang').addEventListener('click', () => {
     const next = getLang() === 'fr' ? 'ar' : 'fr';
     applyLang(next);
-    applyTheme(getTheme());  // refresh theme label too
+    applyTheme(getTheme());
+    // refresh le plan en cours dans la nouvelle langue
+    const active = document.querySelector('.plan-tab.active');
+    if (active) applyCloudPlan(active.dataset.plan);
   });
   document.getElementById('btn-theme').addEventListener('click', () => {
     const next = getTheme() === 'dark' ? 'light' : 'dark';
     applyTheme(next);
+  });
+  document.querySelectorAll('.plan-tab').forEach(btn => {
+    btn.addEventListener('click', () => applyCloudPlan(btn.dataset.plan));
   });
 });
