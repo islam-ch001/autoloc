@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Wrench, Calendar, Gauge, DollarSign, Trash2, AlertCircle, Car } from 'lucide-react';
+import { Plus, Search, Wrench, Calendar, Gauge, DollarSign, Trash2, AlertCircle, Car, CheckCircle2 } from 'lucide-react';
 import { format, parseISO, isBefore, isAfter, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useApp } from '../context/AppContext';
@@ -22,7 +22,8 @@ const TYPES = [
 const fmt = (n) => (Number(n) || 0).toLocaleString('fr-DZ');
 
 export default function Maintenance() {
-  const { maintenance, vehicles, addMaintenance, removeMaintenance } = useApp();
+  const { maintenance, vehicles, addMaintenance, patchMaintenance, removeMaintenance } = useApp();
+  const [completingId, setCompletingId] = useState(null);
   const { t } = useT();
   const [search, setSearch] = useState('');
   const [filterVehicle, setFilterVehicle] = useState('all');
@@ -174,12 +175,31 @@ export default function Maintenance() {
                   <tr key={m.id}>
                     <td className="hide-mobile" style={{ fontSize: 12 }}>{format(parseISO(m.date), 'dd MMM yyyy', { locale: fr })}</td>
                     <td>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.brand} {m.model}</div>
-                        <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>
-                          {format(parseISO(m.date), 'dd MMM yyyy', { locale: fr })} · {m.type}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.brand} {m.model}</div>
+                          <div className="show-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                            {format(parseISO(m.date), 'dd MMM yyyy', { locale: fr })} · {m.type}
+                          </div>
+                          <div className="hide-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>{m.plate}</div>
+                          {/* Mobile : indicateur statut + bouton compact */}
+                          {(m.nextDate || m.nextMileage) && (
+                            <div className="show-mobile" style={{ fontSize: 11, color: 'var(--warning)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                              🔔 Programmée
+                            </div>
+                          )}
                         </div>
-                        <div className="hide-mobile" style={{ fontSize: 11, color: 'var(--text-3)' }}>{m.plate}</div>
+                        {/* Bouton "Fait" sur mobile (caché si pas programmée) */}
+                        {(m.nextDate || m.nextMileage) && (
+                          <button
+                            className="show-mobile action-btn"
+                            title="Marquer comme fait"
+                            onClick={(e) => { e.stopPropagation(); setCompletingId(m.id); }}
+                            style={{ background: 'var(--success-soft)', color: 'var(--success)', flexShrink: 0 }}
+                          >
+                            <CheckCircle2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                     <td className="hide-mobile"><span className="badge badge-warning">{m.type}</span></td>
@@ -189,16 +209,28 @@ export default function Maintenance() {
                     <td className="hide-mobile" style={{ fontSize: 12, color: 'var(--text-3)' }}>
                       {m.nextDate && <div>📅 {format(parseISO(m.nextDate), 'dd/MM/yyyy')}</div>}
                       {m.nextMileage && <div>🛣️ {fmt(m.nextMileage)} km</div>}
-                      {!m.nextDate && !m.nextMileage && '—'}
+                      {!m.nextDate && !m.nextMileage && <span style={{ color: 'var(--success)' }}>✓ Fait</span>}
                     </td>
                     <td className="hide-mobile">
-                      <button className="action-btn" title={t('action.delete')} onClick={async () => {
-                        if (!confirm('Supprimer cette intervention ?')) return;
-                        try { await removeMaintenance(m.id); }
-                        catch (e) { alert('Erreur : ' + e.message); }
-                      }}>
-                        <Trash2 size={14} style={{ color: 'var(--danger)' }} />
-                      </button>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        {(m.nextDate || m.nextMileage) && (
+                          <button
+                            className="action-btn"
+                            title="Marquer comme fait"
+                            disabled={completingId === m.id}
+                            onClick={() => setCompletingId(m.id)}
+                          >
+                            <CheckCircle2 size={14} style={{ color: 'var(--success)' }} />
+                          </button>
+                        )}
+                        <button className="action-btn" title={t('action.delete')} onClick={async () => {
+                          if (!confirm('Supprimer cette intervention ?')) return;
+                          try { await removeMaintenance(m.id); }
+                          catch (e) { alert('Erreur : ' + e.message); }
+                        }}>
+                          <Trash2 size={14} style={{ color: 'var(--danger)' }} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -212,7 +244,118 @@ export default function Maintenance() {
         try { await addMaintenance(data); setShowAdd(false); }
         catch (e) { alert('Erreur : ' + e.message); }
       }} />}
+
+      {completingId && (
+        <CompleteMaintenanceModal
+          maintenance={maintenance.find(m => m.id === completingId)}
+          vehicle={vehicles.find(v => v.id === maintenance.find(m => m.id === completingId)?.vehicleId)}
+          onClose={() => setCompletingId(null)}
+          onConfirm={async (data) => {
+            try {
+              await patchMaintenance(completingId, data);
+              setCompletingId(null);
+            } catch (e) { alert('Erreur : ' + e.message); }
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+// ============================================================
+// Modale : Marquer une maintenance programmee comme effectuee
+// ============================================================
+function CompleteMaintenanceModal({ maintenance, vehicle, onClose, onConfirm }) {
+  const [form, setForm] = useState({
+    completedDate: new Date().toISOString().slice(0, 10),
+    completedMileage: vehicle?.mileage || '',
+    completedCost: maintenance?.cost || '',
+    scheduleNext: false,
+    nextDate: '',
+    nextMileage: '',
+  });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!form.completedDate) return alert('Date obligatoire');
+    setSaving(true);
+    // On met a jour la maintenance existante avec les vraies valeurs
+    await onConfirm({
+      date: form.completedDate,
+      mileage: +form.completedMileage || maintenance.mileage || null,
+      cost: +form.completedCost || maintenance.cost || 0,
+      // Reset des champs "prochain" si pas re-programmé (snakeify s'en charge)
+      nextDate: form.scheduleNext && form.nextDate ? form.nextDate : null,
+      nextMileage: form.scheduleNext && form.nextMileage ? +form.nextMileage : null,
+    });
+    setSaving(false);
+  };
+
+  if (!maintenance) return null;
+
+  return (
+    <Modal title="✓ Marquer la maintenance comme effectuée" onClose={onClose} footer={
+      <>
+        <button className="btn" onClick={onClose}>Annuler</button>
+        <button className="btn btn-primary" disabled={saving} onClick={handleSubmit}>
+          {saving ? 'Enregistrement...' : '✓ Valider'}
+        </button>
+      </>
+    }>
+      <div style={{ padding: 14, background: 'var(--primary-soft)', borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
+        <div style={{ fontWeight: 700, marginBottom: 6 }}>{maintenance.type}</div>
+        <div style={{ color: 'var(--text-2)' }}>
+          🚗 {vehicle?.brand} {vehicle?.model} ({vehicle?.plate})
+        </div>
+        {maintenance.nextDate && (
+          <div style={{ color: 'var(--text-3)', fontSize: 12, marginTop: 4 }}>
+            📅 Date prévue : {format(parseISO(maintenance.nextDate), 'dd/MM/yyyy')}
+          </div>
+        )}
+        {maintenance.nextMileage && (
+          <div style={{ color: 'var(--text-3)', fontSize: 12, marginTop: 2 }}>
+            🛣️ Km prévu : {maintenance.nextMileage.toLocaleString('fr-DZ')} km
+          </div>
+        )}
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Date effective *</label>
+          <input className="form-input" type="date" value={form.completedDate} onChange={e => set('completedDate', e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Kilométrage actuel</label>
+          <input className="form-input" type="number" value={form.completedMileage} onChange={e => set('completedMileage', e.target.value)} placeholder="0" />
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Coût final (DA)</label>
+        <input className="form-input" type="number" value={form.completedCost} onChange={e => set('completedCost', e.target.value)} placeholder="0" />
+      </div>
+
+      <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: form.scheduleNext ? 'var(--primary-soft)' : 'var(--bg-2)', borderRadius: 8, cursor: 'pointer', fontSize: 13 }}>
+        <input type="checkbox" checked={form.scheduleNext} onChange={e => set('scheduleNext', e.target.checked)} />
+        🔔 Programmer la prochaine maintenance
+      </label>
+
+      {form.scheduleNext && (
+        <div className="form-row" style={{ marginTop: 12 }}>
+          <div className="form-group">
+            <label className="form-label">Prochaine date</label>
+            <input className="form-input" type="date" value={form.nextDate} onChange={e => set('nextDate', e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Prochain km</label>
+            <input className="form-input" type="number" value={form.nextMileage} onChange={e => set('nextMileage', e.target.value)} placeholder="0" />
+          </div>
+        </div>
+      )}
+    </Modal>
   );
 }
 
